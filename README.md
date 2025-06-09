@@ -8,7 +8,8 @@ Scaffold-DbContext -Connection "Host=xxx;Database=xxx;Username=xxx;Password=xxx"
 
 ## Ex
 [AspireApp](https://github.com/godsnew2542/AspireApp1) <br/> 
-[DataLakeApp](https://github.com/godsnew2542/DataLakeApp)
+[DataLakeApp](https://github.com/godsnew2542/DataLakeApp) <br/> 
+[psu_oracle_backEnd](https://github.com/godsnew2542/psu_oracle_backEnd) <br/> 
 
 Req Nuget Backend
   * Microsoft.EntityFrameworkCore
