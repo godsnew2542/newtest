@@ -1,0 +1,30 @@
+﻿@page "/applyloansuccess"
+@attribute [Authorize(Roles = "0")]
+
+<div class="container my-4">
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="card bg-white text-center col-6 py-3 px-3 mt-5 shadow rounded" style="height:500px">
+            <div>
+                <div class="mt-5">
+                    <i class="fas fa-check-circle fa-9x" style="color:green"></i>
+                </div>
+                <div class="mt-5 ">
+                    <div class="h3" style="color:green;font-weight:bolder">ยื่นคำขอกู้สำเร็จ</div>
+					<div class="mt-4">โปรดรอผลการตรวจสอบจากเจ้าหน้าที่ และติดตามการดำเนินการได้ที่เมนู "สัญญากู้ยืมเงิน" </div>
+                </div>
+                <div class="mt-5">
+                    <button type="button" @onclick="backHome" class="btn text-light shadow rounded" style="background-color:green">กลับหน้าหลัก</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-3"></div>
+    </div>
+</div>
+
+@code {
+    public void backHome()
+    {
+        navigationManager.NavigateTo("/HomeUser");
+    }
+}

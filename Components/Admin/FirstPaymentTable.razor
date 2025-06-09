@@ -1,0 +1,90 @@
+﻿<div class="mt-4 mx-2">
+    <h6>
+        รายการรอบันทึกโอนเงิน จำนวน @LoanRequestContracts.Count() ฉบับ
+    </h6>
+</div>
+
+<div class="panel my-3">
+    <div class="panel-body mt-4 table-container"
+         style="border-top-left-radius:10px;border-top-right-radius:10px">
+        <div class="py-3" style="height: 60px; background-color: #367691">
+            <div class="ms-3">
+                <h6 class="text-white">รายการคำขอกู้ </h6>
+            </div>
+        </div>
+
+        @if (!loading)
+        {
+            <Table @bind-PageIndex="_pageIndex"
+                   TItem="VLoanRequestContract"
+                   DataSource="@LoanRequestContracts"
+                   Responsive=true>
+                <ActionColumn Title="เลขที่สัญญา"
+                              HeaderStyle="text-align:center; font-weight:bold;">
+                    <GridRow Gutter="(8,8)" Align="middle">
+                        <GridCol Flex="@("none")">
+                            <div style="max-width:250px;">
+                                <Input Placeholder="ระบุเลขที่สัญญา"
+                                       TValue="string"
+                                       DefaultValue="@context.ContractNo"
+                                       OnChange="@(async(e)=>{await AddContractNoAsync(e, context.ContractId);})"
+                                       AllowClear="true"
+                                       MaxLength=20
+                                       ShowCount=true />
+                            </div>
+                        </GridCol>
+                        <GridCol Flex="@("none")" Style="padding: 0 20px;">
+                            <Tooltip Title="สร้างเลขที่สัญญาอัตโนมัติ">
+                                <Button Type="@ButtonType.Primary" Shape="@ButtonShape.Circle" Size="@ButtonSize.Default" OnClick="@(async()=>{await AddContractNoAuto(context);})">
+                                    <i class="fa-solid fa-bolt"></i>
+                                </Button>
+                            </Tooltip>
+                        </GridCol>
+                    </GridRow>
+                </ActionColumn>
+
+                <PropertyColumn Title="ผู้กู้"
+                                Property="c=>c.DebtorStaffId"
+                                HeaderStyle="text-align:center; font-weight:bold;">
+                    @(userService.GetNameForDebtor(context)?.FullNameTh)
+                </PropertyColumn>
+
+                <PropertyColumn Title="ประเภทกู้ยืม"
+                                Property="c=>c.LoanTypeName"
+                                HeaderStyle="text-align:center; font-weight:bold;" />
+
+                <PropertyColumn Title="ยอดเงินกู้ทั้งหมด"
+                                Property="c=>c.ContractLoanAmount"
+                                HeaderStyle="text-align:center; font-weight:bold;"
+                                Style="text-align:center;">
+                    @String.Format("{0:n2}", context.ContractLoanAmount)
+                </PropertyColumn>
+
+                <PropertyColumn Title="วันที่ทำสัญญา"
+                                Property="c=>c.ContractDate"
+                                HeaderStyle="text-align:center; font-weight:bold;"
+                                Style="text-align:center;">
+                    @dateService.ChangeDate(context.ContractDate, "dd MMMM yyyy", Utility.DateLanguage_TH)
+                </PropertyColumn>
+
+                @* <ActionColumn>
+                    <div>
+                        <Button Type="@ButtonType.Primary" OnClick="@(async()=>{await AddContractNoAuto(context);})">
+                            สร้างเลขที่สัญญา Auto
+                        </Button>
+                    </div>
+                </ActionColumn> *@
+
+            </Table>
+        }
+    </div>
+</div>
+
+<style scoped>
+    :root .ant-table-pagination.ant-pagination {
+        margin: 10px !important;
+    }
+</style>
+
+@code {
+}

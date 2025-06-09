@@ -1,0 +1,253 @@
+﻿@page "/Admin/ExportFileByWaitingToSendEvidence"
+@attribute [Authorize(Roles = "2")]
+
+<Spin Spinning=LoadingUi Tip="Loading..." size="large">
+    <div class="container-fluid mt-4 mb-5 pb-5">
+        <div class="mt-4">
+            <div class="section-title" style="font-size:medium">
+                <i class="fa-solid fa-file-export mx-2 fa-lg"></i>
+                ส่งออกข้อมูลสัญญากู้ยืมเงิน (รอผู้กู้ส่งหลักฐาน)
+            </div>
+        </div>
+
+        <div class="card p-2 mt-4">
+            <div class="my-4" style="margin-right:20px;">
+                <GridRow Gutter="(16,8)" Justify="end">
+                    <GridCol Flex="@("none")">
+                        <Button Type="@ButtonType.Primary"
+                                Style="border-radius:8px; width:120px; background-color:#2788de; border:none;"
+                                Size="@ButtonSize.Large"
+                                OnClick="@(()=> { SetOrClearCheckedAsync(true); })">
+                            เลือกทั้งหมด
+                        </Button>
+                    </GridCol>
+                    <GridCol Flex="@("none")">
+                        <Button Type="@ButtonType.Primary"
+                                Style="border-radius:8px; width:120px; background-color:#FF1818; border:none;"
+                                Size="@ButtonSize.Large"
+                                OnClick="@(()=> { SetOrClearCheckedAsync(false); })">
+                            ล้างทั้งหมด
+                        </Button>
+                    </GridCol>
+                </GridRow>
+            </div>
+
+            <h6>
+                <GridRow Gutter="(8,8)">
+                    <GridCol Flex="@("none")" Class="ms-3">
+                        @GetTextSelectedValue(SelectedValue) จำนวน @RequestContracts.Count() รายการ
+                    </GridCol>
+                    @if (ListRecord.Any())
+                    {
+                        <GridCol Flex="@("none")">
+                            <u>
+                                รายการที่เลือก จำนวน @ListRecord.Count() รายการ
+                            </u>
+                        </GridCol>
+                    }
+                </GridRow>
+            </h6>
+
+            <div class="panel my-3">
+                <div class="panel-body table-container"
+                     style="border-top-left-radius:10px;border-top-right-radius:10px">
+                    <div class="table-header py-3"
+                         style="@($"height: 60px;")">
+                        <div class="ms-3">
+                            <h6 style="color:#ffffff">
+                                @GetTextSelectedValue(SelectedValue)
+                            </h6>
+                        </div>
+                    </div>
+
+                    <Table TItem="VLoanRequestContract"
+                           DataSource="@RequestContracts"
+                           Responsive=true
+                           Class="table-hover-cursor">
+                        @{
+                            var fullNameDebtor = userService.GetNameForDebtor(context);
+                        }
+
+                        <ActionColumn Title="เลือก"
+                                      HeaderStyle="text-align:center; font-weight:bold;">
+                            @{
+                                bool Checked_Checkbox = GetCheckContractId(context);
+                            }
+                            <Checkbox Checked="@(Checked_Checkbox)" OnChange="@(()=>{CheckboxClickedV2(context.ContractId, Checked_Checkbox, context);})" />
+                        </ActionColumn>
+
+                        <PropertyColumn Title="ผู้กู้"
+                                        Property="c=>c.DebtorStaffId"
+                                        HeaderStyle="text-align:center; font-weight:bold;">
+                            @(fullNameDebtor?.FullNameTh)
+                            @*
+                            @if (!string.IsNullOrEmpty(fullNameDebtor?.FullNameTh) && !string.IsNullOrEmpty(fullNameDebtor?.FullNameEn))
+                            {
+                            <br />
+                            }
+
+                            @(fullNameDebtor?.FullNameEn) *@
+                        </PropertyColumn>
+
+                        <PropertyColumn Title="หน่วยงาน\ส่วนงาน"
+                                        Property="c=>c.DebtorCampusId"
+                                        HeaderStyle="text-align:center; font-weight:bold;">
+                            @GetFullNameOrgan(context).Result
+                        </PropertyColumn>
+
+                        <ActionColumn Title="เบอร์โทร"
+                                      HeaderStyle="text-align:center; font-weight:bold;">
+                            @GetPhone(context).Result
+                        </ActionColumn>
+
+                        <PropertyColumn Title="ประเภทกู้ยืม"
+                                        Property="c=>c.LoanTypeId"
+                                        HeaderStyle="text-align:center; font-weight:bold;">
+                            @context.LoanTypeName
+                        </PropertyColumn>
+
+                        <PropertyColumn Title="ยอดเงิน"
+                                        Property="c=>c.DebtorCampusId"
+                                        HeaderStyle="text-align:center; font-weight:bold;">
+                            @{
+                                decimal? amount = (context.ContractLoanAmount != null ? context.ContractLoanAmount : context.LoanRequestLoanAmount);
+                                decimal totalAmount = TransactionService.FindLoanTotalAmount(context.ContractId);
+                                decimal balanceAmount = TransactionService.GetBalanceTotalAsync(context).Result;
+                            }
+
+                            <div>
+                                ยอดกู้:
+                                @(amount == null ? "ไม่พบข้อมูล" : String.Format("{0:n2}", amount) + " บาท")
+                                <br />
+
+                                ยอดกู้รวมดอกเบี้ย:
+                                @(totalAmount == 0 ? "ไม่พบข้อมูล" : String.Format("{0:n2}", totalAmount) + " บาท")
+                                <br />
+
+                                หนี้คงเหลือ:
+                                @(balanceAmount == 0 ? "ไม่พบข้อมูล" : String.Format("{0:n2}", balanceAmount) + " บาท")
+                            </div>
+                        </PropertyColumn>
+
+                        <PropertyColumn Title="จำนวนงวด"
+                                        Property="c=>c.ContractLoanNumInstallments"
+                                        HeaderStyle="font-weight:bold; text-align:center;">
+                            @{
+                                decimal? numInstallments = TransactionService.GetBalanceInstallmentNo(context).Result;
+                            }
+
+                            <div>
+                                งวดที่กู้:
+                                @context.ContractLoanNumInstallments งวด
+                                @if (numInstallments != null)
+                                {
+                                    <br />
+                                    @($"ชำระแล้ว: {numInstallments} งวด")
+
+                                    if (context.ContractLoanNumInstallments != null)
+                                    {
+                                        <br />
+                                        @($"คงเหลือ: {(context.ContractLoanNumInstallments - numInstallments)} งวด")
+                                    }
+                                }
+                            </div>
+                        </PropertyColumn>
+
+                        <PropertyColumn Title="สถานะ"
+                                        Property="c=>c.CurrentStatusName"
+                                        HeaderStyle="font-weight:bold; text-align:center;" />
+                    </Table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    @if (!IsloadingSelectStatuse)
+    {
+        <div class="footer">
+            <div class="row  col-xl-11 col-lg-11 col-md-12">
+                <div class="row col-xl-5 col-md-6 col-lg-5">
+                    <GridRow Gutter="(8,8)" Align="middle">
+                        <GridCol Flex="@("none")" Class="font-color font-weight-bolder">
+                            สถานะการกู้
+                        </GridCol>
+                        <GridCol Flex="@("auto")">
+                            <Select @bind-Value="@SelectedValue"
+                                    TItem="ContractStatus"
+                                    TItemValue="decimal"
+                                    DataSource="@ContractStatuses"
+                                    ValueName="@nameof(ContractStatus.ContractStatusId)"
+                                    LabelName="@nameof(ContractStatus.ContractStatusName)"
+                                    Style="min-width:250px"
+                                    OnSelectedItemChanged="OnSelectedItemChangedHandler">
+                            </Select>
+                        </GridCol>
+                    </GridRow>
+                </div>
+
+                @if (ListRecord.Any())
+                {
+                    <div class="col-xl-6 col-lg-3 col-md-5 text-end me-1">
+                       @*  <Button Type="@ButtonType.Primary"
+                                Size="@ButtonSize.Large"
+                                Class="button-color"
+                                Style="border:none; padding: 0px 20px; background-color:#367691"
+                                OnClick="@(async()=>{await ExportToExcel2Async(ListRecord);})">
+                            บันทึกไฟล์
+                        </Button> *@
+                        <Button Type="@ButtonType.Primary"
+                                Size="@ButtonSize.Large"
+                                OnClick="@(async()=>await ExportToExcel2Async(ListRecord))">
+                            ดาวน์โหลดข้อมูล
+                        </Button>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</Spin>
+
+<style scoped>
+    :root .ant-table-pagination.ant-pagination {
+        margin: 10px !important;
+    }
+</style>
+
+@code {
+    private RenderFragment FullNameOrganRender(VLoanStaffDetail staffDetail)
+    {
+        return @<div>
+        @staffDetail.DeptNameThai
+        <br />
+        @staffDetail.FacNameThai
+    </div>;
+    }
+
+    private RenderFragment PhoneRender(LoanStaffDetail staffDetail)
+    {
+        return @<div>
+        @if (!string.IsNullOrEmpty(staffDetail.OfficeTel))
+    {
+        <div>
+            ที่ทำงาน: @staffDetail.OfficeTel
+        </div>
+    }
+
+        @if (!string.IsNullOrEmpty(staffDetail.MobileTel))
+    {
+        <div>
+            มือถือ: @staffDetail.MobileTel
+        </div>
+    }
+
+        @if (string.IsNullOrEmpty(staffDetail.MobileTel) && string.IsNullOrEmpty(staffDetail.OfficeTel))
+    {
+        <div>
+            ไม่พบข้อมูล
+        </div>
+    }
+    </div>;
+    }
+}

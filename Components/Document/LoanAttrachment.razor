@@ -1,0 +1,139 @@
+﻿@page "/Doc/LoanAttrachmentByIT"
+
+<div id="pdf-LoanAttrachmentByIT">
+    <div class="px-5 py-4">
+        <p class="text-end">
+            เลขที่สัญญา<h class="pdf-line" style="padding: 0px 60px;"> </h>
+        </p>
+        <h4 class="text-center mt-2">
+            <b>
+                @TitleDocument @Loan.LoanParentName
+            </b>
+        </h4>
+        <br />
+        <p class="text-end">
+            เขียนที่ &nbsp; <h class="pdf-line">มหาวิทยาลัยสงขลานครินทร์</h>
+        </p>
+        <p class="text-end">
+            วันที่ <h class="pdf-line">@dateService.ChangeDate(Option.DateTitle, "dd", Utility.DateLanguage_TH)</h> &nbsp;
+            เดือน <h class="pdf-line">@dateService.ChangeDate(Option.DateTitle, "MMMM", Utility.DateLanguage_TH)</h> &nbsp;
+            พ.ศ. <h class="pdf-line">@dateService.ChangeDate(Option.DateTitle, "yyyy", Utility.DateLanguage_TH)</h>
+        </p>
+
+        @if (StaffDetail != null)
+        {
+            <p>
+                &emsp;&emsp; ข้าพเจ้า <h class="pdf-line"> @userService.GetFullName(StaffDetail.StaffId) </h>
+                ตำแหน่ง <h class="pdf-line"> @StaffDetail.PosNameThai </h>
+                &nbsp; @GetStaffType(StaffDetail.StaffType) &nbsp;
+                สังกัดส่วนงาน <h class="pdf-line"> @StaffDetail.DeptNameThai</h>
+                ส่วนงาน <h class="pdf-line"> @StaffDetail.FacNameThai </h>
+                มหาวิทยาลัยสงขลานครินทร์
+                เงินเดือน <h class="pdf-line"> @String.Format("{0:n2}", StaffDetail.Salary)</h> บาท
+                โทรศัพท์ <h class="pdf-line"> @userService.GetOfficeTelFromLoanStaffDetail(StaffDetail.StaffId)</h>
+                มือถือ <h class="pdf-line"> @userService.GetMobileTelFromLoanStaffDetail(StaffDetail.StaffId)</h>
+                สถานภาพ &nbsp; @MarriedType(StaffDetail.MarriedId)
+                <h class="pdf-line"> @MarriedOther(StaffDetail.MarriedId, StaffDetail.MarriedNameThai) </h> &nbsp;
+                ได้ทำสัญญาเงินกู้เพื่อเป็นหลักฐานให้ไว้ต่อมหาวิทยาลัยสงขลานครินทร์ โดยมีข้อความ ดังต่อไปนี้
+                <br />
+
+                &emsp;&emsp; <b> ข้อ 1 </b> ข้าพเจ้าได้ @Loan.LoanParentName
+                จำนวน <h class="pdf-line"> @String.Format("{0:n2}", Other.LoanAmount) </h> บาท &nbsp; (ตัวอักษร)
+                <h class="pdf-line"> @GetNumberToText(String.Format("{0:n2}", Other.LoanAmount)) </h>
+                ซึ่งข้าพเจ้าได้รับเงินจำนวนดังกล่าวครบถ้วนแล้ว ในวันที่ทำสัญญานี้
+                <br>
+                &emsp;&emsp; <b> ข้อ 2 </b> ข้าพเจ้าสัญญาว่าจะชำระ
+                @(IsLending ? "เงินยืมนี้" : "เงินต้นที่กู้")
+                เป็นงวดรายเดือนเป็น จำนวน <h class="pdf-line"> @Other.LoanNumInstallments </h>งวด  &nbsp;(ตัวอักษร)
+                <h class="pdf-line">
+                    @GetNumInstallmentsTH(String.Format("{0:n2}", Other.LoanNumInstallments))
+                </h>
+                งวด &nbsp;
+                งวดละ
+                <h class="pdf-line">
+                    @(Other.LoanMonthlyInstallment != null &&
+                        Other.LoanMonthlyInstallment != 0 ?
+                        String.Format("{0:n2}", Other.LoanMonthlyInstallment) : "-")
+                </h>
+                บาท &nbsp;(ตัวอักษร)
+                <h class="pdf-line">@GenerateText(Other.LoanMonthlyInstallment) </h>
+                @if (!IsLending)
+                {
+                    @ShowMessInterest <h class="pdf-line"> @Loan.LoanInterest ต่อปี </h>
+                }
+                ทั้งนี้ เริ่มชำระตั้งแต่งวดประจำเดือน  <h class="pdf-line" style="padding: 0px 50px;"> </h>  เป็นต้นไป
+                <br>
+                &emsp;&emsp; <b> ข้อ 3 </b> ข้าพเจ้ายินยอมให้มหาวิทยาลัยสงขลานครินทร์หักเงินเดือน ค่าจ้างหรือค่าตอบแทนรายเดือน
+                เพื่อชำระหนี้เงินงวดรายเดือน (เงินต้นและดอกเบี้ย) ตามข้อ 2
+                <br>
+                &emsp;&emsp; <b> ข้อ 4 </b> @($"ข้าพเจ้าจะยึดถือปฏิบัติ ตามประกาศมหาวิทยาลัยสงขลานครินทร์ เรื่อง สวัสดิการเงินกู้และเงินยืมบุคลากรมหาวิทยาลัยสงขลานครินทร์ ฉบับลง{Utility.LoanDocDate}")
+                <br>
+                &emsp;&emsp; <b> ข้อ 5 </b> หากข้าพเจ้ามิได้นำเงินที่ได้รับอนุมัติไปเพื่อดำเนินการให้เป็นไปตามวัตถุประสงค์ที่กล่าวไว้ใน
+                ข้อ 1 หรือไม่ปฏิบัติตามข้อตกลงในหนังสือ
+                @(IsLending ? "เงินยืม" : "เงินกู้")
+                ที่ทำไว้กับมหาวิทยาลัยไม่ว่าด้วยกรณีใดๆ ข้าพเจ้ายินยอมให้มหาวิทยาลัยเรียก
+                @(IsLending ? "เงินยืม" : "เงินกู้")
+                ทั้งหมดพร้อมค่าปรับคืนได้ทันที โดยให้ถือเสมือนว่าข้าพเจ้ากระทำผิดสัญญาในข้อที่เป็นสาระสำคัญ
+                และยินยอมให้มหาวิทยาลัยสงขลานครินทร์ตัดสิทธิในการ
+                @(IsLending ? "กู้เงิน/เงินยืม" : "กู้เงิน")
+                สวัสดิการทุกประเภท
+                <br>
+                &emsp;&emsp; <b> ข้อ 6 </b> หากข้าพเจ้ามีความประสงค์จะขอลาออกหรือโอน-ย้าย จากมหาวิทยาลัยสงขลานครินทร์ ข้าพเจ้าจะต้องแจ้งให้
+                @(CapmSelectNow == "03" ? " งานบริหารและพัฒนาทรัพยากรมนุษย์ สำนักงานวิทยาเขตภูเก็ต " : " งานสวัสดิการและสิทธิประโยชน์ กองบริหารทรัพยากรบุคคล ")
+                ทราบเป็นลายลักษณ์อักษรและจัดการชำระ @(IsLending ? "เงินยืม" : "เงินกู้พร้อมดอกเบี้ย")
+                ทั้งหมด ตามสัญญา @(IsLending ? "เงินยืม" : "เงินกู้") @Loan.LoanParentName
+                ซึ่งข้าพเจ้ายังค้างชำระอยู่ให้เสร็จสิ้นก่อนการลาออก หรือโอน-ย้าย
+            </p>
+        }
+
+
+
+        <p>
+            &emsp;&emsp; ข้าพเจ้ายินยอมที่จะผูกพันตามสัญญา @(IsLending ? "เงินยืม" : "เงินกู้")
+            ฉบับนี้ เมื่อ “ได้รับเงินตามจำนวนดังกล่าวที่ระบุไว้
+            ใน ข้อ 1 หรือจำนวนที่ได้รับอนุมัติและเป็นลูกหนี้เงินกู้นับตั้งแต่วันที่เงินจำนวนนี้ได้โอนเข้าบัญชีของข้าพเจ้า”
+        </p>
+        <div class="page-break"></div>
+        <p>
+            &emsp;&emsp; ข้าพเจ้าได้อ่านและเข้าใจข้อความในสัญญา
+            @(IsLending ? "เงินยืม" : "เงินกู้") ฉบับนี้โดยตลอดแล้ว เห็นว่าถูกต้องตามความประสงค์
+            จึงได้ลงลายมือชื่อไว้เป็นสำคัญต่อหน้าพยาน
+        </p>
+        <br>
+        <div class="row justify-content-end">
+            <div class="col-6 text-center">
+                <p class="m-0">
+                    (ลงชื่อ) <h class="pdf-line" style="padding: 0px 120px;"></h> @(IsLending ? "ผู้ยืมเงิน" : "ผู้กู้")
+                </p>
+                <p class="mt-4">
+                    (<h class="pdf-line">@userService.GetFullName(StaffDetail?.StaffId)</h>)
+                </p>
+            </div>
+        </div>
+        <br>
+        <div class="row justify-content-end">
+            <div class="col-6 text-center">
+                <p class="m-0">
+                    (ลงชื่อ) <h class="pdf-line" style="padding: 0px 120px;"> </h> พยาน
+                </p>
+                <p class="mt-4">
+                    (<h class="pdf-line" style="padding: 0px 120px;"> </h>)
+                </p>
+            </div>
+        </div>
+        <br>
+        <div class="row justify-content-end">
+            <div class="col-6 text-center">
+                <p class="m-0">
+                    (ลงชื่อ) <h class="pdf-line" style="padding: 0px 120px;"> </h> พยาน
+                </p>
+                <p class="mt-4">
+                    (<h class="pdf-line" style="padding: 0px 120px;"> </h>)
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+</style>

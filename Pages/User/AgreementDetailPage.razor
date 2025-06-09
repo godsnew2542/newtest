@@ -1,0 +1,610 @@
+﻿@page "/AgreementDetailPage"
+@page "/AgreementDetailPage/{RequestID:decimal}"
+@page "/Admin/AgreementDetailPage/{PageTo:int}/{StaffID}/{RequestID:decimal}"
+
+@page "/{newRole:int}/AgreementDetailPage/{PageTo:int}/{StaffID}/{RequestID:decimal}/{rootPage:int}/{rootRequestID:decimal}"
+
+@page "/{Role}/AgreementDetailPage/{PageTo:int}/{StaffID}/{RequestID:decimal}"
+
+@attribute [Authorize(Roles = "0,2")]
+
+@if (loading)
+{
+    <Loading />
+}
+else
+{
+    <div class="container-fluid mt-3 mb-5 pb-5">
+        <div class="card bg-white px-4 pb-5 mt-4" style="border-radius:10px">
+            @* รายละเอียดการกู้เงิน *@
+            <div>
+                <div class="section-title d-sm-flex justify-content-between mb-4 mt-4 mx-2 py-2"
+                style="border: solid 1px; background-color: #e6ecef ">
+                    <h5 class="mb-0 py-2 px-1 ms-1 font-color">
+                        <strong>รายละเอียดคำขอกู้</strong>
+                    </h5>
+                </div>
+                <div class="row">
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>ประเภทกู้ยืม</b> : @Request?.LoanTypeName
+                    </div>
+                    <br />
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>จำนวนเงินที่ต้องการกู้</b> : @(Request?.LoanRequestLoanAmount != null ? $"{string.Format("{0:n2}", Request.LoanRequestLoanAmount)} บาท" : "ไม่พบข้อมูล")
+                    </div>
+                    <br />
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>
+                            อัตราดอกเบี้ย(ต่อปี)
+                        </b> : @Request?.LoanRequestLoanInterest %
+                    </div>
+                    <br />
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>ผ่อนชำระเดือนละ</b> : @(Request?.LoanRequestLoanInstallment != null ? $"{string.Format("{0:n2}", Request.LoanRequestLoanInstallment)} บาท" : "ไม่พบข้อมูล")
+                    </div>
+                    <br />
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>จำนวนงวดที่ต้องการผ่อน</b> : @Request?.LoanRequestNumInstallments งวด
+                    </div>
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+
+                        @* Open PDF *@
+                        @if (IsMobile)
+                        {
+                            <button style="background-color:transparent;border: none; font-size: medium; font-weight: bold; text-decoration: underline; color: #2788de">
+                                <i class="fa-regular fa-file-pdf fa-lg mx-2"></i>
+                                ดาวน์โหลดคำขอกู้ PDF
+                            </button>
+                        }
+                        else
+                        {
+                            @*แสดงแบบคำขอกู้*@
+                            <button style="background-color:transparent;border: none; font-size: medium; font-weight: bold; color: #2788de"
+                            data-bs-toggle="modal"
+                            data-bs-target="#extralarge"
+                            @onclick="(async()=>{ await OpenPdfAsync(); })">
+                                <div>
+                                    <i class="fa-regular fa-file-pdf fa-5x mx-2 my-2"></i>
+                                </div>
+                                แสดงแบบคำขอกู้
+                            </button>
+
+                            @*หลักฐานการกู้*@
+                            <button style="background-color:transparent; border: none; font-size: medium; font-weight: bold; color: #2788de"
+                            data-bs-toggle="modal"
+                            data-bs-target="#extralargeDoc"
+                            @onclick="(async()=>{ await SetLoanDoc(); })">
+                                <div>
+                                    <i class="fa-regular fa-file-image fa-5x mx-2 my-2"></i>
+                                </div>
+                                หลักฐานการกู้
+                            </button>
+
+                            @* สำหรับดูไฟล์ เอกสารการยื่นกู้ *@
+                            <button style="background-color:transparent; border: none; font-size: medium; font-weight: bold; color: #2788de"
+                            data-bs-toggle="modal"
+                            data-bs-target="#extralarge_Doc_Db">
+                                <div>
+                                    <i class="fa-regular fa-file-image fa-5x mx-2 my-2"></i>
+                                </div>
+                                สัญญาฉบับจริง (มีลายเซ็น)
+                            </button>
+
+                            @* สำหรับสร้างไฟล์ เอกสารการยื่นกู้ DEV *@
+                            @*<button style="background-color:transparent;border: none; font-size: medium; font-weight: bold; color: #2788de"
+                    data-bs-toggle="modal"
+                    data-bs-target="#extralarge_Agreement"
+                    @onclick="(async()=>{ await OpenPdf_2Async(); })">
+                    <div>
+                    <i class="fa-regular fa-file-pdf fa-5x mx-2 my-2"></i>
+                    </div>
+                    สร้างไฟล์ สัญญากู้ (DEV)
+                    </button>*@
+                        }
+
+                    </div>
+
+                </div>
+            </div>
+
+            @* ข้อมูลผู้กู้ *@
+            <div>
+                <div class="section-title d-sm-flex justify-content-between mb-4 mt-3 mx-2 py-"
+                style="border: solid 1px; background-color: #e6ecef">
+                    <h5 class=" mb-0 py-2 px-1 ms-1 font-color">
+                        <strong>ข้อมูลผู้กู้</strong>
+                    </h5>
+                </div>
+
+                <div class="row pt-1">
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>ชื่อ-สกุล </b>: @userService.GetFullName(Request?.DebtorStaffId)
+                    </div>
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>ประเภทบุคลากร </b>: @DebtorStaff?.StaffTypeName
+                    </div>
+
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>ตำแหน่ง</b>: @DebtorStaff?.PosNameThai
+                    </div>
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>ส่วนงาน</b>: @DebtorStaff?.FacNameThai
+                    </div>
+
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>วันที่เริ่มทำงาน</b>: @ChangeDate(DebtorStaff?.StaffAcceptDate, model_month.Th)
+                    </div>
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>สถานภาพสมรส</b>: @DebtorStaff?.MarriedNameThai
+                    </div>
+
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>เบอร์โทรศัพท์มือถือ</b>:
+                        @(!string.IsNullOrEmpty(StaffDetail?.MobileTel) ?
+                                StaffDetail.MobileTel :
+                                " - ")
+                    </div>
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>เบอร์โทรที่ทำงาน</b>:
+                        @(!string.IsNullOrEmpty(StaffDetail?.OfficeTel) ?
+                                StaffDetail.OfficeTel :
+                                " - ")
+                    </div>
+
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>เงินเดือน</b>: @String.Format("{0:n2}", (DebtorStaff?.Salary != null ? DebtorStaff?.Salary : 0)) บาท
+                    </div>
+                    <div class="mt-4"></div>
+                </div>
+
+            </div>
+
+
+            @* ข้อมูลคู่สมรสของผู้กู้ *@
+            @if (DebtorStaff != null)
+            {
+                var FamilyName = getFamilyPartner(StaffFamilies);
+
+                if (DebtorStaff.MarriedId == "2")
+                {
+                    <div>
+                        <div class="section-title d-sm-flex justify-content-between mb-4 mt-2 mx-2 py-2"
+                             style="border: solid 1px; background-color: #e6ecef">
+                            <h5 class=" mb-0 py-2 px-1 ms-1 font-color">
+                                <strong>ข้อมูลคู่สมรสผู้กู้</strong>
+                            </h5>
+                        </div>
+                        <div class="row">
+                            <div class="mt-2 ps-5 col-xl-6 col-lg-6 col-md-12 col-12">
+                                <b>ชื่อ-สกุล</b>: @FamilyName
+                            </div>
+                            <div class="mt-4"></div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(FamilyName))
+                    {
+                        <div>
+                            <div class="section-title d-sm-flex justify-content-between mb-4 mt-2 mx-2 py-2"
+                                 style="border: solid 1px; background-color: #e6ecef">
+                                <h5 class=" mb-0 py-2 px-1 ms-1 font-color">
+                                    <strong>ข้อมูลคู่สมรสผู้กู้</strong>
+                                </h5>
+                            </div>
+                            <div class="row ">
+                                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                                    <b>ชื่อ-สกุล</b>: @FamilyName
+                                </div>
+                                <div class="mt-4"></div>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+
+            @* ข้อมูลทายาทของผู้กู้ *@
+            @if (StaffChild.Any())
+            {
+                <div>
+                    <div class="section-title d-sm-flex justify-content-between mb-4 mt-2 mx-2 py-2"
+                         style="border: solid 1px; background-color: #e6ecef">
+                        <h5 class="mb-0 py-2 px-1 ms-1 font-color">
+                            <strong>ข้อมูลทายาทผู้กู้</strong>
+                        </h5>
+                    </div>
+
+                    <div class="row">
+                        @foreach (var child in StaffChild)
+                        {
+                            <div class="mt-2 ps-5 col-xl-6 col-lg-6 col-md-12 col-12">
+                                <b>ชื่อ-สกุล</b>: @child.ChildFname @child.ChildSname
+                            </div>
+                        }
+                        <div class="mt-4"></div>
+                    </div>
+                </div>
+            }
+
+            @* ข้อมูลผู้ค้ำ *@
+            <div>
+                <div class="section-title d-sm-flex justify-content-between mb-4 mt-2 mx-2 py-2"
+                     style="border: solid 1px; background-color: #e6ecef">
+                    <h5 class=" mb-0 py-2 px-1 ms-1 font-color">
+                        <strong>ข้อมูลผู้ค้ำ</strong>
+                    </h5>
+                </div>
+
+                <div class="row">
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>ชื่อ-สกุล</b>: @userService.GetFullName(GuarantStaff?.StaffId)
+                    </div>
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>ประเภทบุคลากร</b>: @GuarantStaff?.StaffTypeName
+                    </div>
+
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>ตำแหน่ง</b>: @GuarantStaff?.PosNameThai
+                    </div>
+                    <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                        <b>ส่วนงาน</b>: @GuarantStaff?.FacNameThai
+                    </div>
+                    <div class="mt-4"></div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title d-sm-flex justify-content-between mb-4 mt-2 mx-2 py-2"
+                     style="border: solid 1px; background-color: #e6ecef">
+                    <h5 class="mb-0 py-2 px-1 ms-1 font-color">
+                        <i class="fas fa-list-alt mx-2"></i>
+                        <strong>การดำเนินการ</strong>
+                    </h5>
+                </div>
+                <div class="mt-5 mb-2 ms-3">
+                    <Timeline>
+                        @foreach (var listUser in ListStatusUser)
+                        {
+                            <TimelineItem>
+                                <a style="margin-right:5px">@listUser.Title </a>
+                                @if (listUser.DateStatus != null)
+                                {
+                                    @dateService.ChangeDate(listUser.DateStatus.Value, "dd MMMM yyyy", Utility.DateLanguage_TH)
+                                }
+                                &nbsp;
+                                <b>
+                                    [ สถานะ :
+
+                                    @switch (listUser.StatusID)
+                                    {
+                                        case 1:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Yellow.ToString())"
+                                                                           message="@listUser.Status" />
+                                            break;
+
+                                        case 2:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Cyan.ToString())"
+                                                                           message="@listUser.Status" />
+                                            break;
+
+                                        case 4:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.GeekBlue.ToString())"
+                                                                           message="@listUser.Status" />
+                                            break;
+
+                                        case 9:
+                                            <LoanApp.Components.Ant.TagAnt color="#2db7f5"
+                                                                           message="@listUser.Status" />
+                                            break;
+
+                                        case 6:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Purple.ToString())"
+                                                                           message="@listUser.Status" />
+                                            break;
+
+                                        case 7:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Lime.ToString())"
+                                                                           message="@listUser.Status" />
+                                            break;
+
+                                        case 8:
+                                            <LoanApp.Components.Ant.TagAnt color="rgb(143, 201, 146)"
+                                                                           message="@listUser.Status">
+                                                <header>
+                                                    <i class="fas fa-check-circle me-2" style="color:white"></i>
+                                                </header>
+                                            </LoanApp.Components.Ant.TagAnt>
+                                            break;
+
+                                        case 80:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Orange.ToString())"
+                                                                           message="@listUser.Status">
+                                                <header>
+                                                    <i class="fas fa-frown me-2" style="color: #d46b08"></i>
+                                                </header>
+                                            </LoanApp.Components.Ant.TagAnt>
+                                            break;
+
+                                        case 81:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Volcano.ToString())"
+                                                                           message="@listUser.Status">
+                                                <header>
+                                                    <i class="fas fa-frown me-2" style="color: #d4380d"></i>
+                                                </header>
+                                            </LoanApp.Components.Ant.TagAnt>
+                                            break;
+
+                                        case 82:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Magenta.ToString())"
+                                                                           message="@listUser.Status">
+                                                <header>
+                                                    <i class="fas fa-frown me-2" style="color: #c41d7f"></i>
+                                                </header>
+                                            </LoanApp.Components.Ant.TagAnt>
+                                            break;
+
+                                        case 99:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Green.ToString())"
+                                                                           message="@listUser.Status">
+                                                <header>
+                                                    <i class="fas fa-smile me-2" style="color: #389e0d"></i>
+                                                </header>
+                                            </LoanApp.Components.Ant.TagAnt>
+                                            break;
+
+                                        case 98:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Pink.ToString())"
+                                                                           message="@listUser.Status" />
+                                            break;
+
+                                        case 200:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Gold.ToString())"
+                                                                           message="@listUser.Status" />
+                                            break;
+
+                                        default:
+                                            <LoanApp.Components.Ant.TagAnt color="error"
+                                                                           message="@listUser.Status">
+                                                <header>
+                                                    <i class="fas fa-times-circle me-2" style="color: #f5222d"></i>
+                                                </header>
+                                            </LoanApp.Components.Ant.TagAnt>
+                                            break;
+                                    }
+                                    ]
+                                </b>
+                            </TimelineItem>
+                        }
+                    </Timeline>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*footer*@
+    <div class="footer">
+        <div class="row py-1 col-12 ms-0 px-0">
+            <div class="col-xl-3 col-lg-3 col-md-3 col-3">
+                <button class="btn secondary-bg shadow rounded text-center"
+                        style="border-radius:20px;width:160px"
+                        @onclick="BackPage">
+                    <i class="fa-solid fa-arrow-left fa-lg me-3"></i>
+                    ย้อนกลับ
+                </button>
+            </div>
+            <div class="col-xl-4 col-lg-3 col-md-5 col-4 text-center"></div>
+            <div class="col-xl-3 col-lg-3 col-md-3 col-3 p-0 ms-0" style="text-align:end">
+                @if (Request != null)
+                {
+                    if ((Request.CurrentStatusId >= 6 && Request.CurrentStatusId <= 8) ||
+                    (Request.CurrentStatusId >= 80 && Request.CurrentStatusId <= 82) ||
+                    Request.CurrentStatusId == 99)
+                    {
+                        <button class="btn button-color shadow rounded text-center"
+                                style="border-radius:20px;width:160px" @onclick="()=>ToPageTransaction(Request)">
+                            ดูข้อมูลชำระหนี้
+                        </button>
+                    }
+
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Extra large modal -->
+    <div class="modal fade"
+         id="extralarge"
+         tabindex="-1"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">เอกสารคําขอกู้</h5>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(LoanAttrachmentHTML))
+                    {
+                        <PreviewPdf Url="@LoanAttrachmentHTML" Height="650px" />
+                    }
+                    else
+                    {
+                        <Loading Message="ระบบกำลังประมวลผล กรุณารอสักครู่" />
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        ยกเลิก
+                    </button>
+                    @if (!string.IsNullOrEmpty(LoanAttrachmentHTML))
+                    {
+                        <button type="button"
+                                class="btn button-color"
+                                @onclick="()=> PrintPdfAsync(LoanAttrachmentHTML)">
+                            พิมพ์
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- doc สัญญากู้ large modal -->
+    <div class="modal fade"
+         id="extralarge_Agreement"
+         tabindex="-1"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        เอกสารการยื่นกู้
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(LoanAttrachmentHTML_2))
+                    {
+                        <PreviewPdf Url="@LoanAttrachmentHTML_2" Height="650px" />
+                    }
+                    else
+                    {
+                        <Loading Message="ระบบกำลังประมวลผล กรุณารอสักครู่" />
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        ยกเลิก
+                    </button>
+                    @if (!string.IsNullOrEmpty(LoanAttrachmentHTML_2))
+                    {
+                        <button type="button"
+                                class="btn button-color"
+                                @onclick="@(async()=> {await PrintPdfAsync(LoanAttrachmentHTML_2, "เอกสารการยื่นกู้");})">
+                            พิมพ์
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ดูไฟล์ สัญญาฉบับจริง large modal *@
+    <div class="modal fade"
+         id="extralarge_Doc_Db"
+         tabindex="-1"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        สัญญาฉบับจริง (มีลายเซ็น)
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    @if (pathContract.Any())
+                    {
+                        foreach (var item in pathContract)
+                        {
+                            <iframe src="@item" style="width:100%; height:80vh;"></iframe>
+                        }
+                    }
+                    else
+                    {
+                        <Empty />
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extra large modal (extralargeDoc) -->
+    <div class="modal fade"
+         id="extralargeDoc"
+         tabindex="-1"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        หลักฐาน
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    @if (!LoadingResultImg)
+                    {
+                        <ImgStapComponents ListDocModels="ResultDocList" />
+                    }
+                    else
+                    {
+                        <Loading />
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        ปิด
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Document*@
+    <div class="d-none">
+        <RequestAttrachment Loan="LoanData"
+                            TitleDocument="แบบคำขอสวัสดิการ"
+                            StaffDetail="DebtorStaff"
+                            Other="Info"
+                            StaffAssress="StaffAddress"
+                            Option="OptionLoanAgreement"
+                            @ref="RefRequestAttrachment" />
+
+        @* เอกสารสัญญา *@
+        <LoanAttrachment StaffDetail="DebtorStaff"
+                         StaffAssress="StaffAddress"
+                         Loan="LoanData"
+                         Other="Info"
+                         Option="OptionLoanAgreement"
+                         @ref="RefLoanAttrachment" />
+
+        <LoanGuarantor DebtorStaffDetail="DebtorStaff"
+                       GuarantorStaffDetail="GuarantStaff"
+                       StaffAssress="GuarantorStaffAssress"
+                       Loan="LoanData"
+                       Option="OptionLoanAgreement"
+                       @ref="RefGuarantor" />
+
+        @if (DebtorStaff?.MarriedId == "2")
+        {
+            @*Role="ผู้กู้"*@
+            <LoanPartner Loan="@LoanData"
+                         StaffDetail="@DebtorStaff"
+                         StaffFamilies="StaffFamilies"
+                         Option="OptionLoanAgreement"
+                         @ref="RefDebtorPartner"
+                         PageId="DebtorStaffDetail" />
+        }
+
+        @if (GuarantStaff?.MarriedId == "2")
+        {
+            <LoanPartner Loan="@LoanData"
+                         StaffDetail="@GuarantStaff"
+                         StaffFamilies="GuarantorStaffFamilies"
+                         Role="ผู้ค้ำประกัน"
+                         Option="OptionLoanAgreement"
+                         @ref="RefGuarantorPartner"
+                         PageId="GuarantorStaffDetail" />
+        }
+    </div>
+}
+
+@code { }

@@ -1,0 +1,34 @@
+﻿body {
+}
+@media (min-width: 1024px) {
+   
+
+    .buttonsize {
+        width: 200px
+    }
+}
+
+@media (max-width: 1024px) {
+    
+    .buttonsize {
+        width: 200px
+    }
+}
+
+@media (max-width: 768px) {
+  
+
+    .buttonsize {
+        width: 100%
+    }
+}
+
+@media (max-width: 450px) {
+  
+
+    .buttonsize {
+        width: 100%
+    }
+
+    
+}

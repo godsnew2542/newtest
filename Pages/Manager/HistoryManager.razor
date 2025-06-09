@@ -1,0 +1,166 @@
+﻿@page "/Manager/HistoryManager"
+@attribute [Authorize(Roles = "3")]
+
+<div class="container-fluid mt-5">
+
+	<div class="panel mt-5">
+		<div class="panel-body table-responsive mt-4 table-container" style="border-top-left-radius:10px;border-top-right-radius:10px">
+			<table class="table table-hover table-borderless">
+				<thead class="table-header text-center" style="border-bottom: solid 1px; border-color: #367691">
+					<tr>
+						<th>ผู้กู้</th>
+						<th>ประเภทกู้ยืม</th>
+						<th>ยอดเงินกู้</th>
+						<th>สถานะ</th>
+						<th>วันที่/เวลาลงนามอนุมัติ</th>
+					</tr>
+				</thead>
+
+				<tbody>
+					@if (ReqCon.Count != 0)
+					{
+						foreach (var item in ReqCon)
+						{
+					<tr class="py-2" style="background-color:whitesmoke;">
+						<td class="text-left">
+
+							<div>
+										@userService.GetFullName(item.DebtorStaffId)
+							</div>
+						</td>
+						<td class="text-left">
+							<div>
+								@GetLoanName(item.LoanTypeId)
+							</div>
+						</td>
+						<td class="text-center">
+							<div>
+								@String.Format("{0:n2}", item.ContractLoanAmount)
+							</div>
+						</td>
+						<td class="text-left">
+							<div>
+								@item.CurrentStatusName
+							</div>
+						</td>
+						<td class="text-left">
+							<div>
+								@ChangeDate(item.ContractApproveDate)
+							</div>
+						</td>
+						
+					</tr>
+						}
+					}
+					else
+					{
+				<tr class="my-2 py-2">
+					<td colspan="6">
+						<Empty>
+							<DescriptionTemplate>
+								<span>ไม่พบข้อมูล</span>
+							</DescriptionTemplate>
+						</Empty>
+					</td>
+				</tr>
+				}
+				</tbody>
+			</table>
+
+			<div class="panel-footer">
+				<div class="d-flex tool-bar">
+					<div class="ml-auto d-flex justify-content-center align-items-center">
+						<span class="form-control-user mr-2">
+							รายการต่อหน้า
+						</span>
+						<label class="d-flex align-items-center text-center">
+							<select class="form-control form-control-sm text-center"
+									@onchange="SelectPageSize">
+								@foreach (var LM in Footer.Limits)
+								{
+									<option value="@LM">@LM</option>
+								}
+							</select>
+						</label>
+					</div>
+					<div class="d-flex justify-content-center align-items-center">
+						<span class="form-control-user mr-2 ml-2">
+							รายการ
+						</span>
+						<span class="mr-2">
+							หน้า
+						</span>
+					</div>
+					<div class="d-flex align-items-center">
+						<div role="group" class="btn-group">
+							<button class="btn btn-light btn-sm"
+									type="button"
+									@onclick="@(e => NavigateTo("Prev"))">
+								<i class="fas fa-chevron-left icon-primary"></i>
+							</button>
+							<label class="d-flex align-items-center text-center mx-1">
+								<select class="form-control form-control-sm text-center"
+										@onchange="SelectCurrentPage"
+										value="@Footer.CurrentPage">
+									@for (int i = 1; i <= Footer.TotalPages; i++)
+									{
+										<option value="@i">@i</option>
+									}
+								</select>
+							</label>
+							<button class="btn btn-light btn-sm"
+									type="button"
+									@onclick="@(e => NavigateTo("Next"))">
+								<i class="fas fa-chevron-right icon-primary"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="footer">
+    <div class="row py-1 col-12">
+        <div class="col-xl-5 col-lg-5 col-md-5 col-6 row">
+			<div class="col-xl-2 col-lg-2 col-md-2 col-2" style="text-align:end">
+				<div class="font-color font-weight-bolder">
+					ปี
+				</div>
+			</div>
+            <div class="col-xl-7 col-lg-7 col-md-6 col">
+                <select class="form-select form-select-sm" @onchange="SelectYear">
+                    @for (var i = 0; i < Year.Count; i++)
+                    {
+                        var item = Year[i];
+                        <option value="@item.Year">@item.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-xl-5 col-lg-5 col-md-5 col-6 row">
+			<div class="col-xl-2 col-lg-2 col-md-2 col-4 " style="text-align:end">
+				<div class="font-color font-weight-bolder">
+					เดือน
+				</div>
+			</div>
+            <div class="col-xl-7 col-lg-7 col-md-6 col">
+                <select class="form-select form-select-sm ms-2 px-2" @onchange="SelectMonth">
+                    @for (var i = 0; i < Month.Count; i++)
+                    {
+                        var item = Month[i];
+                        <option value="@item.Month">@item.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@code {
+}
+
+

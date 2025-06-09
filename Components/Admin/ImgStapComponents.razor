@@ -1,0 +1,76 @@
+﻿@for (int x = 0; x < ListDocModels.Count(); x++)
+{
+    var list = ListDocModels[x];
+
+    <div class="text-center h5">
+        @list.TitleStap
+    </div>
+
+    foreach (var TitleImg in list.TitleList)
+    {
+        bool IsnoImg = true;
+        <div>
+            @TitleImg.AttachmentNameThai
+        </div>
+
+        for (int i = 0; i < list.ResultList.Count; i++)
+        {
+            var ResultImg = list.ResultList[i];
+            if (TitleImg.AttachmentTypeId == ResultImg.AttachmentTypeId)
+            {
+                string? extension = Path.GetExtension(ResultImg.Name);
+                var fileData = SaveFileAndImgService.GetUrl(ResultImg.Url);
+
+                if (!string.IsNullOrEmpty(extension))
+                {
+                    IsnoImg = false;
+                    @if (extension.ToLower() == ".pdf")
+                    {
+                        <div class="text-center my-2">
+                            @if (!string.IsNullOrEmpty(fileData))
+                            {
+                                <iframe src="@fileData" style="width:100%; height:500px">
+                                </iframe>
+                            }
+                            else
+                            {
+                                <Empty />
+                            }
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <div class="text-center col-6 p-2">
+                                @if (!string.IsNullOrEmpty(fileData))
+                                {
+                                    <img src="@fileData" style="width:100%; height:250px;" />
+                                }
+                                else
+                                {
+                                    <Empty />
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        }
+        if (IsnoImg)
+        {
+            <Empty>
+                <DescriptionTemplate>
+                    <span>ไม่พบไฟล์</span>
+                </DescriptionTemplate>
+            </Empty>
+        }
+    }
+
+    if (ListDocModels.Count != (x + 1))
+    {
+        <hr />
+    }
+}
+
+@code { }

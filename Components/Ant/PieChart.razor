@@ -1,0 +1,29 @@
+﻿@using AntDesign.Charts
+
+<div class="card" style="height:250px;border-radius:5px">
+
+    <div class="text-start ps-2 mt-4">
+        <h5 class="font-color" style="font-weight:bold">
+            @* วงเงินกู้ยืมตามประเภท *@
+            วงเงินตามประเภทกู้ยืม
+        </h5>
+        @if (data1 != null)
+        {
+            <Pie Data="data1" Config="config1" />
+        }
+        else
+        {
+            <Empty>
+                <DescriptionTemplate>
+                    <span>ไม่พบข้อมูลสัญญา</span>
+                </DescriptionTemplate>
+            </Empty>
+        }
+
+
+    </div>
+</div>
+
+@code {
+
+}

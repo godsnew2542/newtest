@@ -1,0 +1,86 @@
+﻿@page "/Dev/ViewAsUser"
+
+<PageHeader>
+    <TitleTemplate>
+        <Space Size="@("small")" Wrap>
+            <SpaceItem>
+                ViewAsUser
+            </SpaceItem>
+        </Space>
+    </TitleTemplate>
+</PageHeader>
+
+<div class="container">
+    <Card Style="margin-top: 10px;">
+        <GridRow Gutter="(8,8)" Style="margin:10px;">
+            <GridCol Flex="@("auto")">
+                StaffId: @userStateProvider?.CurrentUser.StaffId
+            </GridCol>
+            <GridCol Flex="@("auto")">
+                username : @userStateProvider?.CurrentUser.UserName
+            </GridCol>
+        </GridRow>
+
+        <Spin Spinning=loading>
+            <GridRow Gutter="(8,8)" Style="margin-top: 15px;">
+                <GridCol Flex="@("auto")">
+                    <AntDesign.Input Placeholder="คำค้นหา ชื่อ-บุคลากร/รหัสบุคลากร"
+                                     @bind-Value="@searchValue"
+                                     OnPressEnter="(e)=>OnEnter(e, searchValue)"
+                                     AllowClear="true">
+                        <Prefix>
+                            <Icon Type="search" />
+                        </Prefix>
+                    </AntDesign.Input>
+                </GridCol>
+                <GridCol Flex="@("none")">
+                    <Button Icon="search"
+                            Class="Button-style"
+                            Type="@ButtonType.Primary"
+                            OnClick="@(() => Submit(searchValue))">
+                        ค้นหา
+                    </Button>
+                </GridCol>
+            </GridRow>
+
+            <div style="margin-top: 10px;">
+                <Table DataSource="vLoanStaffDetails"
+                       TItem="VLoanStaffDetail"
+                       Responsive=true
+                       Class="table-hover-cursor">
+                    <Column Title="StaffId"
+                            @bind-Field="@context.StaffId" />
+                    <Column Title="Name (Thai)"
+                            TData="string">
+                        @($"{context.TitleNameThai}{context.StaffNameThai} {context.StaffSnameThai}")
+                    </Column>
+                    <Column Title="Name (English)"
+                            TData="string">
+                        @($"{context.StaffNameEng} {context.StaffSnameEng}")
+                    </Column>
+                    <Column Title="StaffDepart"
+                            TData="string">
+                        @context.StaffDepart
+                    </Column>
+                    <Column Title="Camp/Fac/Dep/Sec_id"
+                            TData="string">
+                        @context.CampNameThai <br />
+                        @context.FacNameThai <br />
+                        @context.DeptNameThai <br />
+                        @context.SectId
+                    </Column>
+                    <Column Title="Action" @bind-Field="@context.StaffId">
+                        <Button Type="@ButtonType.Primary" OnClick="@(()=> { SetMember(context.StaffId); })">
+                            Change Member
+                        </Button>
+                    </Column>
+                </Table>
+            </div>
+        </Spin>
+
+    </Card>
+</div>
+
+@code {
+
+}

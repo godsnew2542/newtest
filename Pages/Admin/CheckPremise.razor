@@ -1,0 +1,219 @@
+﻿@page "/Admin/CheckPremise"
+@page "/Admin/CheckPremise/{RequestID:decimal}"
+
+@attribute [Authorize(Roles = "2")]
+
+<div class="container-fluid my-4 pb-5 mb-5">
+    <div class="card shadow d-sm-flex justify-content-between mb-4 mt-5">
+        <Card Style="background-color: rgba(0, 0, 0, 0.03);">
+            <Body>
+                <h6 class="mb-0 py-2 px-1 ms-1 font-color" style="font-weight:bold;">
+                    @{
+                        bool isEdit = IsChangeContractNo(ReqCon).Result;
+                    }
+                    <HeaderDetailLoan IsEditContractNo="@isEdit" ReqCon="@ReqCon" />
+                    @* <GridRow Gutter="(8,8)" Align="middle">
+                        <GridCol Flex="@("none")">
+                            <a style="color:black">[เลขที่สัญญา : @ReqCon?.ContractNo]</a>
+                        </GridCol>
+                        @if (isEdit)
+                        {
+                            <GridCol Flex="@("none")">
+                                <Tooltip Placement="@Placement.Top">
+                                    <TitleTemplate>
+                                        แก้ไข เลขที่สัญญาหรือวันที่กองคลังโอนเงิน
+                                    </TitleTemplate>
+                                    <ChildContent>
+                                        <Button Type="@ButtonType.Primary" Style="border-radius:8px;" OnClick="@(()=> { EditContractNoVisible = true; })">
+                                            <i class="fa-solid fa-pen-to-square fa-flip-horizontal fa-lg"></i>
+                                        </Button>
+                                    </ChildContent>
+                                </Tooltip>
+                            </GridCol>
+                        }
+                        <GridCol Flex="@("none")">
+                            @GetData(LoanRequest)
+                        </GridCol>
+                    </GridRow> *@
+                </h6>
+            </Body>
+        </Card>
+
+
+
+        <div class="row mb-2 justify-content-center mx-2">
+            <div class="mx-2 my-2">
+                <Alert Type="@AlertType.Warning"
+                       Message="กรุณาตรวจสอบเอกสารหลักฐานที่ผู้กู้ได้อัปโหลดหลังทำสัญญาเรียบร้อย"
+                       ShowIcon="true" />
+            </div>
+            @if (LoanRequest != null)
+            {
+                var ListTitle = GetAttachmentTitle(LoanRequest).Result;
+
+                foreach (var title in ListTitle)
+                {
+                    var model = GetAttachmentAsync(title, LoanRequest?.DebtorStaffId).Result;
+                    var NoImg = true;
+
+                    <div class="mt-3 font-color">
+                        <i class="fa-solid fa-file mx-1 fa-lg"></i>
+                        <a style="color: black;font-size:medium">
+                            @title.AttachmentNameThai
+                        </a>
+                    </div>
+                    <Divider />
+                    <div class="mb-2 justify-content-center mx-2">
+                        @if (model.ImgFail.Any() || model.ImgSuccess.Any())
+                        {
+                            @*foreach (var Fails in model.ImgFail)
+                {
+                NoImg = false;
+                <div>@Fails.TempImgName => @Fails.Url</div>
+                }*@
+                            foreach (var Success in model.ImgSuccess)
+                            {
+                                NoImg = false;
+                                var extension = Path.GetExtension(Success.TempImgName);
+                                if (extension == ".pdf")
+                                {
+                                    <iframe src="@Success.Url" style="width:100%; height:500px"></iframe>
+                                }
+                                else
+                                {
+                                    <img src="@Success.Url" style="width:auto; height:600px;">
+                                }
+                            }
+
+                            if (NoImg)
+                            {
+                                <Empty>
+                                    <DescriptionTemplate>
+                                        <span>ไม่พบไฟล์</span>
+                                    </DescriptionTemplate>
+                                </Empty>
+                            }
+                        }
+                        else if (NoImg)
+                        {
+                            <Empty>
+                                <DescriptionTemplate>
+                                    <span>ไม่พบไฟล์</span>
+                                </DescriptionTemplate>
+                            </Empty>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="row py-1 col-12 ms-1">
+        <div class="col-xl-3 col-lg-3 col-md-3 text-left">
+            <button type="button"
+                    class="btn secondary-bg shadow rounded text-center"
+                    style="border-radius: 5px;width:180px"
+                    @onclick="Back">
+                <i class="fa-solid fa-arrow-left fa-lg me-3"></i>
+                ย้อนกลับ
+            </button>
+        </div>
+        <div class="col-xl-7 col-lg-6 col-md-8 text-end">
+            <button type="button"
+                    class="btn shadow rounded text-center mx-2 "
+                    data-bs-toggle="modal"
+                    data-bs-target="#BackPremise"
+                    style="border-radius: 5px; width: 180px; background-color: red; color: white">
+                ไม่ผ่าน
+            </button>
+            <button type="button"
+                    class="btn shadow rounded text-center"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirmPremise"
+                    style="border-radius: 5px; width: 180px; background-color: green;color:white">
+                ผ่าน
+            </button>
+        </div>
+    </div>
+</div>
+
+@* model confirmPremise *@
+<div class="modal fade"
+     id="confirmPremise"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6>หลักฐานหลังรับเงินกู้เรียบร้อย ยืนยันการตรวจสอบว่าผ่านใช่หรือไม่ ?</h6>
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ปิด
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="@(async()=> { await SaveToDbAsync(LoanRequest); })">
+                    ยืนยัน
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*model BackPremise*@
+<div class="modal fade"
+     id="BackPremise"
+     tabindex="-1"
+     aria-labelledby="exampleModal"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6>พบหลักฐานหลังรับเงินกู้ไม่เรียบร้อย ต้องการให้ผู้กู้อัปโหลดใหม่ ใช่หรือไม่ ?</h6>
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ปิด
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="() => BackToUploadAsync(LoanRequest)">
+                    ยืนยัน
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<Modal Title="@($"เลขที่สัญญา: {ReqCon?.ContractNo} วันที่กองคลังโอนเงิน: {dateService.ChangeDate(ReqCon?.PaidDate, "d MMMM yyyy", Utility.DateLanguage_TH)} ณ ปัจจุบัน")"
+       @bind-Visible="@EditContractNoVisible"
+       MaskClosable=false
+       Footer="@(null)"
+       Width="@("40%")">
+    <div>
+        <EditContractNoAndPaidDate ContractNo="@(ReqCon?.ContractNo)"
+                                   ContractId="@(ReqCon?.ContractId)"
+                                   PaidDate="@(ReqCon?.PaidDate)"
+                                   OnCallbackData="@((e)=> CallbackData(e) )" />
+    </div>
+</Modal>
+
+<style scoped>
+    :root .ant-card-body {
+        padding: 1rem !important;
+    }
+</style>
+@code { }

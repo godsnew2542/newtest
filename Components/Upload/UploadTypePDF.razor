@@ -1,0 +1,46 @@
+﻿<div class="my-2 mx-3 row">
+	@if (!string.IsNullOrEmpty(Title)) 
+	{
+		<div class="col-xl-4 col-lg-12 col-md-12 col-12 p-2">
+			<label class="form-label font-color">
+				<a class="font-weight-bold">@Title</a>
+				<a style="color:red;">*</a>
+				@if (!String.IsNullOrEmpty(Detail))
+				{
+					<a style="color:black;font-size:small;"> @Detail </a>
+				}
+			</label>
+			
+		</div>
+	}
+	<div class="col-xl-10 col-lg-8 col-md-8 col-8">
+		<div class="card p-1">
+			@if (string.IsNullOrEmpty(ModelUploadPDF.Name))
+			{
+				<div style="color:gray;font-size:small;">กรุณาอัปโหลดไฟล์</div>
+			}
+			else
+			{
+				<div style="color:gray;font-size:small;">@ModelUploadPDF.Name</div>
+			}
+		</div>
+	</div>
+	<div class="col-xl-2 col-lg-3 col-md-4 col-4 text-end">
+		<button type="button"
+				class="btn buttonsize button-color shadow rounded text-center"
+				style="border-radius: 5px;height:40px;width:160px"
+				id="Upload_PDF"
+				@onclick="()=> GeneratePDFService.OpenTypeFileAsync(GenId, myFile)">
+			อัปโหลดไฟล์
+		</button>
+	</div>
+</div>
+
+<NewUpload SetChildData="SetCurrentDataAsync" 
+		   AttachmentTypeId="@AttTypeId" 
+		   MyFile="@myFile"
+		   ArrayTypeFileImg="ArrayTypeFileImg"/>
+
+@code {
+	private string[] ArrayTypeFileImg { get; } = new[] { "PDF" };
+}

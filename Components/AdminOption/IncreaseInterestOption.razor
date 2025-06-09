@@ -1,0 +1,100 @@
+﻿<div>
+	<div class="card pt-3 pb-4 mt-5 mb-3 shadow rounded">
+		<div class="font-color">
+			<div class="row pt-4">
+				<div class="col-6" style="padding-left: 100px">
+					<a style="font-size:larger">ยอดเงินกู้</a>
+				</div>
+				<div class="col-6" style="text-align:end;padding-right:90px">
+					<a style="font-size:larger">
+						@*@String.Format("{0:n2}", ReqCon.LoanRequestLoanAmount) บาท*@
+						@String.Format("{0:n2}", FormOption.LoanAmount) บาท
+					</a>
+				</div>
+			</div>
+			<div class="row pt-4">
+				<div class="col-6" style="padding-left: 100px">
+					<a style="font-size:larger">อัตราดอกเบี้ย</a>
+				</div>
+				<div class="col-6" style="text-align:end;padding-right:90px">
+					<div class="input-group">
+						<AntDesign.InputNumber class="form-control"
+											   Step="1"
+											   Min="0"
+											   Formatter="FormatNumber"
+											   TValue="decimal?"
+											   DefaultValue="FormOption.IncreaseInterest.NewLoanInterest"
+											   ValueChanged="(decimal? val)=>NewLoanInterestChangeAsync(val)" />
+						<span class="input-group-text py-0">%</span>
+					</div>
+					@*<div class="input-group">
+							<AntDesign.InputNumber class="form-control"
+												   Step="1"
+												   Min="0"
+												   Formatter="FormatNumber"
+												   Parser="Utility.ParseNumber"
+												   @bind-Value="NewInterest" />
+							<span class="input-group-text py-0">%</span>
+						</div>*@
+				</div>
+			</div>
+			<div class="row pt-4">
+				<div class="col-6" style="padding-left: 100px">
+					<a style="font-size:larger">ผ่อนชำระสูงสุด</a>
+				</div>
+				<div class="col-6" style="text-align:end;padding-right:90px">
+					<a style="font-size:larger">
+						@*@ReqCon.LoanRequestNumInstallments งวด*@
+						@FormOption.IncreaseInterest.LoanNumInstallments งวด
+					</a>
+				</div>
+			</div>
+			<div class="row pt-4">
+				<div class="col-6" style="padding-left: 100px">
+					<a style="font-size:larger">ผ่อนชำระเดือนละ</a>
+				</div>
+				<div class="col-6" style="text-align:end;padding-right:90px">
+					<a style="font-size:larger">
+						@*@String.Format("{0:n2}", (ReqCon.ContractLoanInstallment == null ?
+							" - " : ReqCon.ContractLoanInstallment)) บาท*@
+						@String.Format("{0:n2}", (FormOption.IncreaseInterest.LoanInstallment == null ?
+												   " - " : FormOption.IncreaseInterest.LoanInstallment)) บาท
+					</a>
+				</div>
+			</div>
+			<div class="row pt-4">
+				<div class="col-6" style="padding-left: 100px">
+					<a style="font-size:larger">ยอดเงินกู้คงเหลือ</a>
+				</div>
+				<div class="col-6" style="text-align:end;padding-right:90px">
+					<a style="font-size:larger">
+						@*@String.Format("{0:n2}", GetBalanceTotal()) บาท*@
+						@String.Format("{0:n2}", FormOption.IncreaseInterest.BalanceAmount) บาท
+					</a>
+				</div>
+			</div>
+			<div class="row pt-4">
+				<div class="col-6" style="padding-left: 100px">
+					<a style="font-size:larger">วันที่ทำรายการ</a>
+				</div>
+				<div class="col-6" style="text-align:end;padding-right:90px">
+					<a style="font-size:larger">
+						@dateService.ChangeDate(FormOption.DateNow, "dd MMMM yyyy", Utility.DateLanguage_TH)
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	private string FormatNumber(decimal? data)
+	{
+		string value = "0";
+		if (data != null)
+		{
+			value = data.Value.ToString("n2");
+		}
+		return value;
+	}
+}

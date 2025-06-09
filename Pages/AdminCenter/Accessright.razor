@@ -1,0 +1,374 @@
+﻿@page "/Admin/Accessright"
+@attribute [Authorize(Roles = "1")]
+
+<div class="container-fluid my-4 pb-5">
+    <Spin Spinning=loading>
+        <div>
+            <div class="section-title" style="font-size:medium">
+                <i class="material-icons me-2">security</i> สิทธิ์การใช้งาน
+            </div>
+        </div>
+
+        <div class="card rounded shadow mt-4 py-2 px-3">
+            <div>
+                <GridRow Gutter="(8,8)" Style="margin: 15px 0;" Justify="end">
+                    <GridCol Flex="@("auto")">
+                        @* @bind-Value="@searchValue" *@
+
+                        <AntDesign.Input Value="searchValue"
+                                         OnChange="@((string? e)=>ChangeText(e))"
+                                         Placeholder="คำค้นหา ชื่อ-บุคลากร/รหัสบุคลากร"
+                                         OnPressEnter="@(async()=>{await Submit(searchValue);})"
+                                         Size="large"
+                                         Style="min-width:350px;"
+                                         AllowClear=true>
+                        </AntDesign.Input>
+                    </GridCol>
+                    <GridCol Flex="@("none")">
+                        <Button Style="border-radius:8px; background:#367691"
+                                Size="@ButtonSize.Large"
+                                OnClick="@(async()=>{await Submit(searchValue);})">
+                            <i class="fas fa-search" style="color: #ffffff "></i>
+                        </Button>
+                    </GridCol>
+                </GridRow>
+
+                @if (ListStaffDetail.Any())
+                {
+                    @*                    <div class="overflow-auto my-2" style="height:200px;">
+                <ul>
+                @foreach (var people in ListStaffDetail)
+                {
+                var fullName = userService.GetFullName(people);
+
+                <li @onclick="@(async()=>{ChangeValStaff(people);})">
+                <a class="dropdown-item">
+                @fullName ( @people.FacNameThai ) ( @people.CampNameThai ) (@people.StaffId)
+                </a>
+                </li>
+                }
+                </ul>
+                </div> *@
+
+                    <div class="overflow-auto my-2" style="height:200px;">
+                        <AntList DataSource="@ListStaffDetail" TItem="VLoanStaffDetail">
+                            @{
+                                var fullName = userService.GetFullName(context);
+                            }
+                            <ListItem OnClick="()=>ChangeValStaff(context)">
+                                <ListItemMeta>
+                                    <TitleTemplate>
+                                        @fullName ( @context.FacNameThai ) ( @context.CampNameThai ) (@context.StaffId)
+                                    </TitleTemplate>
+                                </ListItemMeta>
+                            </ListItem>
+                        </AntList>
+                    </div>
+                }
+            </div>
+
+            @if (!string.IsNullOrEmpty(StaffDetail?.StaffId))
+            {
+                var ListPrivilegeGroup = userService.GetRole(StaffDetail.StaffId);
+
+                <div class="py-2 px-3">
+                    <Card>
+                        <TitleTemplate>
+                            ข้อมูลเบื้องต้น
+                        </TitleTemplate>
+                        <Extra>
+                            <Button Type="@ButtonType.Primary"
+                                    Size="@ButtonSize.Large"
+                                    OnClick="@(()=>{SetDataAddPerson(StaffDetail);})">
+                                เพิ่มสิทธิการเข้าถึง
+                            </Button>
+                        </Extra>
+                        <Body>
+                            <GridRow Gutter="(8,8)" Style="font-size:16px;">
+                                <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+                                    <div>
+                                        <Paragraph>
+                                            ชื่อ : @userService.GetFullName(StaffDetail)
+                                        </Paragraph>
+
+                                        <Paragraph>
+                                            ตำแหน่ง : @StaffDetail?.PosNameThai
+                                        </Paragraph>
+
+                                        <Paragraph>
+                                            วิทยาเขต : @StaffDetail?.CampNameThai
+                                        </Paragraph>
+
+                                        <Paragraph>
+                                            ประเภทบุคลากร : @StaffDetail?.StaffTypeName
+                                        </Paragraph>
+
+                                        <Paragraph>
+                                            ส่วนงาน : @StaffDetail?.FacNameThai
+                                        </Paragraph>
+
+                                        <Paragraph>
+                                            @{
+                                                string? OfficeTel = userService.GetOfficeTelFromLoanStaffDetail(StaffDetail?.StaffId);
+                                            }
+
+                                            เบอร์โทรที่ทำงาน : @(!string.IsNullOrEmpty(OfficeTel) ? OfficeTel : " - ")
+                                        </Paragraph>
+
+                                        <Paragraph>
+                                            วันที่เริ่มทำงาน :  @ChangeDate(StaffDetail?.StaffAcceptDate, model_month.Th)
+                                        </Paragraph>
+
+                                        <Paragraph>
+                                            วันที่สิ้นสุดการทำงาน : @ChangeDate(StaffDetail?.StaffEnd, model_month.Th)
+                                        </Paragraph>
+                                    </div>
+                                </GridCol>
+                                <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+                                    <Paragraph style="text-align:center;">
+                                        สิทธิการเข้าถึงที่ได้รับ
+                                    </Paragraph>
+
+                                    <GridRow Gutter="(8,8)" Justify="center">
+                                        @if (ListPrivilegeGroup.Any())
+                                        {
+                                            @for (int i = 0; i < ListPrivilegeGroup.Count(); i++)
+                                            {
+                                                var item = ListPrivilegeGroup[i];
+
+                                                <GridCol Xxl="20" Xl="20" Lg="18" Md="16" Sm="16" Xs="24">
+                                                    <Text>
+                                                        - @userService.GetGroupName(item.GroupId)
+                                                    </Text>
+                                                    @if (item.GroupId != 1)
+                                                    {
+                                                        <AntDesign.Text Style="margin: 0 10px;">
+                                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Blue.ToString())"
+                                                                                           header="@HeaderRender(item)" />
+                                                        </AntDesign.Text>
+                                                    }
+                                                </GridCol>
+
+                                                <GridCol Xxl="4" Xl="4" Lg="6" Md="8" Sm="8" Xs="24">
+                                                    <div style="text-align:end;">
+                                                        <Button Danger
+                                                                Size="@ButtonSize.Default"
+                                                                OnClick="@(()=>{ StaffPrivilege = item; visibleDelete = true; })">
+                                                            <i class="fas fa-trash-alt fa-lg" style="color:red"></i>
+                                                        </Button>
+                                                    </div>
+                                                </GridCol>
+
+                                                @if ((i + 1) != ListPrivilegeGroup.Count())
+                                                {
+                                                    <Divider Style="margin: 5px;" />
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <Empty />
+                                        }
+                                    </GridRow>
+                                </GridCol>
+                            </GridRow>
+                        </Body>
+                    </Card>
+                </div>
+            }
+
+            <Table TItem="LoanStaffPrivilege"
+                   DataSource="@ListStaffPrivilege"
+                   Bordered=true
+                   Responsive=true
+                   Class="table-hover-cursor">
+                <ColumnDefinitions>
+                    <PropertyColumn Title="ชื่อ-นามสกุล"
+                                    Property="c => c.StaffId"
+                                    Sortable=true
+                                    Align="ColumnAlign.Center">
+                        <TitleTemplate>
+                            <div style="font-size: 18px; font-weight: bold; color: #2788de;">
+                                ชื่อ-นามสกุล
+                            </div>
+                        </TitleTemplate>
+                        <ChildContent>
+                            <div style="text-align:start; font-size:16px;">
+                                @userService.GetFullName(context.StaffId)
+                            </div>
+                        </ChildContent>
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="วิทยาเขต"
+                                    Property="c => c.CampId"
+                                    Sortable=true
+                                    Align="ColumnAlign.Center">
+                        <TitleTemplate>
+                            <div style="font-size: 18px; font-weight: bold; color: #2788de;">
+                                วิทยาเขต
+                            </div>
+                        </TitleTemplate>
+
+                        <ChildContent>
+                            <div style="text-align:start; font-size:16px;">
+                                @GetCampusName(context.CampId)
+                            </div>
+                        </ChildContent>
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="บทบาท"
+                                    Property="c => c.GroupId"
+                                    Sortable=true
+                                    Align="ColumnAlign.Center">
+                        <TitleTemplate>
+                            <div style="font-size: 18px; font-weight: bold; color: #2788de;">
+                                บทบาท
+                            </div>
+                        </TitleTemplate>
+                        <ChildContent>
+                            <div style="text-align:start; font-size:16px;">
+                                @userService.GetGroupName(context.GroupId)
+                            </div>
+                        </ChildContent>
+                    </PropertyColumn>
+
+                    <ActionColumn>
+                        <Button Danger Size="@ButtonSize.Large" Block OnClick="@(()=>{ StaffPrivilege = context; visibleDelete = true; })">
+                            <i class="fas fa-trash-alt fa-lg" style="color:red"></i>
+                        </Button>
+                    </ActionColumn>
+                </ColumnDefinitions>
+            </Table>
+        </div>
+    </Spin>
+</div>
+
+@* model delete *@
+@{
+    RenderFragment footerDelete = @<Template>
+        <Button Style="color: #fff; background-color: #6c757d; border-color: #6c757d; font-size: 1rem; border-radius: 0.25rem;"
+                OnClick="@HandleCancelDelete"
+                @key="@( "back" )">
+            ปิด
+        </Button>
+        <Button Style="color: #fff; background-color: #367691; border-color: #367691; font-size: 1rem; border-radius: 0.25rem;"
+                OnClick="@HandleOkDelete"
+                @key="@( "submit" )">
+            ยืนยัน
+        </Button>
+    </Template>;
+}
+
+<Modal Visible="@visibleDelete"
+       OnOk="@HandleOkDelete"
+       OnCancel="@HandleCancelDelete"
+       MaskClosable=false
+       Footer="@footerDelete">
+    <TitleTemplate>
+        <div style="font-size:18px !important;">
+            ยืนยันการลบสิทธิ์การเข้าถึงของท่านนี้ใช่หรือไม่ ?
+        </div>
+    </TitleTemplate>
+    <ChildContent>
+        <div style="font-size:16px !important;">
+            <Paragraph Style="margin:unset">
+                @userService.GetFullName(StaffPrivilege.StaffId)
+            </Paragraph>
+            <Paragraph Style="margin:unset">
+                @{
+                    string? campName = null;
+
+                    if (StaffPrivilege.GroupId != 1)
+                    {
+                        var cName = GetCampusName(StaffPrivilege.CampId);
+                        campName = StaffPrivilege.GroupId != 2 ? $"[วิทยาเขต {cName}]" : $"[{cName}]";
+                    }
+                }
+                บทบาท : @($"{userService.GetGroupName(StaffPrivilege.GroupId)} {campName}")
+            </Paragraph>
+        </div>
+    </ChildContent>
+</Modal>
+
+@* model Add Person *@
+@* @{
+    RenderFragment footerAddPerson = @<Template>
+        <Button Style="color: #fff; background-color: #6c757d; border-color: #6c757d; font-size: 1rem; border-radius: 0.25rem;"
+                OnClick="@(()=>{ visibleAddPerson = false;})"
+                @key="@( "back" )">
+            ปิด
+        </Button>
+
+        @if(!IsAddPerson){
+        <Popconfirm OnConfirm="HandleOkAddPerson"
+                    OkText="ยืนยัน"
+                    CancelText="ปิด"
+                    Icon="null">
+            <TitleTemplate>
+                <div>
+                    @{
+                var campNameThai = ListCampus.Find(x => x.CampId == SetRole.CampId)?.CampNameThai;
+                var groupName = ListGroup.Find(x => x.GroupId == SetRole.GroupId)?.GroupName;
+                var campName = SetRole.GroupId == 1 ? "" : SetRole.GroupId == 2 ? campNameThai : $"วิทยาเขต {campNameThai}";
+                    }
+
+                    ยืนยันการเพิ่มสิทธิ์นี้หรือไม่ ?
+                    <br />
+                    บทบาท : @($"{groupName} {campName}")
+
+                </div>
+            </TitleTemplate>
+            <ChildContent>
+                <Button Style="color: #fff; background-color: #367691; border-color: #367691; font-size: 1rem; border-radius: 0.25rem;" Disabled=IsAddPerson @key="@( "submit" )">
+                    ยืนยัน
+                </Button>
+            </ChildContent>
+        </Popconfirm>
+    }
+
+    </Template>;
+} *@
+
+@*        OnOk="@HandleOkAddPerson" *@
+<Modal Visible="@visibleAddPerson"
+       OnCancel="@(()=>{visibleAddPerson = false;})"
+       MaskClosable=false
+       Footer="null"
+       Width="@("49%")">
+    <TitleTemplate>
+        <div style="font-size:18px !important;">
+            เพิ่มสิทธิการเข้าถึง
+        </div>
+    </TitleTemplate>
+    <ChildContent>
+        @if (visibleAddPerson && StaffDetail != null)
+        {
+            <LoanApp.Components.Admin.AddAccessright StaffDetail="@StaffDetail" SetRole="@SetRole" ListGroup="@ListGroup" ListCampus="@ListCampus" OnCallback="@((e)=> {visibleAddPerson = e;})" OnCallbackReloadUI="@(async(e)=> {await ReloadUI(e);})" OnCallbackSuccess="@(async(e)=>{await DataOnCallbackSuccess(e);})" />
+        }
+    </ChildContent>
+</Modal>
+
+<style scoped>
+    :root .ant-table-pagination.ant-pagination {
+        margin: 10px !important;
+    }
+</style>
+
+@code {
+    private RenderFragment CancelButtonRender = @<Button Style="width:100%; color: #fff; background-color: #367691; border-color: #367691; font-size: 1rem; border-radius: 0.25rem;">
+        ยืนยัน
+    </Button>;
+
+    private RenderFragment OkButtonRender = @<Button Style="color: #fff; background-color: #6c757d; border-color: #6c757d; font-size: 1rem; border-radius: 0.25rem;">
+        ปิด
+    </Button>;
+
+    private RenderFragment HeaderRender(LoanStaffPrivilege privilege)
+    {
+        var campName = GetCampusName(privilege.CampId);
+
+        return @<div style="font-size:14px; padding: 0 5px;">
+        @(privilege.GroupId != 2 ? $"วิทยาเขต {campName}" : campName)
+    </div>;
+    }
+}

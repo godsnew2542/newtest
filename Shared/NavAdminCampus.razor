@@ -1,0 +1,148 @@
+﻿<div class="sb-sidenav-menu">
+    <div class="nav">
+        <ul class="nav flex-column">
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="/Admin/AdminHome">
+                    <i class="material-icons me-2">dashboard</i> ภาพรวม
+                </NavLink>
+            </li>
+            <Divider Class="divider-style-nav" />
+
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="./Admin/ManageLoanRequest/1">
+                    <i class="far fa-file-alt fa-lg me-2"></i> คำขอกู้
+                </NavLink>
+            </li>
+            <Divider Class="divider-style-nav" />
+
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="./Admin/ManageLoanAgreement/7">
+                    <i class="fa-solid fa-file-contract me-2 fa-lg"></i>สัญญากู้ยืมเงิน
+                </NavLink>
+            </li>
+            <Divider Class="divider-style-nav" />
+
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="./Admin/ManageAppointment">
+                    <i class="far fa-calendar fa-lg me-2"></i>จัดการนัดหมาย
+                </NavLink>
+            </li>
+            <Divider Class="divider-style-nav" />
+
+            <li class="navitem px-2 m-0" style="padding-top: 0.5rem">
+                <NavLink class="nav-link" href="./Admin/RecordFirstPayment">
+                    <i class="fa-solid fa-circle-dollar-to-slot fa-lg me-2 "></i>
+                    บันทึกโอนเงิน
+                </NavLink>
+            </li>
+            <Divider Class="divider-style-nav" />
+
+            <li class="navitem px-2" style="padding-bottom: 0.5rem">
+                <NavLink class="nav-link" href="./Admin/NewRecordPayment">
+                    <i class="fa-solid fa-hand-holding-dollar fa-lg me-2 "></i>บันทึกชำระเงิน
+                </NavLink>
+            </li>
+            <Divider Class="divider-style-nav" />
+
+            <li class="navitem px-2">
+                <a href="#submenu2" data-bs-toggle="collapse" class="nav-link">
+                    <NavLink>
+                        <i class="fa-solid fa-file-export me-1 fa-lg"></i>
+                        <a class="me-3 ps-1">
+                            ส่งออกข้อมูล
+                        </a>
+                        <i class="fa-solid fa-caret-down ms-2" style="text-align:end;align-items:end"></i>
+                    </NavLink>
+                </a>
+                <ul class="collapse nav flex-column ms-1 mt-1" id="submenu2" style="background-color: #95d1ccb8">
+                    <li class="navitem px-2 m-0" style="padding-top: 0.5rem">
+                        <NavLink class="nav-link" href="./Admin/ExportFileByManager">
+                            การอนุมัติคำขอกู้
+                        </NavLink>
+                    </li>
+                    <Divider Class="divider-style-nav" Style="padding-left:1px; padding-right:1px;" />
+
+                    <li class="navitem px-2" style="padding-bottom: 0.5rem">
+                        <NavLink class="nav-link" href="./Admin/ExportFileByTreasury">
+                            สัญญา (รอบันทึกโอนเงิน)
+                        </NavLink>
+                    </li>
+                    <Divider Class="divider-style-nav" Style="padding-left:1px; padding-right:1px;" />
+
+                    <li class="navitem px-2" style="padding-bottom: 0.5rem">
+                        <NavLink class="nav-link" href="./Admin/ExportFileByWaitingToSendEvidence">
+                            สัญญา (รอผู้กู้ส่งหลักฐาน)
+                        </NavLink>
+                    </li>
+                    <Divider Class="divider-style-nav" Style="padding-left:1px; padding-right:1px;" />
+
+                    <li class="navitem px-2" style="padding-bottom: 0.5rem">
+                        <NavLink class="nav-link" href="./Admin/FilterReportAdmin">
+                            @* รายงานการกู้ยืมเงิน *@
+                            สรุปการกู้ยืมรายปีงบประมาณ
+                        </NavLink>
+                    </li>
+                    <Divider Class="divider-style-nav" Style="padding-left:1px; padding-right:1px;" />
+
+                    <li class="navitem px-2" style="padding-bottom: 0.5rem">
+                        <NavLink class="nav-link" href="./Admin/ExportFileLoanAgreement">
+                            @* สรุปการหักชำระเงินกู้ *@
+                            สรุปการหักชำระเงินกู้รายเดือน
+                        </NavLink>
+                    </li>
+                    <Divider Class="divider-style-nav" Style="padding-left:1px; padding-right:1px;" />
+
+                    <li class="navitem px-2" style="padding-bottom: 0.5rem">
+                        <NavLink class="nav-link" href="./Admin/LoanAgreementGenFileImport">
+                            หักชำระเงินกู้รายเดือน
+                        </NavLink>
+                    </li>
+                </ul>
+            </li>
+            <Divider Class="divider-style-nav" />
+
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="./Admin/CheckLoanpage">
+                    <i class="material-icons me-2">how_to_reg</i> ตรวจสอบสิทธิ์การกู้
+                </NavLink>
+            </li>
+            <Divider Class="divider-style-nav" />
+
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="./Admin/Access">
+                    <i class="material-icons me-2">security</i> สิทธิ์การใช้งานพิเศษ
+                </NavLink>
+            </li>
+            <Divider Class="divider-style-nav" />
+
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="./Admin/CloseAppointment">
+                    <i class="fa-regular fa-calendar-xmark fa-lg me-2"></i> ปิดวันที่ทำสัญญา
+                </NavLink>
+            </li>
+            <Divider Class="divider-style-nav" />
+        </ul>
+    </div>
+</div>
+
+<style scoped>
+    .divider-style-nav {
+        margin-bottom: 0px !important;
+        margin-top: 0px !important;
+    }
+
+    .nav-link {
+        height: max-content !important;
+        padding: 0px 0px 0px 16px !important;
+        margin: 0px !important;
+    }
+
+</style>
+
+
+
+
+
+
+
+

@@ -1,0 +1,96 @@
+﻿<Collapse DefaultActiveKey="@(new[]{"1"})">
+    <Panel Key="1">
+        <HeaderTemplate>
+            <Text Strong>@TitleName</Text> @($"({requestContracts.Count()} สัญญา)")
+            </HeaderTemplate>
+            <ChildContent>
+                <Table TItem="VLoanRequestContract"
+                       DataSource="@requestContracts"
+                       Responsive=true
+                       Context="ctx"
+                       Class="table-hover-cursor">
+                    <PropertyColumn Title="เลขที่สัญญา"
+                                    Property="c=>c.ContractNo"
+                                    HeaderStyle="font-weight:bold; text-align:center;" />
+
+                    <PropertyColumn Title="ประเภทกู้ยืม"
+                                    Property="c=>c.LoanTypeName"
+                                    HeaderStyle="font-weight:bold; text-align:center;" />
+
+                    <PropertyColumn Title="ผู้กู้"
+                                    Property="c=>c.LoanRequestGuaranStaffId"
+                                    HeaderStyle="font-weight:bold; text-align:center;">
+                        @{
+                        string fullName = psuLoan.GetFullNameNoTitleName(ctx.DebtorStaffId).Result;
+                    }
+
+                    @(!string.IsNullOrEmpty(fullName) ? $"{fullName} ({ctx.DebtorStaffId})" : "ไม่พบข้อมูล")
+                </PropertyColumn>
+
+                <PropertyColumn Title="ยอดเงิน"
+                                Property="c=>c.ContractLoanTotalAmount"
+                                HeaderStyle="font-weight:bold; text-align:center;">
+                    @{
+                        decimal? amount = (ctx.ContractLoanAmount != null ? ctx.ContractLoanAmount : ctx.LoanRequestLoanAmount);
+                        decimal totalAmount = TransactionService.FindLoanTotalAmount(ctx.ContractId);
+                        decimal balanceAmount = TransactionService.GetBalanceTotalAsync(ctx).Result;
+                    }
+
+                    <div>
+                        ยอดกู้:
+                        @(amount == null ? "ไม่พบข้อมูล" : String.Format("{0:n2}", amount) + " บาท")
+                        <br />
+
+                        ยอดกู้รวมดอกเบี้ย:
+                        @(totalAmount == 0 ? "ไม่พบข้อมูล" : String.Format("{0:n2}", totalAmount) + " บาท")
+                        <br />
+
+                        หนี้คงเหลือ:
+                        @(balanceAmount == 0 ? "ไม่พบข้อมูล" : String.Format("{0:n2}", balanceAmount) + " บาท")
+                    </div>
+                </PropertyColumn>
+
+                <PropertyColumn Title="จำนวนงวด"
+                                Property="c=>c.ContractLoanNumInstallments"
+                                HeaderStyle="font-weight:bold; text-align:center;">
+                    @{
+                        decimal? numInstallments = TransactionService.GetBalanceInstallmentNo(ctx).Result;
+                    }
+
+                    <div>
+                        งวดที่กู้:
+                        @ctx.ContractLoanNumInstallments งวด
+                        @if (numInstallments != null)
+                        {
+                            <br />
+                            @($"ชำระแล้ว: {numInstallments} งวด")
+
+                            if (ctx.ContractLoanNumInstallments != null)
+                            {
+                                <br />
+                                @($"คงเหลือ: {(ctx.ContractLoanNumInstallments - numInstallments)} งวด")
+                            }
+                        }
+                    </div>
+                </PropertyColumn>
+
+                <PropertyColumn Title="สถานะ"
+                                Property="c=>c.CurrentStatusName"
+                                HeaderStyle="font-weight:bold;" />
+
+                <ActionColumn>
+                    <Button Type="@ButtonType.Primary"
+                            OnClick="(()=>{TopageGuarantDetail(ctx.LoanRequestId, ctx.DebtorStaffId);})"
+                            Style="border-radius: 4px;">
+                        <i class="fa-solid fa-eye fa-lg mx-1"></i>
+                        ดูข้อมูล
+                    </Button>
+                </ActionColumn>
+            </Table>
+        </ChildContent>
+    </Panel>
+</Collapse>
+
+@code {
+
+}

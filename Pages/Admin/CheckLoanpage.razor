@@ -1,0 +1,469 @@
+﻿@page "/Admin/CheckLoanpage"
+@page "/Admin/CheckLoanpage/{StaffID}"
+@page "/{Role}/CheckLoanpage"
+@page "/{Role}/CheckLoanpage/{StaffID}"
+@attribute [Authorize(Roles = "2")]
+
+<div class="container-fluid mt-4 pb-5 mb-5">
+
+    @* ค้นหาจากชื่อ - นามสกุล หรือ รหัสบุคลากร *@
+    <div>
+        <div class="section-title" style="font-size:medium">
+            <i class="material-icons mx-2 my-1">how_to_reg</i>
+            ตรวจสอบสิทธิ์การกู้ @(Role == "Manager" ? "" : "และจำลองการกู้")
+        </div>
+    </div>
+    <div class="card rounded shadow mt-4 py-2 px-3">
+        <div class="row col-12 p-2">
+            <div class="col-xl-9 col-lg-9 col-md-8 col-8">
+                <Input @bind-Value="@SearchView"
+                       Size="@ButtonSize.Large"
+                       Placeholder="ค้นหาจากชื่อ-สกุล/รหัสบุคลากร"
+                       OnPressEnter="@(async()=>{await SearchDataAsync(SearchView);})"
+                       AllowClear=true />
+            </div>
+            <div class="col-xl-3 col-lg-3 col-md-4 col-4 justify-content-center">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <Checkbox @bind-Checked="isStaffDepart">
+                            ค้นหาทั้งหมด
+                        </Checkbox>
+                    </div>
+                    <div class="col">
+                        <button type="button"
+                                class="btn button-color p-2"
+                                style="border:none; width:100%"
+                                @onclick="()=>SearchDataAsync(SearchView)">
+                            <i class="fas fa-search mx-2 my-1" style="color: #ffffff " /> ค้นหา
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            @if (ListStaffDetail.Any())
+            {
+                <div class="overflow-auto my-2" style="height:200px;">
+                    <ul>
+                        @for (var i = 0; i < ListStaffDetail.Count; i++)
+                        {
+                            var people = ListStaffDetail[i];
+                            var FName = people.StaffNameThai;
+                            var LName = people.StaffSnameThai;
+                            var FacName = people.FacNameThai;
+                            @* await ChangeValStaff(people, OptionSearchName) *@
+                            <li @onclick="@(async()=>{await ChangeValStaff(people, true);})">
+                                <a class="dropdown-item">
+                                    @FName @LName ( @FacName )( รหัสบุคลากร : @people.StaffId | รหัสเงินเดือน : @(people.StaffSalaryId != null ? @people.StaffSalaryId : "-") )
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+            @if (CheckSearchVeiw)
+            {
+                <div class="mt-2" style="color:red">
+                    ไม่พบรายชื่อที่คุณค้นหา
+                </div>
+            }
+        </div>
+
+        @* ข้อมูลส่วนตัวในระบบ *@
+        @if (!string.IsNullOrEmpty(StaffDetail?.StaffId))
+        {
+            <div class="card mt-3 mb-3 p-2 simple-card" style="background-color:#FFE8E8">
+                <div class="ms-2">
+
+                    <div class="pt-3">
+                        <GridRow Gutter="(8,8)">
+                            @{
+                                var ChildData = psuLoan.GetListVStaffChildAsync(StaffDetail!.StaffId).Result;
+                                string? MobileTel = userService.GetMobileTelFromLoanStaffDetail(StaffDetail.StaffId);
+                                string? OfficeTel = userService.GetOfficeTelFromLoanStaffDetail(StaffDetail.StaffId);
+                            }
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>ชื่อ-สกุล</b> : @userService.GetFullName(StaffDetail.StaffId) [@StaffDetail.StaffId]
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>สถานภาพสมรส</b> : @StaffDetail.MarriedNameThai
+                            </GridCol>
+
+                            @if (StaffDetail.MarriedId == "2")
+                            {
+                                <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                    <a>
+                                        <b>ชื่อ-สกุลคู่สมรส</b> :
+                                        @(!string.IsNullOrEmpty(StaffFamily.FamilyPartnerFname) ?
+                                            $"{StaffFamily.FamilyPartnerFname} {StaffFamily.FamilyPartnerOldsname}" :
+                                            "ไม่พบข้อมูลคู่สมรส")
+                                    </a>
+                                </GridCol>
+                            }
+                            else if (StaffFamily.FamilyPartnerFname != null)
+                            {
+                                <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                    <a>
+                                        <b>ชื่อ-สกุลคู่สมรส</b> : @StaffFamily.FamilyPartnerFname  @StaffFamily.FamilyPartnerOldsname
+                                    </a>
+                                </GridCol>
+                            }
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <a>
+                                    <b>สถานภาพการมีบุตร</b> : @(ChildData.Any() ? "มีบุตร" : "ไม่มีบุตร")
+                                </a>
+                            </GridCol>
+
+                            @if (ChildData.Any())
+                            {
+                                @foreach (var Child in ChildData)
+                                {
+                                    <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                        <a>
+                                            <b>ชื่อ-สกุลบุตร</b> : @Child.ChildFname @Child.ChildSname
+                                        </a>
+                                    </GridCol>
+                                }
+                            }
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>ตำแหน่ง</b> : @StaffDetail?.PosNameThai
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>ประเภทบุคลากร</b> : @StaffDetail?.StaffTypeName
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>ส่วนงาน</b> : @StaffDetail?.FacNameThai
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>เบอร์โทรศัพท์มือถือ</b> : @(!string.IsNullOrEmpty(MobileTel) ? MobileTel : " ไม่ได้ระบุ")
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>เบอร์โทรศัพท์ที่ทำงาน</b> : @(!string.IsNullOrEmpty(OfficeTel) ? OfficeTel : " ไม่ได้ระบุ ")
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>วันที่เริ่มการทำงาน</b> : @ChangeDate(StaffDetail?.StaffAcceptDate, model_month.Th)
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>วันที่สิ้นสุดการทำงาน</b> : @ChangeDate(StaffDetail?.StaffEnd, model_month.Th)
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>รหัสเงินเดือน</b> : @StaffDetail?.StaffSalaryId
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>เงินเดือน</b> :
+                                @(String.Format("{0:n2}", (StaffDetail?.Salary != null ? StaffDetail?.Salary : 0)))
+                                บาท
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>ยอดเงินกู้ทั้งหมด</b> : @String.Format("{0:n2}", SumAmount(StaffDetail?.StaffId))
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>ยอดเงินกู้คงเหลือ</b> : @String.Format("{0:n2}", BalanceTotalAsync(StaffDetail?.StaffId).Result)
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>คำขอกู้</b> : @RequestDebtor(StaffDetail?.StaffId).Result รายการ
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>สัญญากู้ยืมเงิน</b> : @AgreementDebtor(StaffDetail?.StaffId) สัญญา
+                            </GridCol>
+
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <b>สัญญาค้ำประกัน</b> : @CountAgreementGuarantor สัญญา
+                            </GridCol>
+
+                            @if (LoanAgreementDebtor.Any() || LoanAgreementGuaran.Any())
+                            {
+                                <GridCol Flex="@("auto")">
+                                    <b>สัญญากู้ยืมเงิน/ค้ำประกัน (StaffId เก่า) (** แสดงเฉพาะสัญญาที่ยังคงอยู่)</b> :
+                                    @LoanAgreementDebtor.Count() / @LoanAgreementGuaran.Count()  สัญญา
+                                </GridCol>
+                            }
+                        </GridRow>
+                    </div>
+
+                    @* <div class="row pt-3">
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>ชื่อ-สกุล</b> : @userService.GetFullName(StaffDetail.StaffId) [@StaffDetail.StaffId]
+                </div>
+
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>สถานภาพสมรส</b> : @StaffDetail.MarriedNameThai
+                </div>
+
+                @if (StaffDetail.MarriedId == "2")
+                {
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <a>
+                <b>ชื่อ-สกุลคู่สมรส</b> :
+                @(!string.IsNullOrEmpty(StaffFamily.FamilyPartnerFname) ?
+                $"{StaffFamily.FamilyPartnerFname} {StaffFamily.FamilyPartnerOldsname}" :
+                "ไม่พบข้อมูลคู่สมรส")
+                </a>
+                </div>
+                }
+                else
+                {
+                @if (StaffFamily.FamilyPartnerFname != null)
+                {
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <a>
+                <b>ชื่อ-สกุลคู่สมรส</b> : @StaffFamily.FamilyPartnerFname  @StaffFamily.FamilyPartnerOldsname
+                </a>
+                </div>
+                }
+                else
+                {
+                }
+                }
+                @{
+                var ChildData = psuLoan.GetListVStaffChildAsync(StaffDetail?.StaffId).Result;
+                }
+
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <a>
+                <b>สถานภาพการมีบุตร</b> : @(ChildData.Count != 0 ? "มีบุตร" : "ไม่มีบุตร")
+                </a>
+                </div>
+
+                @if (ChildData.Any())
+                {
+                @foreach (var Child in ChildData)
+                {
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <a>
+                <b>ชื่อ-สกุลบุตร</b> : @Child.ChildFname @Child.ChildSname
+                </a>
+                </div>
+                }
+                }
+
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>ตำแหน่ง</b> : @StaffDetail?.PosNameThai
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>ประเภทบุคลากร</b> : @StaffDetail?.StaffTypeName
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>ส่วนงาน</b> : @StaffDetail?.FacNameThai
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                @{
+                string? MobileTel = userService.GetMobileTelFromLoanStaffDetail(StaffDetail?.StaffId);
+                }
+                <b>เบอร์โทรศัพท์มือถือ</b> :@(!string.IsNullOrEmpty(MobileTel) ? MobileTel : " ไม่ได้ระบุ")
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                @{
+                string? OfficeTel = userService.GetOfficeTelFromLoanStaffDetail(StaffDetail?.StaffId);
+                }
+                <b>เบอร์โทรศัพท์ที่ทำงาน</b>: @(!string.IsNullOrEmpty(OfficeTel) ? OfficeTel : " ไม่ได้ระบุ ")
+                </div>
+
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>วันที่เริ่มการทำงาน</b> : @ChangeDate(StaffDetail?.StaffAcceptDate, model_month.Th)
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>วันที่สิ้นสุดการทำงาน</b> : @ChangeDate(StaffDetail?.StaffEnd, model_month.Th)
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>รหัสเงินเดือน</b> : @StaffDetail?.StaffSalaryId
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>เงินเดือน</b> :
+                @(String.Format("{0:n2}", (StaffDetail?.Salary != null ?
+                StaffDetail?.Salary :
+                0)))
+                บาท
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>ยอดเงินกู้ทั้งหมด</b> : @String.Format("{0:n2}", SumAmount(StaffDetail?.StaffId))
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>ยอดเงินกู้คงเหลือ</b> : @String.Format("{0:n2}", BalanceTotalAsync(StaffDetail?.StaffId).Result)
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>คำขอกู้</b> : @RequestDebtor(StaffDetail?.StaffId).Result รายการ
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>สัญญากู้ยืมเงิน</b> : @AgreementDebtor(StaffDetail?.StaffId) สัญญา
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6 my-1">
+                <b>สัญญาค้ำประกัน</b> : @CountAgreementGuarantor สัญญา
+                </div>
+
+                </div> *@
+
+                    @*  <div class="row justify-content-end mt-3">
+                <button class="me-1 button-style p-2  CardHove justify-content-center"
+                style="border:none; width:150px"
+                @onclick="()=> TopageAgreementAsync(1, StaffDetail?.StaffId)">
+                คำขอกู้
+                </button>
+
+                <button class="me-1 button-style  CardHove p-2 justify-content-center"
+                style="border:none; width:150px"
+                @onclick="()=> TopageAgreementAsync(2, StaffDetail?.StaffId)">
+                สัญญากู้ยืมเงิน
+                </button>
+
+                <button class="me-0 button-style  CardHove p-2 justify-content-center"
+                style="border: none; width: 150px"
+                @onclick="()=> TopageAgreementAsync(3, StaffDetail?.StaffId)">
+                สัญญาค้ำประกัน
+                </button>
+
+                <button class="me-0 button-style  CardHove p-2 justify-content-center"
+                style="border: none; width: auto; margin: 0px 0.3rem;">
+                สัญญาอื่นๆ ที่เคยกู้ (กรณีเปลี่ยน StaffId) ** แสดงเฉพาะสัญญาที่ยังคงอยู่
+                </button>
+                </div> *@
+
+                    <div class="mt-3">
+                        <GridRow Gutter="(8,8)" Justify="end">
+                            <GridCol Flex="@("none")">
+                                <button class="me-1 button-style p-2  CardHove justify-content-center"
+                                        style="border:none; width:150px"
+                                        @onclick="()=> TopageAgreementAsync(1, StaffDetail?.StaffId)">
+                                    คำขอกู้
+                                </button>
+                            </GridCol>
+
+                            <GridCol Flex="@("none")">
+                                <button class="me-1 button-style  CardHove p-2 justify-content-center"
+                                        style="border:none; width:150px"
+                                        @onclick="()=> TopageAgreementAsync(2, StaffDetail?.StaffId)">
+                                    สัญญากู้ยืมเงิน
+                                </button>
+                            </GridCol>
+
+                            <GridCol Flex="@("none")">
+                                <button class="me-0 button-style  CardHove p-2 justify-content-center"
+                                        style="border: none; width: 150px"
+                                        @onclick="()=> TopageAgreementAsync(3, StaffDetail?.StaffId)">
+                                    สัญญาค้ำประกัน
+                                </button>
+                            </GridCol>
+
+                            @if (LoanAgreementDebtor.Any() || LoanAgreementGuaran.Any())
+                            {
+                                <GridCol Flex="@("none")">
+                                    <button class="me-0 button-style CardHove p-2 justify-content-center" style="border: none; width: auto; margin: 0px 0.3rem; background-color:#ffc64d; color:black;" @onclick="@(()=>{TopageLoanAgreementOld(LoanAgreementDebtor, LoanAgreementGuaran, ListStaffIdOld, StaffDetail?.StaffId);})">
+                                        สัญญากู้ยืมเงิน/ค้ำประกัน (StaffId เก่า)
+                                    </button>
+                                </GridCol>
+                            }
+                        </GridRow>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+
+    @* ข้อมูลอื่นๆ *@
+    @* @if (!string.IsNullOrEmpty(StaffDetail?.StaffId) && Role != "Manager") *@
+    @if (!string.IsNullOrEmpty(StaffDetail?.StaffId) && Role != RoleTypeEnum.Manager.ToString())
+    {
+        <div class="card  bg-light mt-3 mb-3 p-2 simple-card">
+            <EditForm Model="Search">
+                <div class="row">
+                    <div class="my-3 col-xl-4 col-lg-4 col-md-4 col-12 row">
+                        <label class="form-label font-weight-bold col-xl-5 col-lg-5 col-md-5 col-5">
+                            เงินเดือนคงเหลือสุทธิ <a style="color:red">  *</a>
+                        </label>
+                        <div class="col-xl-5 col-lg-4 col-md-4 col-5">
+                            <AntDesign.InputNumber @bind-Value="Search.SalaryNetAmount"
+                                                   class="form-control"
+                                                   Style="width:100%" />
+                        </div>
+                        <a class="col-xl-2 col-lg-3 col-md-3 col-2"> บาท </a>
+                    </div>
+                    <div class="my-3 col-xl-4 col-lg-4 col-md-4 col-12 row">
+                        <label for="guarantor" class="form-label font-weight-bold col-xl-5 col-lg-5 col-md-5 col-5">
+                            จำนวนเงินที่ต้องการกู้<a style="color:red">  *</a>
+                        </label>
+                        <div class="col-xl-5 col-lg-4 col-md-4 col-5">
+                            <AntDesign.InputNumber @bind-Value="Search.LoanAmount"
+                                                   Style="width:100%" />
+                        </div>
+                        <a class="col-xl-2 col-lg-3 col-md-3 col-2"> บาท </a>
+                    </div>
+                    <div class="my-3 col-xl-4 col-lg-4 col-md-4 col-12 row">
+                        <label for="guarantor" class="form-label font-weight-bold col-xl-5 col-lg-5 col-md-5 col-5">
+                            จำนวนงวดที่ต้องการผ่อน<a style="color:red">  *</a>
+                        </label>
+                        <div class="col-xl-5 col-lg-4 col-md-4 col-5">
+                            <AntDesign.InputNumber @bind-Value="Search.LoanNumInstallments"
+                                                   class="form-control"
+                                                   Style="width:100%" />
+                        </div>
+                        <a class="col-xl-2 col-lg-3 col-md-3 col-2"> งวด </a>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    }
+
+    @* สิทธิการกู้ที่ได้รับ *@
+    @* @if (!string.IsNullOrEmpty(StaffDetail?.StaffId) && Role != "Manager") *@
+    @if (!string.IsNullOrEmpty(StaffDetail?.StaffId) && Role != RoleTypeEnum.Manager.ToString())
+    {
+        var loan = GetLoanPrivacyRights(StaffDetail.StaffId);
+
+        foreach (var loanType in loan)
+        {
+            <div class="row my-3">
+                <div class="col-xl-5  col-lg-4 col-md-4 col-4">
+                    <div class="bg-white p-1 check-card">
+                        <div class="p-2">
+                            @userService.GetLoanName(loanType)
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-3 text-center">
+                    <div class="bg-white p-2 check-card">
+                        <div class="p-3">
+                            @(loanType.LoanMaxAmount == 0 ?
+                                $"วงเงินกู้ตามจริง" :
+                                $"{Convert.ToString(String.Format("{0:n2}", loanType.LoanMaxAmount))} บาท")
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-2 col-lg-2 col-md-2 col-2 text-center">
+                    <div class="bg-white p-2 check-card">
+                        <div class="p-3">
+                            @loanType.LoanNumInstallments งวด
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-2 col-lg-2 col-md-2 col-2 text-center p-2">
+                    <div class="p-1">
+                        <button type="button" class="btn secondary-bg  CardHove simple-card text-center"
+                                style="width:180px"
+                                @onclick="@(()=>CreateLoanAsync(loanType))">
+                            <i class="fas fa-pen fa-lg mx-2"></i>
+                            จำลอง
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code { }

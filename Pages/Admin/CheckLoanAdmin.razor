@@ -1,0 +1,123 @@
+﻿@page "/Admin/CheckLoanAdmin"
+@attribute [Authorize(Roles = "2")]
+
+<div class="container-fluid mt-4 mb-5 pb-5">
+    @if (!string.IsNullOrEmpty(ModelApplyLoan.DebtorId))
+    {
+        <div class="card bg-white px-4 pb-5 mt-5" style="border-radius:10px">
+            <div class="row my-3 pt-4">
+                <div class="col-12 col-md-6">
+                    <div class="mb-3">
+                        <label for="Staff" class="form-label font-weight-bold">
+                            ชื่อ-สกุลของบุคลากร
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               value="@userService.GetFullName(ModelApplyLoan.DebtorId)"
+                               disabled />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">
+                            เงินเดือนคงเหลือสุทธิ
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               value="@String.Format("{0:n2}", ModelApplyLoan.SalaryNetAmount)"
+                               disabled />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">
+                            ประเภทกู้ยืม
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               value="@Loan?.LoanParentName (@Loan?.LoanTypeName)"
+                               disabled />
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-8">
+                            <label for="guarantor" class="form-label font-weight-bold">
+                                จำนวนเงินที่ต้องการกู้
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   value="@String.Format("{0:n2}", ModelApplyLoan.LoanAmount)"
+                                   disabled />
+                        </div>
+                        <div class=" col-4">
+                            <label for="guarantor" class="form-label font-weight-bold">
+                                จำนวนงวด
+                            </label>
+                            <input type="number"
+                                   class="form-control"
+                                   value="@ModelApplyLoan.LoanNumInstallments"
+                                   disabled />
+                        </div>
+                    </div>
+                </div>
+                <div class="col secondary-bg mx-1" style="border-radius:10px">
+                    <div class="text-h3 my-4 py-2 px-2 text-center"
+                         style="background-color: #ffffff; color: black; border-radius: 10px">
+                        @Loan?.LoanParentName (@Loan?.LoanTypeName)
+                    </div>
+                    <div class="mt-4 px-4">
+                        <div class="row py-1">
+                            <div class="col-xl-7 col-7">
+                                วงเงินสูงสุด
+                            </div>
+                            <div class="col-xl-5 col-5 text-end">
+                                @(Loan?.LoanMaxAmount == 0 ?
+                                    "วงเงินกู้ตามจริง" :
+                                    $"{Convert.ToString(String.Format("{0:n2}", Loan?.LoanMaxAmount))} บาท")
+                            </div>
+                        </div>
+                        <div class="row py-1">
+                            <div class="col-xl-7 col-7">
+                                อัตราดอกเบี้ย
+                            </div>
+                            <div class="col-xl-5 col-5 text-end">
+                                @Loan?.LoanInterest %
+                            </div>
+                        </div>
+                        <div class="row py-1">
+                            <div class="col-xl-7 col-7">
+                                ผ่อนชำระสูงสุด
+                            </div>
+                            <div class="col-xl-5 col-5 text-end">
+                                @Loan?.LoanNumInstallments งวด
+                            </div>
+                        </div>
+                        <div class="row py-1">
+                            <div class="col-xl-7 col-7">
+                                ผ่อนชำระเดือนละ
+                            </div>
+                            <div class="col-xl-5 col-5 text-end">
+                                @String.Format("{0:n2}", Calculate(Loan)) บาท
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@*footer*@
+<div class="footer">
+    <div class="row py-1 col-12 ms-1">
+        <div class="col-3 text-left">
+            <button type="button"
+                    class="btn secondary-bg shadow rounded text-center"
+                    style="border-radius: 5px;width:180px"
+                    @onclick="()=>Backcheckloan(ModelApplyLoan)">
+                <i class="fa-solid fa-arrow-left fa-lg me-3"></i>
+                ย้อนกลับ
+            </button>
+        </div>
+        <div class="col-4 text-center"></div>
+        <div class="col-3" style="text-align:end"></div>
+    </div>
+</div>
+
+@code
+{ }

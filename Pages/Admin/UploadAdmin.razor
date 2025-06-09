@@ -1,0 +1,370 @@
+﻿@page "/Admin/UploadAdmin"
+@page "/Admin/UploadAdmin/{RequestID:decimal}"
+@attribute [Authorize(Roles = "2")]
+
+<div class="container-fluid mt-5 mb-5 pb-5">
+	@if (!IsConfirm)
+	{
+		<div class="card shadow d-sm-flex justify-content-between mb-4 mt-5">
+			<div class="card-header py-3">
+				<h6 class="mb-0 py-2 px-1 ms-1 font-color">
+					<strong>
+						@DataUser<a style="color:black">@DataUserStatus</a>
+					</strong>
+				</h6>
+			</div>
+			<div class="row mb-2 justify-content-center mx-2">
+				<div class="my-2 mx-3 row">
+					<UploadTypePDF Title="สัญญาฉบับจริง"
+								   Detail="(ไฟล์ชนิด .pdf ขนาดไม่เกิน 20 MB)"
+								   GenId="Upload_PDF_UploadAdmin"
+								   myFile="my_filePDF_UploadAdmin"
+								   ModelId="@ResultInfoList.Count()"
+								   SetChildData="SetCurrentDataUploadPDF" />
+				</div>
+				@if (!string.IsNullOrEmpty(ModelUploadPDF.Url))
+				{
+					<div class="text-center my-2">
+						<iframe src="@GetUrl(ModelUploadPDF)" style="width:100%; height:500px"></iframe>
+					</div>
+				}
+			</div>
+		</div>
+
+		@if (ItemUploadImg.Count != 0)
+		{
+			<div class="card shadow d-sm-flex justify-content-between mb-4 mt-5 pb-3">
+				<div class="card-header py-3">
+					<h6 class=" mb-0 py-2 px-1 ms-1" style="color:black">
+						<strong>
+							อัปโหลดเอกสารเพื่อทำสัญญา
+							<a style="color:red">
+								*
+							</a>
+						</strong>
+						<button class="btn text-end"
+								style="border:none"
+								data-bs-toggle="modal"
+								data-bs-target="#extralargeAll">
+							<i class="fa-regular fa-eye"></i>
+						</button>
+					</h6>
+				</div>
+
+				@for (var i = 0; i < ItemUploadImg.Count; i++)
+				{
+					var item = ItemUploadImg[i];
+					var index = i + 1;
+					var GenId = $"Upload_{index}";
+					var myFile = $"my_file{index}";
+					var AttTypeId = item.AttachmentTypeId;
+
+					<div class="row my-1 p-2">
+						<div class="col-12">
+							<div class="card p-2 shadow rounded"
+								 style="border-radius: 5px;height:50px;font-size:large;font-weight:bold">
+								<div class="row ms-2">
+									<div class="col-xl-10 col-lg-9 col-md-9 col-sm-3 font-color ps-2">
+										@item.AttachmentNameThai
+										<button class="btn text-end"
+												style="border:none"
+												@onclick="()=> ShowImg(ResultInfoList, AttTypeId)"
+												data-bs-toggle="modal"
+												data-bs-target="#extralargeDocEye">
+											<i class="fa-regular fa-eye"></i>
+										</button>
+									</div>
+									<div class="col justify-content-end align-content-end">
+										<button class="btn text-end"
+												style="border:none"
+												id="@GenId"
+												@onclick="()=> GeneratePDFService.OpenTypeFileAsync(GenId, myFile)">
+											| <i class="fa-solid fa-upload mx-1"></i>
+											อัปโหลดไฟล์
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<NewUpload SetChildData="SetCurrentData"
+							   AttachmentTypeId="@AttTypeId"
+							   MyFile="@myFile" />
+
+
+					@if (ResultInfoList.Count != 0)
+					{
+						var NoImg = true;
+						foreach (var img in ResultInfoList)
+						{
+							if (item.AttachmentTypeId == img.AttachmentTypeId)
+							{
+								NoImg = false;
+								<ListUpload listModel="img" ListId="CurrentRemoveListAsync" />
+							}
+						}
+
+						if (NoImg)
+						{
+							<div class="col-xxl-10 col-xl-9 col-lg-8 col-md-7 col-sm-12  ms-2"
+								 style="color: grey; font-size: medium">
+								ยังไม่มีเอกสาร
+							</div>
+						}
+					}
+					else
+					{
+						<div class="col-xxl-10 col-xl-9 col-lg-8 col-md-7 col-sm-12"
+							 style="color: black; font-size: medium">
+							ยังไม่มีเอกสาร
+						</div>
+					}
+				}
+			</div>
+		}
+	}
+	else
+	{
+		<Loading Message="ระบบกำลังประมวลผล กรุณารอสักครู่" />
+	}
+</div>
+
+@*footer*@
+<div class="footer">
+	<div class="row py-1 col-12">
+		<div class="col-xl-4 col-lg-4 col-md-4 col-4 text-left">
+			<button class="btn secondary-bg shadow rounded text-center"
+					style="border-radius:20px;width:170px"
+					@onclick="Back">
+				<i class="fa-solid fa-arrow-left fa-lg me-3"></i>
+				ย้อนกลับ
+			</button>
+		</div>
+		<div class="col-xl-6 col-lg-6 col-md-8 col-5 text-end">
+			<button type="button"
+					class="btn  button-color shadow rounded text-center buttonsize"
+					style="border-radius: 5px"
+					data-bs-toggle="modal"
+					data-bs-target="#success">
+				ดำเนินการ
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- extralargeDocEye modal -->
+<div class="modal fade"
+	 id="extralargeDocEye"
+	 tabindex="-1"
+	 aria-labelledby="exampleModalLabel"
+	 aria-hidden="true">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">
+					@{ var i18N = SaveFileAndImgService.GetAttachmentNameAsync(ShowResultImgTitle).Result; }
+					@(i18N != null ? i18N.Th : null)
+				</h5>
+			</div>
+			<div class="modal-body">
+				<div class="card p-4">
+					@if (ShowListResultImg.Count != 0)
+					{
+						for (int i = 0; i < ShowListResultImg.Count; i++)
+						{
+							var item = ShowListResultImg[i];
+							var extension = Path.GetExtension(item.Name);
+
+							if (extension == ".pdf")
+							{
+								<div class="text-center my-2">
+									<iframe src="@GetUrl(item)" style="width:100%; height:500px"></iframe>
+								</div>
+							}
+							else
+							{
+								<div class="row">
+									<div class="text-center col-6 p-2">
+										<img src="@GetUrl(item)" style="width:auto; height:200px;">
+									</div>
+								</div>
+							}
+						}
+					}
+					else
+					{
+						<Empty>
+							<DescriptionTemplate>
+								<span>ไม่พบไฟล์</span>
+							</DescriptionTemplate>
+						</Empty>
+					}
+				</div>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button"
+						class="btn button-color"
+						data-bs-dismiss="modal">
+					ปิด
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@*extralargeAll*@
+<div class="modal fade" id="extralargeAll" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<strong>
+					เอกสารเพื่อทำสัญญา
+				</strong>
+			</div>
+			<div class="modal-body">
+				<div class="p-2 row">
+					@if (ItemUploadImg.Count != 0 && ResultInfoList.Count != 0)
+					{
+						@for (var i = 0; i < ItemUploadImg.Count; i++)
+						{
+							var item = ItemUploadImg[i];
+							var NoImg = true;
+
+
+							@foreach (var img in ResultInfoList)
+							{
+								if (item.AttachmentTypeId == img.AttachmentTypeId)
+								{
+									NoImg = false;
+									var extension = Path.GetExtension(img.Name);
+
+									if (extension == ".pdf")
+									{
+										<div class="font-weight-bold col-12" style="color:black">
+											@item.AttachmentNameThai
+										</div>
+
+										<div class="text-center my-2 col-12">
+											<iframe src="@GetUrl(img)" style="width:100%; height:500px"></iframe>
+										</div>
+									}
+									else
+									{
+										<div class="text-center col-6 p-2">
+											<div class="my-2 font-weight-bold" style="color:black">
+												@item.AttachmentNameThai
+											</div>
+
+											<img src="@GetUrl(img)" style="width:auto; height:200px;">
+										</div>
+									}
+								}
+							}
+
+							@if (NoImg)
+							{
+								<div class="text-center col-6 p-2">
+									<div class="my-2 font-weight-bold" style="color:black">
+										@item.AttachmentNameThai
+									</div>
+
+									<Empty>
+										<DescriptionTemplate>
+											<span>ไม่พบเอกสาร</span>
+										</DescriptionTemplate>
+									</Empty>
+
+								</div>
+							}
+						}
+					}
+					else
+					{
+						<Empty>
+							<DescriptionTemplate>
+								<span>ไม่พบเอกสาร</span>
+							</DescriptionTemplate>
+						</Empty>
+					}
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button"
+						class="btn button-color"
+						data-bs-dismiss="modal">
+					ปิด
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@* model success page *@
+<div class="modal fade" id="success" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		@if (!string.IsNullOrEmpty(ModelUploadPDF.Url))
+		{
+			<div class="modal-content">
+				<div class="modal-header">
+					<div class="row col-12">
+						<div class="justify-content-center text-center col-11">
+							คุณได้ตรวจสอบข้อมูลแล้ว และยืนยันการทำสัญญานี้ใช่หรือไม่ ?
+						</div>
+						<button type="button"
+								class="btn-close col-1"
+								data-bs-dismiss="modal"
+								aria-label="Close">
+						</button>
+						<div class="justify-content-center text-center my-1 col-11">
+							ผู้กู้และผู้ค้ำจะได้รับผลการทำสัญญานี้ทางอีเมล
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer text-center">
+					<button type="button"
+							class="btn btn-secondary"
+							data-bs-dismiss="modal">
+						ยกเลิก
+					</button>
+					<button type="button"
+							class="btn button-color text-light text-center"
+							data-bs-dismiss="modal"
+							@onclick="@(async()=> { IsConfirm = true; await ConfirmAsync(); })">
+						ยืนยัน
+					</button>
+				</div>
+			</div>
+		}
+		else
+		{
+			<div class="modal-content">
+				<div class="modal-header">
+					<div class="row col-12">
+						<div class="justify-content-center text-center col-11">
+							ไม่สามารถดำเนินการได้ เนื่องจากยังไม่ได้อัปโหลดสัญญาฉบับจริง
+						</div>
+						<button type="button"
+								class="btn-close col-1"
+								data-bs-dismiss="modal"
+								aria-label="Close">
+						</button>
+					</div>
+				</div>
+				<div class="modal-footer text-center">
+					<button type="button"
+							class="btn button-color"
+							data-bs-dismiss="modal">
+						ปิด
+					</button>
+				</div>
+			</div>
+		}
+	</div>
+</div>
+
+@code{
+
+}

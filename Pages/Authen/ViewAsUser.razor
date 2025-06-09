@@ -1,0 +1,24 @@
+﻿@page "/ViewAsUser"
+
+<div class="container">
+    UserName:
+    <Input Placeholder="User Name" Size="@InputSize.Large" @bind-Value="@userName" AllowClear />
+     <br />
+     <br />
+     PassWord:
+     <Input Placeholder="PassWord" Type="password" Size="@InputSize.Large" @bind-Value="@passWord" AllowClear />
+     <br />
+     <br />
+     <div style="text-align:center">
+         <Button Type="@ButtonType.Primary"
+                 Size="@ButtonSize.Large"
+                 Shape="@ButtonShape.Round"
+                 OnClick="@(async()=>{await ViewAsLogin();})">
+             เข้าสู่ระบบ ทดสอบ
+         </Button>
+     </div>
+ </div>
+
+ @code {
+
+}

@@ -1,0 +1,54 @@
+﻿@page "/RequestLoan"
+@attribute [Authorize(Roles = "0")]
+
+<div class="container-fluid my-3">
+	<div class="section-title col-md-12 col-11 font-color shadow rounded mt-5 py-3"
+		 style="border-radius:10px;height:60px">
+		<a style="font-size:large;padding-left:15px;font-weight:bold">
+			ทำรายการคำขอประเภทอื่นๆ
+		</a>
+	</div>
+	<div class="card pa-3 mt-4 shadow rounded col-md-12 col-11"
+		 style="height:300px;border-radius:15px">
+		<div class="row pt-3 justify-content-center">
+			<div class="card col-lg-10 col-md-9 col-8 font-color pt-3 mt-3 shadow rounded"
+				 style="height:60px;border-radius:10px;"
+				 @onclick="ChangeGuarantor">
+				<div class="col-lg-8 col-md-8 col-12 " style="font-size:larger">
+					คำขอเปลี่ยนผู้ค้ำ
+				</div>
+			</div>
+			<div class="col-lg-1 col-md-1 col-1 card mt-3 shadow rounded ms-3"
+				 @onclick="ChangeGuarantor"
+				 style="height:60px;width:40px">
+			</div>
+		</div>
+		<div class="row pt-3 justify-content-center">
+			<div class="card col-lg-10 col-md-9 col-8 font-color pt-3 mt-3 shadow rounded"
+				 style="height:60px;border-radius:10px;"
+				 @onclick="CompoundLoan">
+				<div class="col-lg-8 col-md-8 col-12" style="font-size:larger">
+					คำขอกู้ทบยอด
+				</div>
+			</div>
+			<div class="col-lg-1 col-md-1 col-1 card mt-3 shadow rounded ms-3"
+				 style="height:60px;width:40px"
+				 @onclick="CompoundLoan">
+			</div>
+		</div>
+		<div class="row pt-3  justify-content-center">
+			<div class="card col-lg-10 col-md-9 col-8 font-color pt-3 mt-2 shadow rounded"
+				 style="height:60px;border-radius:10px"
+				 @onclick="AnotherRequest">
+				<div class="col-lg-8 col-md-8 col-12" style="font-size:larger">
+					คำขออื่นๆ
+				</div>
+			</div>
+			<div class="col-lg-1 col-md-1 col-1 card mt-2 shadow rounded ms-3"
+				 style="height:60px;width:40px"
+				 @onclick="AnotherRequest">
+			</div>
+		</div>
+	</div>
+</div>
+@code { }

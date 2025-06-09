@@ -1,0 +1,43 @@
+﻿@media (min-width: 1681px) {
+    .fontsize {
+        font-size: 25px;
+    }
+    .fontType {
+        font-size:medium;
+    }
+}
+
+@media (max-width: 1680px) {
+    .fontsize {
+        font-size: 25px;
+    }
+    .fontType {
+        font-size:medium;
+    }
+}
+@media (max-width: 1024px) {
+    .fontsize {
+        font-size: 18px;
+    }
+    .fontType {
+        font-size: small;
+    }
+}
+
+@media (max-width: 768px) {
+    .fontsize {
+        font-size: 18px;
+    }
+    .fontType {
+        font-size: small;
+    }
+}
+
+@media (max-width: 450px) {
+    .fontsize {
+        font-size: 18px;
+    }
+    .fontType {
+        font-size:small;
+    }
+}

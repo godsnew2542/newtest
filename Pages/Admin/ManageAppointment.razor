@@ -1,0 +1,285 @@
+﻿@page "/Admin/ManageAppointment"
+@attribute [Authorize(Roles = "2")]
+
+@using Radzen.Blazor
+
+<div class="container-fluid mt-4 mb-5 pb-5">
+    <div class="mt-4 mx-1">
+        <div class="section-title" style="font-size:medium">
+            <i class="far fa-calendar fa-lg mx-2"></i> จัดการนัดหมายทำสัญญา
+        </div>
+    </div>
+
+    @*calendar radzen*@
+    <div class="card shadow d-sm-flex justify-content-between mb-4 mt-4">
+        <div class="row mb-2 justify-content-center mx-2">
+            <div class="col-12 col-xl-4 col-lg-12 col-md-12 my-2">
+                <div class="mt-2 text-center">
+                    <RadzenDatePicker Culture="@(new System.Globalization.CultureInfo("en-EN"))"
+                                      DateRender=@(e => dateService.DateRender(e, dates))
+                                      TValue="DateTime?"
+                                      Inline="true"
+                                      Change="@(args => OnChange(args, DateFormat))" />
+                </div>
+                <div class="mt-2 text-center mt-3 mx-2">
+                    <button type="button"
+                            class="button-color shadow rounded"
+                            style="color:white;border-radius:15px;height:40px;width:120px;border:none"
+                            @onclick="SearchDate">
+                        แสดงนัดหมาย
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-8 col-lg-12 col-md-12 text-center my-2">
+                <div class="row">
+                    <div class="col-1"></div>
+                    <div class="card col-10">
+                        <div class="font-color py-2 px-2 mt-3 rounded" style="font-size:medium">
+                            ข้อมูลนัดหมายทำสัญญาในวันที่
+                            @dateService.ChangeDate(SelectDateValue, "dd MMMM yyyy", Utility.DateLanguage_TH)
+                        </div>
+
+                        @if (ListPerson.Any())
+                        {
+                            foreach (var ele in ListPerson)
+                            {
+                                if (ele.RequestContracts.Any())
+                                {
+                                    <div class="row p-2 mt-1 mx-2">
+                                        <div class="col-xl-9 col-lg-8 col-8 mx-1 my-2 p-2 card font-color font-weight-bold"
+                                             style="border-color: dodgerblue; height: 40px">
+                                            ช่วงเวลา @ele.Time น. @($"({dateService.ChangeDate(SelectDateValue, DateFormat, Utility.DateLanguage_TH)})")
+                                        </div>
+                                        <div class="col-xl-2 col-lg-3 col-3 p-2 card text-white"
+                                             style="background-color: red; height: 40px; cursor: pointer"
+                                             data-bs-toggle="modal"
+                                             data-bs-target="#deleteAll"
+                                             @onclick="()=>DeletePerson = SetDeletePerson(ele)">
+                                            ยกเลิกทั้งช่วง
+                                        </div>
+                                    </div>
+
+                                    foreach (var item in ele.RequestContracts)
+                                    {
+                                        <div class="row py-2">
+                                            <div class="col-4 row text-start ps-4">
+                                                <div class="col-12 text-start">
+                                                    @{
+                                                        string? MobileTel = userService.GetMobileTelFromLoanStaffDetail(item?.DebtorStaffId);
+                                                    }
+
+                                                    @userService.GetFullName(item?.DebtorStaffId)
+                                                </div>
+                                                <div class="col-12 text-start">
+                                                    ( @(!string.IsNullOrEmpty(MobileTel) ? MobileTel : "ไม่พบเบอร์โทรศัทพ์มือถือ") )
+                                                </div>
+                                            </div>
+                                            <div class="col-6 text-start">
+                                                ประเภท : @GetLoan(item?.LoanTypeId)
+                                            </div>
+                                            <div class="col-2 p-2 card"
+                                                 style="border-color: red;color:red; height: 40px;width:60px;cursor:pointer"
+                                                 data-bs-toggle="modal"
+                                                 data-bs-target="#deleteSelect"
+                                                 @onclick="()=>DeletePerson = SetDeletePerson(ele, item!.LoanRequestId)">
+                                                ยกเลิก
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            }
+                        }
+                    </div>
+                    <div class="col-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    @if (UpdateTimeList.Any())
+    {
+        <div class="card shadow d-sm-flex justify-content-between mb-4 mt-3">
+            <div class="card-header py-3">
+                <h6 class="mb-0 py-2 px-1 ms-1 font-color">
+                    <strong>
+                        เลือกวันนัดหมายใหม่
+                    </strong>
+                </h6>
+            </div>
+            <div class="row p-2 mx-2">
+                <div class="mx-2 my-1">
+                    <Alert Type="@AlertType.Warning"
+                           Message="กรณีสัญญาที่ไม่ต้องการเปลี่ยนวันนัดหมาย หรือไม่ได้ระบุวันนัดหมายใหม่ ระบบจะยึดตามวัน/เวลานัดหมายเดิม"
+                           ShowIcon="true" />
+                </div>
+                <div class="p-2 col-12">
+                    @foreach (var item in UpdateTimeList)
+                    {
+                        <div class="row">
+                            <div class="col-xl-5 col-lg-6 col-6 text-start my-2">
+                                ชื่อ-สกุล : @userService.GetFullName(item.DebtorStaffId)
+                                [ประเภท : @userService.GetLoanName(userService.GetLoanType((byte?)item.LoanTypeId))]
+                            </div>
+                            <div class="col-xl-3 col-lg-6 col-6 my-2">
+                                นัดหมายเดิม :
+                                @(dateService.ChangeDate(
+                                    dateService.ConvertToDateTime(item.ContractDate),
+                                    "dd MMMM yyyy HH.mm น.",
+                                    Utility.DateLanguage_TH))
+                            </div>
+                            <div class="col-xl-2 col-lg-3 col-3 text-end my-2">
+                                นัดหมายใหม่ :
+                            </div>
+                            <div class="col-xl-2 col-lg-5 col-4 my-2">
+                                <RadzenDatePicker Culture="@(new System.Globalization.CultureInfo("en-EN"))"
+                                                  TValue="DateTime?"
+                                                  DateFormat="d"
+                                                  Change="@(args => NewOnChange(args, item))"
+                                                  Class="w-100" />
+                            </div>
+
+                            <div class="col-12 p-2">
+                                @if (item.Datepass)
+                                {
+                                    <div class="card">
+                                        <div class="row p-2">
+                                            @foreach (var time in item.ListTime)
+                                            {
+                                                <div class="col-2 my-2 mx-1 text-center">
+                                                    <button class="btn shadow rounded text-light button-color"
+                                                            style="height: 60px;border-radius:10px"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#ChooseDate"
+                                                            @onclick="()=>SelectTime(time, item)">
+                                                        เวลา @time น.
+                                                    </button>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@* modal delete *@
+<div class="modal fade"
+     id="deleteAll"
+     aria-hidden="true"
+     aria-labelledby="exampleModalToggleLabel"
+     tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="text-center">
+                    คุณต้องการยกเลิกคำขอในช่วงเวลานี้ใช่หรือไม่ ?
+                </h6>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                ท่านต้องการยกเลิกการจองทั้งหมดในช่วงเวลา @DeletePerson.Time น.
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn text-light"
+                        style="background-color:red"
+                        data-bs-dismiss="modal">
+                    ปิด
+                </button>
+                <button class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="()=> HiddenListTimeAsync(DeletePerson)">
+                    ยืนยัน
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* modal deleteSelect *@
+<div class="modal fade"
+     id="deleteSelect"
+     aria-hidden="true"
+     aria-labelledby="exampleModalToggleLabel"
+     tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="text-center">
+                    คุณต้องการยกเลิกคำขอนี้ใช่หรือไม่ ?
+                </h6>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                ท่านต้องการยกเลิกการจองในช่วงเวลา @DeletePerson.Time น.
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn text-light"
+                        style="background-color:red"
+                        data-bs-dismiss="modal">
+                    ปิด
+                </button>
+                <button class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="()=> HiddenSelectAsync(DeletePerson)">
+                    ยืนยัน
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* model Choosedate *@
+<div class="modal fade"
+     id="ChooseDate"
+     aria-hidden="true"
+     aria-labelledby="exampleModalToggleLabel"
+     tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="text-center">
+                    คุณต้องการนัดหมาย วัน/เวลา นี้ใช่หรือไม่ ?
+                </h6>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card shadow rounded p-2 text-center">
+                    วันที่ @Tview.Date เวลา @Tview.Time น.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn text-light" style="background-color:red" data-bs-dismiss="modal">
+                    เลือกใหม่
+                </button>
+                <button class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="()=> UpdateScheduleAsync(Tview)">
+                    ตกลง
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code { }

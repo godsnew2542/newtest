@@ -1,0 +1,144 @@
+﻿@page "/Admin/AgreementCheck/{RequestID:decimal}"
+@attribute [Authorize(Roles = "2")]
+
+@using Radzen.Blazor;
+@using LoanApp.Services.IServices;
+
+<div class="container-fluid my-3 mb-5 pb-5">
+    <div class="card shadow d-sm-flex justify-content-between mb-4 mt-5 mx-2">
+        <div class="card-header py-3">
+            <h6 class="mb-0 py-2 px-1 ms-1 font-color" style="font-weight:bold;">
+                <HeaderDetailLoan ReqCon="ReqCon" />
+            </h6>
+        </div>
+
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-8 p-3 mt-4 mb-4">
+                <div class="row mt-5" style="padding-left:40px">
+                    <div class="col-2" style="font-weight:bold">ดำเนินการ :</div>
+                    <div class="col-9">
+                        <select class="form-select shadow rounded"
+                                style="border-radius:10px"
+                                aria-label="Default select example"
+                                @onchange="SelectTypeID">
+
+                            @for (var i = 0; i < Select.Count; i++)
+                            {
+                                var item = Select[i];
+                                <option value="@item.ID">@item.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                @switch (FormOption.Select?.ID)
+                {
+                    case 1: // ใช้งานได้ => ปิด/โปะยอดการกู้
+                        <PayOffOption Transaction="Transaction"
+                                      FormOption="FormOption"
+                                      IsEqualsLoanNumInstallments="IsEqualsLoanNumInstallments"
+                                      OnPayOffChange="FormAdminChange" />
+                        break;
+
+                    case 2: // ไม่สามารถใช้งานได้ => ปรับดอกเบี้ยเพิ่ม
+                        <IncreaseInterestOption ReqCon="ReqCon"
+                                                FormOption="FormOption"
+                                                OnIncreaseInterestChange="FormAdminChange" />
+                        break;
+
+                    case 3: // ใช้งานได้ => เพิ่ม/เปลี่ยนผู้ค้ำ
+                        <ChangeGuarantorOption ReqCon="ReqCon"
+                                               FormOption="FormOption"
+                                               OnChangeGuarantorChange="FormAdminChange" />
+                        break;
+
+                    default://แสดงผล
+                        <DisplayOption FormOption="FormOption" />
+                        break;
+                }
+            </div>
+            <div class="col-2"></div>
+        </div>
+    </div>
+</div>
+
+@*footer*@
+<div class="footer">
+    <div class="row py-1 col-12 ms-1">
+        <div class="col-3 text-left">
+            <button type="button"
+                    class="btn secondary-bg shadow rounded text-center"
+                    style="border-radius: 5px; width: 180px"
+                    @onclick="() => Back(ReqCon)">
+                <i class="fa-solid fa-arrow-left fa-lg me-3"></i>
+                ย้อนกลับ
+            </button>
+        </div>
+        <div class="col-4 text-center">
+        </div>
+        <div class="col-3" style="text-align:end">
+            @if (FormOption.Select?.ID != 0)
+            {
+                <button type="button"
+                        class="btn button-color shadow rounded"
+                        style="color: white; width: 180px"
+                        data-bs-toggle="modal"
+                        data-bs-target="#nextPage1">
+                    ดำเนินการ
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+@* model Next page *@
+<div class="modal fade"
+     id="nextPage1"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                @if (FormOption.Select?.ID == 1)
+                {
+                    <div>
+                        กรุณาตรวจสอบความถูกต้องของข้อมูล ยืนยันการปิดยอดชำระใช่หรือไม่ ?
+                    </div>
+                }
+                else if (FormOption.Select?.ID == 2)
+                {
+                    <div>
+                        กรุณาตรวจสอบความถูกต้องของข้อมูล ยืนยันการเปลี่ยอัตราดอกเบี้ยใช่หรือไม่ ?
+                    </div>
+                    <div>
+                        *** ยังไม่พร้อมใช้งาน
+                    </div>
+                }
+                else if (FormOption.Select?.ID == 3)
+                {
+                    <div>
+                        กรุณาตรวจสอบความถูกต้องของข้อมูล ยืนยันการเปลี่ยผู้ค้ำใช่หรือไม่ ?
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ยกเลิก
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="@(async() => {await NextPageAsync(); })">
+                    ยืนยัน
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code { }

@@ -1,0 +1,65 @@
+﻿@page "/User/PdfAgreement"
+@page "/User/PdfAgreement/{RequestID:decimal}"
+@page "/User/PdfAgreement/{Page}/{RequestID:decimal}"
+@page "/User/PdfAgreement/{Page}/{StepID:decimal}/{RequestID:decimal}"
+
+@page "/Admin/PdfAgreement/{Page}/{StepID:decimal}/{RequestID:decimal}/{FromPage:int}"
+@page "/Admin/PdfAgreement/{Page}/{StepID:decimal}/{RequestID:decimal}/{FromPage:int}/{StaffID}"
+
+@page "/{Role}/PdfAgreement/{Page}/{StepID:decimal}/{RequestID:decimal}/{FromPage:int}"
+@page "/{Role}/PdfAgreement/{Page}/{StepID:decimal}/{RequestID:decimal}/{FromPage:int}/{StaffID}"
+
+@page "/{newRole:int}/PdfAgreement/{Page}/{StepID:decimal}/{RequestID:decimal}/{FromPage:int}/{StaffID}/{rootPage:int}/{rootRequestID:decimal}"
+@attribute [Authorize(Roles = "0, 2")]
+
+<div class="container-fluid pb-5">
+    <div class="mt-4">
+        @if (!string.IsNullOrEmpty(Url))
+        {
+            @if (ExistsFile)
+            {
+                <div>
+                    <iframe src="@Url" style="width:100%; height:@Utility.PdfHeightMaxPage"></iframe>
+                    <div>
+                        ประเภทเอกสาร : @ConAttachment?.AttachmentFileName
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="justify-content-center mt-5">
+                    <Empty ImageStyle="height:200px">
+                        <DescriptionTemplate>
+                            <span>ไม่พบไฟล์ กรุณาติดต่อเจ้าหน้าที่เพื่อแก้ไขปัญหาดังกล่าว</span>
+                        </DescriptionTemplate>
+                    </Empty>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="justify-content-center mt-5">
+                <Empty ImageStyle="height:200px">
+                    <DescriptionTemplate>
+                        <span>ไม่พบไฟล์ กรุณาติดต่อเจ้าหน้าที่เพื่อแก้ไขปัญหาดังกล่าว</span>
+                    </DescriptionTemplate>
+                </Empty>
+            </div>
+        }
+    </div>
+</div>
+
+@*footer*@
+<div class="footer">
+    <div class="row py-1 col-12 ms-1">
+        <div class="col-3 text-left">
+            <button class="btn secondary-bg shadow rounded text-center"
+                    style="border-radius:20px;width:170px"
+                    @onclick="BackPage">
+                <i class="fa-solid fa-arrow-left fa-lg me-3"></i> ย้อนกลับ
+            </button>
+        </div>
+        <div class="col-4 text-center"></div>
+        <div class="col-3" style="text-align:end"></div>
+    </div>
+</div>

@@ -1,0 +1,166 @@
+﻿@inherits LayoutComponentBase
+
+<AuthorizeView>
+    <Authorized>
+        <div class="@NavMenuCssClass">
+            <nav class="sb-topnav navbar navbar-expand navbar-light">
+                <!-- Navbar Brand-->
+                <a class="navbar-brand p-2 ">ระบบสวัสดิการเงินกู้ <br> มหาวิทยาลัยสงขลานครินทร์</a>
+                <!-- Sidebar Toggle-->
+                <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 ms-1 me-lg-0"
+                        id="sidebarToggle"
+                        href="#!"
+                        @onclick="ToggleNavMenu">
+                    <i class="fas fa-bars fa-xl"></i>
+                </button>
+                <!-- Navbar  ms-auto me-0 me-md-3 my-2 my-md-0 -->
+                <div class="ms-auto me-0 me-md-3 my-2 my-md-0">
+                    <ul class="navbar-nav ">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="#!">Settings</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#!">Activity Log</a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#!">Logout</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <!-- single sign-On ms-auto ms-md-0 me-3 me-lg-4 -->
+                <div class="ms-auto ms-md-0 me-3 me-lg-4">
+                    <button type="button" class="btn" style="background-color: #dbe8ee; color: #003c71 ">
+                        <i class="fa-solid fa-border-all fa-lg"></i>
+                    </button>
+                </div>
+            </nav>
+
+            <div id="layoutSidenav">
+                <div id="layoutSidenav_nav">
+                    <nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">
+                        <div class="sb-sidenav-menu">
+                            <div class="nav">
+                                <ul class="nav flex-column">
+                                    <li class="navitem px-2">
+                                        <NavLink class="nav-link" href="/HomeUser">
+                                            <i class="fad fa-chart-line fa-lg mx-2"></i>
+                                            ภาพรวม
+                                        </NavLink>
+                                    </li>
+                                    <li class="navitem px-2">
+                                        <NavLink class="nav-link" href="UserResume">
+                                            <i class="far fa-address-card fa-lg mx-2"></i> ข้อมูลส่วนตัว
+                                        </NavLink>
+
+                                    </li>
+                                    <li class="navitem px-2">
+                                        <NavLink class="nav-link" href="LoanAgreement">
+                                            <i class="fas fa-file-contract fa-lg mx-2"></i> สัญญาเงินกู้
+                                        </NavLink>
+
+                                    </li>
+                                    <li class="navitem px-2">
+                                        <NavLink class="nav-link" href="Guarantor">
+                                            <i class="fas fa-user-friends fa-lg mx-2"></i> การค้ำประกัน
+                                        </NavLink>
+                                    </li>
+                                    <li class="navitem px-2">
+                                        <NavLink class="nav-link" href="./User/CheckLoan">
+                                            <i class="fas fa-clipboard-check fa-lg mx-2"></i> ตรวจสอบสิทธ์การกู้
+                                        </NavLink>
+                                    </li>
+                                    <li class="navitem px-2">
+                                        <NavLink class="nav-link" href="/Applyloan">
+                                            <i class="fas fa-file-import fa-lg mx-2"></i> ยื่นกู้
+                                        </NavLink>
+                                    </li>
+                                    <li class="navitem px-2">
+                                        <NavLink class="nav-link" href="RequestLoan">
+                                            <i class="fas fa-window-restore fa-lg mx-2"></i> ยื่นคำขออื่นๆ
+                                        </NavLink>
+                                    </li>
+                                    @*<div class="sb-sidenav-menu-heading">สลับบทบาท</div>*@
+                                    <li class="navitem px-2">
+                                        <NavLink class="nav-link collapsed"
+                                                 href="#"
+                                                 data-bs-toggle="collapse"
+                                                 data-bs-target="#roleLayouts"
+                                                 aria-expanded="false"
+                                                 aria-controls="collapseLayouts">
+                                            <i class="fa-solid fa-arrow-right-arrow-left fa-lg mx-2"></i>
+                                            บทบาทหน้าที่
+                                            <div class="sb-sidenav-collapse-arrow">
+                                                <i class="fas fa-angle-down"></i>
+                                            </div>
+                                        </NavLink>
+                                        <div class="collapse" id="roleLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                                            <nav class="sb-sidenav-menu-nested nav">
+                                                <a class="nav-link">เจ้าหน้าที่(แอดมิน)</a>
+                                                <a class="nav-link">ผู้บริหาร</a>
+                                                <a class="nav-link">ผู้ใช้งาน</a>
+                                            </nav>
+                                        </div>
+                                    </li>
+                                    <li class="navitem px-2">
+                                        <NavLink class="nav-link"
+                                                 href="SignOut"
+                                                 @onclick="@(async()=> {await SignOut(userService, _authStateTask, psuoAuth2Services);})">
+                                            <i class="fas fa-sign-out-alt fa-lg mx-2"></i>
+                                            ออกจากระบบ
+                                        </NavLink>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="sb-sidenav-footer">
+                            <div class="text-center" style="font-size:small">ติดต่อสอบถามเพิ่มเติม</div>
+                            <div class="text-center" style="font-size:small">
+                                โทร. xxxx
+                            </div>
+                            <div class="text-center" style="font-size:small">
+                                อีเมล์ : support@cc.psu.ac.th
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+                <div id="layoutSidenav_content">
+                    <main>
+                        @Body
+                    </main>
+                </div>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="page" style="height:100%">
+            <div class="main">
+                <NavIndex />
+                <div>
+                    @Body
+                </div>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+
+@code {
+    private bool collapseNavMenu = false;
+    private string NavMenuCssClass => collapseNavMenu ? "sb-nav-fixed sb-sidenav-toggled" : "sb-nav-fixed";
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+
+    }
+}

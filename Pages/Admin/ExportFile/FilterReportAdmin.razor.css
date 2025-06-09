@@ -1,0 +1,47 @@
+﻿body {
+}
+
+@media (min-width: 1024px) {
+    .footer {
+        width: 100%;
+    }
+
+    .buttonsize {
+        width: 180px
+    }
+}
+
+@media (max-width: 1024px) {
+    .footer {
+        width: 100%;
+    }
+
+    .buttonsize {
+        width: 180px
+    }
+}
+
+@media (max-width: 768px) {
+    .footer {
+        width: 100%;
+    }
+
+    .buttonsize {
+        width: 100%
+    }
+}
+
+@media (max-width: 450px) {
+    .footer {
+        width: 100%;
+    }
+
+    .buttonsize {
+        width: 100%
+    }
+
+    .setMargin {
+        padding: 0 20px;
+    }
+}
+

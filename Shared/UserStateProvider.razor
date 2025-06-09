@@ -1,0 +1,79 @@
+﻿@using System.Security.Claims;
+@using LoanApp.Services.IServices;
+
+<CascadingValue Value="@this">
+    @ChildContent
+</CascadingValue>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? _authStateTask { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Inject] private Services.IServices.INotificationService notificationService { get; set; } = null!;
+    [Inject] private Services.IServices.LoanDb.IPsuLoan psuLoan { get; set; } = null!;
+
+
+    public User CurrentUser { get; set; } = new()
+        {
+            StaffNameEng = "Anonymous",
+            StaffNameThai = "Anonymous",
+            StaffNameIdentifier = "Anonymous"
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (_authStateTask != null)
+        {
+            var authState = await _authStateTask;
+            var authUser = authState.User;
+
+            try
+            {
+                if (authUser.Identity!.IsAuthenticated)
+                {
+                    string? staffId = authUser.FindFirst(c => c.Type == "StaffID")!.Value;
+                    string? UserName = authUser.FindFirst(c => c.Type == ClaimTypes.Name)!.Value;
+
+                    List<RoleMember> roleMembers = new()
+                    {
+                        new()
+                        {
+                            StaffId = staffId,
+                            RoleType = RoleType.User
+                        }
+                    };
+
+                    List<LoanStaffPrivilege> loanStaffPrivilege = await psuLoan.GetLoanStaffPrivilegeByStaffId(staffId);
+                    Dictionary<decimal, LoanGroup> loanGroupDict = await psuLoan.GetLoanGroupDict();
+
+                    foreach (var item in loanStaffPrivilege)
+                    {
+                        decimal roleGroup = loanGroupDict[item.GroupId!.Value].GroupId;
+
+                        if (!roleMembers.Exists(c => (int)c.RoleType == (int)item.GroupId))
+                        {
+                            RoleType intAsEnum = (RoleType)(int)item.GroupId;
+                            roleMembers.Add(new RoleMember()
+                                {
+                                    StaffId = staffId,
+                                    RoleType = intAsEnum
+                                });
+                        }
+                    }
+
+                    CurrentUser.StaffNameThai = authUser.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)!.Value;
+                    CurrentUser.StaffNameEng = authUser.FindFirst(c => c.Type == ClaimTypes.GivenName)!.Value;
+                    CurrentUser.CampusId = authUser.FindFirst(c => c.Type == "CampusID")!.Value;
+                    CurrentUser.StaffId = staffId;
+                    CurrentUser.UserName = UserName;
+                    CurrentUser.MemberOfRoles = roleMembers;
+                }
+            }
+            catch (Exception ex)
+            {
+                await notificationService.Error(notificationService.ExceptionLog(ex));
+            }
+        }
+    }
+}

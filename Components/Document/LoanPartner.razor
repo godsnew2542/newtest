@@ -1,0 +1,68 @@
+﻿@page "/Doc/LoanPartner"
+
+<div id="@PageId">
+	<div class="px-5">
+		<h4 class="text-center">
+			<b>
+				(ใช้เฉพาะกรณีที่มีคู่สมรส)
+			</b>
+		</h4>
+		<br />
+		@if (!IsLending)
+		{
+			<p class="text-end">
+				เขียนที่ &nbsp; <h class="pdf-line"> มหาวิทยาลัยสงขลานครินทร์ </h>
+			</p>
+		}
+		<p class="text-end">
+			วันที่ <h class="pdf-line">@dateService.ChangeDate(Option.DateTitle, "dd", Utility.DateLanguage_TH)</h> &nbsp;
+			เดือน <h class="pdf-line">@dateService.ChangeDate(Option.DateTitle, "MMMM", Utility.DateLanguage_TH)</h> &nbsp;
+			พ.ศ. <h class="pdf-line">@dateService.ChangeDate(Option.DateTitle, "yyyy", Utility.DateLanguage_TH)</h>
+		</p>
+		<br />
+		<p>
+			&emsp;&emsp; โดยหนังสือฉบับนี้ข้าพเจ้า
+			<h class="pdf-line"> @GetNamePartner(StaffFamilies) </h>
+			ขอรับรองและยืนยันไว้ ณ ที่นี้ว่า ข้าพเจ้าตกลงยินยอมด้วยในการที่
+			<h class="pdf-line"> @userService.GetFullName(StaffDetail.StaffId) </h>
+			ผู้ซึ่งเป็นสามี/ภรรยา โดยชอบด้วยกฎหมายของข้าพเจ้า ได้ทำสัญญา @Loan.LoanParentName กับมหาวิทยาลัยสงขลานครินทร์
+			รวมทั้งขอให้ความยินยอมล่วงหน้าไว้สำหรับการทำนิติกรรมใด ๆ อันสืบเนื่องจากหรือเกี่ยวข้องกับนิติกรรมที่กล่าวถึงข้างต้นอันอาจเกิดขึ้นในอนาคต
+			เช่น การแก้ไข เปลี่ยนแปลง เพิ่มเติม ต่ออายุ ยกเลิก เพิกถอน ประนีประนอม แปลงหนี้ หักกลบลบหนี้ รับสภาพหนี้ ฯลฯ ทุกประการ
+		</p>
+		<br>
+		<div class="row justify-content-end">
+			<div class="col-6 text-center">
+				<p class="m-0">
+					(ลงชื่อ)
+					<h class="pdf-line" style="padding: 0px 80px;"> </h>
+					ผู้ให้ความยินยอม
+				</p>
+				<p class="mt-2">
+					(<h class="pdf-line"> @GetNamePartner(StaffFamilies) </h>)
+				</p>
+			</div>
+		</div>
+		<div class="mt-5"></div>
+		<p style="padding-left:25px">
+			&emsp; &emsp; ขอยืนยันว่าลายมือชื่อข้างต้น
+		</p>
+		<p style="padding-left:30px">
+			&emsp; เป็นลายมือชื่อคู่สมรสของข้าพเจ้า
+		</p>
+
+		<p class="m-0">
+			(ลงชื่อ) <h class="pdf-line" style="padding: 0px 120px;">  </h>
+			@if (string.IsNullOrEmpty(Role))
+			{
+				@(IsLending ? "ผู้ยืมเงิน" : "ผู้กู้");
+			}
+			else
+			{
+				@Role
+			}
+		</p>
+		<p style="padding-left:35px">
+			&emsp; (<h class="pdf-line">@userService.GetFullName(StaffDetail.StaffId) </h>)
+		</p>
+	</div>
+</div>

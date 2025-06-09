@@ -1,0 +1,76 @@
+﻿<div class="sb-sidenav-menu">
+    <div class="nav">
+        <ul class="nav flex-column">
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="/HomeUser">
+                    <i class="fas fa-chart-line fa-lg mx-2"></i>
+                    ภาพรวม
+                </NavLink>
+            </li>
+            <Divider Style="margin-bottom:0px; margin-top:0px" />
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="UserResume">
+                    <i class="far fa-address-card fa-lg mx-2"></i>
+                    ข้อมูลส่วนตัว
+                </NavLink>
+            </li>
+            <Divider Style="margin-bottom:0px; margin-top:0px" />
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="./User/CheckLoan">
+                    <i class="fas fa-clipboard-check fa-lg mx-2"></i>
+                    ตรวจสอบสิทธิ์การกู้
+                </NavLink>
+            </li>
+            <Divider Style="margin-bottom:0px; margin-top:0px" />
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="/Applyloan">
+                    <i class="fas fa-file-import fa-lg mx-2"></i>
+                    ยื่นคำขอกู้
+                </NavLink>
+            </li>
+            <Divider Style="margin-bottom:0px; margin-top:0px" />
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="LoanAgreement">
+                    <i class="fas fa-file-contract fa-lg mx-2"></i>
+                    สัญญากู้ยืมเงิน
+                </NavLink>
+            </li>
+            <Divider Style="margin-bottom:0px; margin-top:0px" />
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="Guarantor">
+                    <i class="fas fa-handshake fa-lg mx-2"></i>
+                    การค้ำประกัน
+                </NavLink>
+            </li>
+            <Divider Style="margin-bottom:0px; margin-top:0px" />
+            <li class="navitem px-2">
+                <a class="nav-link"
+                   target="_blank"
+                   href="Files/Manual/Loan_User_Manual/LOAN_User_Manual/index.html">
+                    @*<i class="fa-regular fa-file-pdf fa-lg  mx-2"></i>*@
+                    <i class="fas fa-book fa-lg mx-2"></i>
+                    คู่มือการใช้งาน
+                </a>
+            </li>
+            <Divider Style="margin-bottom:0px; margin-top:0px" />
+            <li class="navitem px-2">
+                <NavLink class="nav-link" href="/User/ContactUs">
+                    <i class="fa-solid fa-address-book fa-lg mx-2"></i>
+                    ติดต่อเรา
+                </NavLink>
+            </li>
+
+            @if (Dev.Contains(userStateProvider?.CurrentUser.UserName))
+            {
+                <Divider Style="margin-bottom:0px; margin-top:0px" />
+                <li class="navitem px-2">
+                    <NavLink class="nav-link" href="/Dev/ViewAsUser">
+                        <i class="fa-solid fa-file-export fa-lg mx-2"></i>Dev
+                    </NavLink>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+

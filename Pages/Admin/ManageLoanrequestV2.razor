@@ -1,0 +1,330 @@
+﻿@page "/Admin/ManageLoanRequest"
+@page "/Admin/ManageLoanRequest/{StatusID:decimal}"
+@page "/Admin/ManageLoanRequest/{BACKPAGE:bool}/{LOANTYPEID:decimal}/{StatusID:decimal}"
+@attribute [Authorize(Roles = "2")]
+
+<div class="container-fluid mt-3 mb-5 pb-5">
+    <div class="mt-4 mx-2">
+        <div class="section-title" style="font-size:medium">
+            <i class="far fa-file-alt fa-lg mx-1"></i> คำขอกู้
+        </div>
+    </div>
+
+    @* New vision *@
+    <div class="card rounded shadow mt-4 pb-3 px-2 mb-3">
+        <div style="margin-top:1.5rem;">
+            <GridRow Gutter="(8,8)" Justify="space-around" Align="middle">
+                <GridCol Xxl="14" Xl="14" Lg="14" Md="12" Sm="24" Xs="24">
+                    <GridRow Gutter="(18,8)" Justify="space-around" Align="middle">
+                        <GridCol Flex="@("none")">
+                            <div style="margin-left:1rem">
+                                <Switch Control Checked="@LoanCheckbook.Value" OnClick="CheckboxSwitch" />
+                             </div>
+                         </GridCol>
+                         <GridCol Flex="@("auto")">
+                             <Text Strong>@Message</Text>
+                            </GridCol>
+                        </GridRow>
+                    </GridCol>
+                    <GridCol Xxl="9" Xl="9" Lg="9" Md="10" Sm="22" Xs="22">
+                        <GridRow Gutter="(18,8)">
+                            <GridCol Flex="@("auto")">
+                                <Input @bind-Value="@SearchView"
+                                       Size="@ButtonSize.Large"
+                                       Placeholder="ค้นหาจากชื่อ-สกุล"
+                                       OnPressEnter="@(async()=>{await OnSearch(SearchView, ModelApplyLoan);})"
+                                       AllowClear=true />
+                            </GridCol>
+                            <GridCol Flex="@("none")">
+                                <Button Style="border-radius:8px; background:#367691"
+                                        Size="@ButtonSize.Large"
+                                        OnClick="@(async()=>{await OnSearch(SearchView, ModelApplyLoan);})">
+                                    <i class="fas fa-search" style="color: #ffffff "></i>
+                                </Button>
+                            </GridCol>
+                        </GridRow>
+                    </GridCol>
+                </GridRow>
+            </div>
+
+            <div class="mt-4 mx-2">
+                คำขอกู้จำนวน @newLoanRequestContracts.Count รายการ
+        </div>
+
+        <div class="panel">
+            <div class="panel-body  mt-1 table-container" style="border-top-left-radius:10px;border-top-right-radius:10px">
+                <div class="table-header py-3" style="height: 60px;">
+                    <div class="ms-3">
+                        <h6 style="color:#ffffff">รายการคำขอกู้</h6>
+                    </div>
+                </div>
+                <Table TItem="VLoanRequestContract"
+                       DataSource="@newLoanRequestContracts"
+                       Responsive=true
+                       Class="table-hover-cursor">
+
+                    <PropertyColumn Title="ผู้กู้"
+                                    Property="c=>c.DebtorStaffId"
+                                    HeaderStyle="text-align:center; font-weight:bold;">
+                        @(userService.GetNameForDebtor(context)?.FullNameTh)
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="ประเภทกู้ยืม"
+                                    Property="c=>c.LoanTypeName"
+                                    HeaderStyle="text-align:center; font-weight:bold;" />
+
+                    <PropertyColumn Title="สถานะ"
+                                    Property="c=>c.LoanTypeName"
+                                    HeaderStyle="text-align:center; font-weight:bold;">
+                        @switch (context.CurrentStatusId)
+                        {
+                            case 1:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Yellow.ToString())"
+                                                               message="@userService.GetStatusNameFromVLoanRequestContract(context)" />
+                                break;
+
+                            case 2:
+                                <div>
+                                    <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Cyan.ToString())"
+                                                                   message="@userService.GetStatusNameFromVLoanRequestContract(context)" />
+                                </div>
+                                <div>
+                                    <i class="far fa-thumbs-up mx-1"></i>
+                                    @context.LoanRequestApproveNameTh
+                                    @context.LoanRequestApproveSnameTh
+                                </div>
+                                break;
+
+                            case 4:
+                                <div>
+                                    <LoanApp.Components.Ant.TagAnt color="@(PresetColor.GeekBlue.ToString())"
+                                                                   message="@userService.GetStatusNameFromVLoanRequestContract(context)" />
+                                </div>
+                                <div>
+                                    <i class="far fa-thumbs-up mx-1"></i>
+                                    @context.LoanRequestApproveNameTh
+                                    @context.LoanRequestApproveSnameTh
+                                </div>
+                                break;
+
+                            default:
+                                <div>
+                                    @userService.GetStatusNameFromVLoanRequestContract(context)
+                                </div>
+                                break;
+                        }
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="ยอดเงินกู้"
+                                    Property="c=>c.ContractLoanAmount"
+                                    HeaderStyle="text-align:center; font-weight:bold;">
+                        @(context.ContractLoanAmount != null ?
+                            String.Format("{0:n2}", context.ContractLoanAmount) :
+                            String.Format("{0:n2}", context.LoanRequestLoanAmount))
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="ผู้ค้ำ"
+                                    Property="c=>(c.ContractGuarantorStaffId != null ? c.ContractGuarantorStaffId : c.LoanRequestGuaranStaffId)"
+                                    HeaderStyle="text-align:center; font-weight:bold;">
+                        @(userService.GetNameForGuarantor(context)?.FullNameTh)
+                    </PropertyColumn>
+
+                    <ActionColumn>
+                        @switch (context.CurrentStatusId)
+                        {
+                            case 1:
+                                <div>
+                                    ยื่นกู้วันที่ @ChangeDate(context.LoanRequestDate)
+                                </div>
+                                break;
+
+                            case 2:
+                                <div>
+                                    วันที่ตรวจสอบ @ChangeDate(context.AdminRecordDate)
+                                </div>
+                                break;
+
+                            case 4:
+                                <div>
+                                    นัดหมายวันที่ @ChangeDate(context.ContractDate)
+                                </div>
+                                break;
+
+                            case 5:
+                                <div>
+                                    วันที่ทำสัญญา @ChangeDate(context.AdminUploadDate)
+                                </div>
+                                break;
+                        }
+                    </ActionColumn>
+
+                    <ActionColumn>
+                        @switch (context.CurrentStatusId)
+                        {
+                            case 1:
+                                <button class="btn lightBlue" style="border-radius: 10px; width: 140px" @onclick="()=>CheckrequestAsync(context)">
+                                    ตรวจสอบ
+                                </button>
+                                break;
+
+                            case 2:
+                                <button class="btn lightBlue" style="border-radius: 10px; width: 140px" @onclick="() => ChoosedateAsync(context)">
+                                    เลือกวันนัดหมาย
+                                </button>
+                                <button class="btn text-white mt-1" data-bs-toggle="modal" data-bs-target="#CancelAgreement" style="border-radius: 10px; width: 140px;background-color:orangered" @onclick="@(() => { DefaultRemark(Select, context.LoanRequestId, 2); })">
+                                    ยกเลิก
+                                </button>
+                                break;
+
+                            case 4:
+                                <button class="btn lightGreen" style="border-radius: 10px; width: 140px;color:#ffffff " @onclick="()=>OpenPdgePDFAsync(context)">
+                                    ทำสัญญา
+                                </button>
+                                <button class="btn text-white mt-1" data-bs-toggle="modal" data-bs-target="#CancelAgreement" style="border-radius: 10px; width: 140px;background-color:orangered" @onclick="@(() => { DefaultRemark(Select, context.LoanRequestId, 1); })">
+                                    ยกเลิก
+                                </button>
+                                break;
+                        }
+                    </ActionColumn>
+                </Table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <div class="row py-1 col-12">
+        <div class="col-xl-1 col-lg-1 col-md-2" style="text-align:end">
+            <div class="font-color font-weight-bolder">
+                <i class="fas fa-filter me-1"></i>
+                ประเภทกู้ยืม
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-3 col-md-3">
+            <select class="form-select form-select-sm" id="selectLoanTypeId" @onchange="SelectLoanTypeIDAsync">
+                @for (var i = 0; i < LoanTypeList.Count; i++)
+                {
+                    var item = LoanTypeList[i];
+                    <option value="@item.LoanTypeId">@item.LoanTypeName</option>
+                }
+            </select>
+        </div>
+
+        @if (LoanCheckbook == false)
+        {
+            <div class="col-xl-1 col-lg-1 col-md-2" style="text-align:end">
+                <div class="font-color font-weight-bolder">
+                    สถานะคำขอกู้
+                </div>
+            </div>
+            <div class="col-xl-2 col-lg-3 col-md-3">
+
+                <select class="form-select form-select-sm"
+                        id="selectStatusId"
+                        @onchange="SelectContractStatusAsync">
+                    @for (var i = 0; i < Status.Count; i++)
+                    {
+                        var item = Status[i];
+                        <option value="@item.ContractStatusId">@item.ContractStatusName</option>
+                    }
+                </select>
+
+            </div>
+        }
+    </div>
+</div>
+
+@*CancelAgreement*@
+<div class="modal fade"
+     id="CancelAgreement"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="font-size:larger">
+                คุณยืนยันการยกเลิกคำขอกู้นี้ใช่หรือไม่?
+            </div>
+            <div class="modal-body">
+                <div class="p-2 mt-2 text-center" style="font-size:medium">
+                    <div class="my-3 row col-xl-12">
+                        <div class="col-xl-10 col-lg-10 col-md-9 col-sm-7">
+                            <input type="text"
+                                   value="@Remark"
+                                   class="form-control"
+                                   style="height:50px"
+                                   Placeholder="ระบุหมายเหตุ"
+                                   disabled="@(SelectRemark.ID == 99 ? false : true)"
+                                   @onchange="@((ChangeEventArgs e) => { Remark = e.Value.ToString(); })" />
+                        </div>
+                        <div class="col-xl-2 col-lg-2 col-md-3 col-sm-5  text-center">
+                            <button class="btn appbar-action button-color  text-center"
+                                    style="border: none; height: 50px;width:160px"
+                                    @onclick="() => ToggleButton(false)">
+                                เลือกหมายเหตุ
+                            </button>
+                        </div>
+                    </div>
+                    @if (changType)
+                    {
+                        <div class="my-3 mx-3">
+                            <div class="card bg-white p-2 rounded shadow mt-1">
+                                @for (var i = 0; i < Select.Count; i++)
+                                {
+                                    var item = Select[i];
+                                    <div class="row p-2">
+                                        <div class="text-start col-lg-12 col-md-7 col-xl-9">
+                                            @item.Name
+                                        </div>
+                                        <div class="col-lg-12 col-md-3 text-end  col-xl-3">
+                                            <button class="btn appbar-action px-3"
+                                                    style="width:120px"
+                                                    @onclick="()=>SelectType(item, SelectRemark.LoanRequestId)">
+                                                เลือก
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ยกเลิก
+                </button>
+                @if (SelectRemark.LoanRequestId != null)
+                {
+                    <button type="button"
+                            class="btn btn-primary"
+                            data-bs-dismiss="modal"
+                            @onclick="()=> SaveToDbAsync(SelectRemark, Remark)">
+                        ยืนยัน
+                    </button>
+                }
+                else
+                {
+                    <div>
+                        เกิดความผิดพลาดทางระบบ กรุณาติดต่อจ้าหน้าที่
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style scoped>
+    :root .ant-table-pagination.ant-pagination {
+        margin: 10px !important;
+    }
+</style>
+
+@code {
+    // private bool countTable = false;
+}

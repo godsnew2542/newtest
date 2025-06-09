@@ -1,0 +1,67 @@
+﻿@if (imgOther != null)
+{
+    if (imgOther.contractAttachments.Any())
+    {
+        @*<div class="text-center h5">
+			@imgOther.Title
+		</div>*@
+        foreach (var item in imgOther.contractAttachments)
+        {
+            var extension = Path.GetExtension(item.AttachmentFileName);
+            var physicalFilePath = Utility.CheckOSisWindows() ? fileUploadSetting.Value.Windows.PhysicalFilePath : fileUploadSetting.Value.Linux.PhysicalFilePath;
+
+            var Url = $"{physicalFilePath}\\{item.AttachmentAddr}";
+            bool IsnoImg = File.Exists(Url);
+            var fileData = SaveFileAndImgService.GetUrl(item.AttachmentAddr);
+
+            if (IsnoImg)
+            {
+                if (extension == ".pdf")
+                {
+                    <div class="text-center my-2">
+                        @if (!string.IsNullOrEmpty(fileData))
+                        {
+
+                            <iframe src="@fileData"
+                                    style="width:100%; height:500px">
+                            </iframe>
+                        }
+                        else
+                        {
+                            <Empty />
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="text-center col-6 p-2">
+                            @if (!string.IsNullOrEmpty(fileData))
+                            {
+                                <img src="@fileData"
+                                     style="width:100%; height:250px;">
+                            }
+                            else
+                            {
+                                <Empty />
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <Empty>
+                    <DescriptionTemplate>
+                        <span>ไม่พบไฟล์</span>
+                    </DescriptionTemplate>
+                </Empty>
+            }
+        }
+    }
+}
+
+
+@code {
+
+}

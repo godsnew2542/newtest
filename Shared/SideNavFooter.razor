@@ -1,0 +1,37 @@
+﻿<div class="sb-sidenav-footer p-1">
+    @if (role != "user")
+    {
+        <div class="text-center mt-2" style="font-size:small">
+            สอบถามข้อมูลสวัสดิการ / การใช้งานระบบ
+        </div>
+        <div class="text-center mt-1" style="font-size: small">
+            โทร. 2053 / 9091
+        </div>
+        <div class="text-center mt-1" style="font-size: small">
+            @*อีเมล : support@cc.psu.ac.th*@
+            อีเมล : support@psu.ac.th
+        </div>
+    }
+    <div class="text-center mt-1 mb-2" style="font-size: small">
+        @* Software Version : 1.0.1 *@
+
+        Software Version : @version
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string? role { get; set; } = "user";
+
+    private string? version = null;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            version = GetType().Assembly.GetName().Version?.ToString();
+
+            StateHasChanged();
+        }
+    }
+}

@@ -1,0 +1,352 @@
+﻿@page "/Manager/ManageloanRequest"
+@attribute [Authorize(Roles = "3")]
+
+<div class="container-fluid mt-3">
+    @* Search *@
+    <div class="mt-1 row">
+        <div class="row justify-content-end mt-3">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 col-sm-6 text-center">
+                        <div class="edit-button appbar-action btn"
+                             type="button"
+                             style="width:100px"
+                             @onclick="() => SetOrClearCheckedAsync(true, ReqCon)">
+                            ทั้งหมด
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6 text-center">
+                        <div class="error-button appbar-action btn"
+                             type="button"
+                             style="width:100px"
+                             @onclick="() => SetOrClearCheckedAsync(false, ReqCon)">
+                            ล้าง
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
+                <EditForm Model="Search" class="d-flex col-12">
+                    <input type="search"
+                           class="bg-white font-color p-2 simple-card me-2 col-10"
+                           style="border:none"
+                           placeholder="ค้นหาจากชื่อ-สกุล"
+                           name="searchbar"
+                           @onchange="@((ChangeEventArgs e) => { SearchView = e.Value.ToString(); SearchData(SearchView, index); })" />
+
+                    <button type="button"
+                            class="btn btn-outline-secondary primary-bg-drop shadow rounded"
+                            @onclick="()=>SearchData(SearchView, index)">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel mt-3">
+        <div class="panel-body table-responsive mt-4 table-container"
+             style="border-top-left-radius:10px;border-top-right-radius:10px">
+            <table class="table table-hover table-borderless">
+                <thead class="table-header text-center"
+                       style="border-bottom: solid 1px; border-color: #367691">
+                    <tr>
+                        <th></th>
+                        <th>ผู้กู้</th>
+                        <th>ประเภทกู้ยืม</th>
+                        <th>ยอดเงินกู้</th>
+                        <th>วันที่ทำสัญญา</th>
+                        <th>สถานะ</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ReqCon.Count != 0)
+                    {
+                        @foreach (var item in ReqCon)
+                        {
+                            var loan = userService.GetLoanType(item.LoanTypeId);
+                            <tr class="py-2" style="background-color:whitesmoke;">
+                                <td class="text-end">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           value="@item.LoanRequestId"
+                                           id="@item.LoanRequestId"
+                                    @onchange="eventArgs =>{ CheckboxClicked(item.LoanRequestId, eventArgs.Value); }">
+                                </td>
+                                <td class="text-left">
+                                    <div>
+                                        @userService.GetFullName(item.DebtorStaffId)
+                                    </div>
+                                </td>
+                                <td class="text-left">
+                                    <div>
+                                        @loan?.LoanParentName
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div>
+                                        @String.Format("{0:n2}", item.ContractLoanAmount)
+                                    </div>
+                                </td>
+                                <td class="text-left">
+                                    @if (item.AdminUploadDate != null)
+                                    {
+                                        <div>
+                                            @dateService.ChangeDate(dateService.ConvertToDateTime(item.AdminUploadDate), "dd MMMM yyyy", Utility.DateLanguage_TH)
+                                        </div>
+                                    }
+                                </td>
+                                <td class="text-left">
+                                    <div>
+                                        @item.CurrentStatusName
+                                    </div>
+                                </td>
+
+
+                                <td class="text-center">
+                                    <button class="btn button-color text-light shadow rounded"
+                                            style="border-radius: 10px; width: 100px"
+                                    @onclick="()=> ShowData(item)"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmPage">
+                                        ดำเนินการ
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr class="my-2 py-2">
+                            <td colspan="6">
+                                <Empty>
+                                    <DescriptionTemplate>
+                                        <span>ไม่พบข้อมูล</span>
+                                    </DescriptionTemplate>
+                                </Empty>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="panel-footer">
+                <div class="d-flex tool-bar">
+                    <div class="ml-auto d-flex justify-content-center align-items-center">
+                        <span class="form-control-user mr-2">
+                            รายการต่อหน้า
+                        </span>
+                        <label class="d-flex align-items-center text-center">
+                            <select class="form-control form-control-sm text-center"
+                            @onchange="SelectPageSize">
+                                @foreach (var LM in Footer.Limits)
+                                {
+                                    <option value="@LM">@LM</option>
+                                }
+                                @*<option value=1000>ทั้งหมด</option>*@
+                            </select>
+                        </label>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <span class="form-control-user mr-2 ml-2">
+                            รายการ
+                        </span>
+                        <span class="mr-2">
+                            หน้า
+                        </span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div role="group" class="btn-group">
+                            <button class="btn btn-light btn-sm"
+                                    type="button"
+                            @onclick="@(e => NavigateTo("Prev"))">
+                                <i class="fas fa-chevron-left icon-primary"></i>
+                            </button>
+                            <label class="d-flex align-items-center text-center mx-1">
+                                <select class="form-control form-control-sm text-center"
+                                @onchange="SelectCurrentPage"
+                                        value="@Footer.CurrentPage">
+                                    @for (int i = 1; i <= Footer.TotalPages; i++)
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                </select>
+                            </label>
+                            <button class="btn btn-light btn-sm"
+                                    type="button"
+                            @onclick="@(e => NavigateTo("Next"))">
+                                <i class="fas fa-chevron-right icon-primary"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@* footer *@
+<div class="footer">
+    <div class="row py-1 col-12">
+        <div class="col-xl-1 col-lg-1 col-md-1" style="text-align:end">
+            <div class="font-color font-weight-bolder">
+                ประเภทกู้ยืม
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-3 col-md-3">
+            <select class="form-select form-select-sm"
+                    id="selectLoanTypeId"
+            @onchange="SelectLoanTypeID">
+                @for (var i = 0; i < LoanTypeList.Count; i++)
+                {
+                    var item = LoanTypeList[i];
+                    <option value="@item.LoanTypeId">@item.LoanTypeName</option>
+                }
+            </select>
+        </div>
+
+        @if (SelestReqId.Count != 0)
+        {
+            <div class="col-4">
+                <button class="text-light shadow rounded my-1"
+                        style="background-color: green; border-radius: 10px; height: 50px;width:135px;border:none;font-weight:bold"
+                        data-bs-toggle="modal"
+                        data-bs-target="#nextPage">
+                    เห็นควรอนุมัติ
+                </button>
+            </div>
+            <div class="col-4">
+                <button class="text-light shadow rounded my-1"
+                        style="background-color: red; border-radius: 10px; height: 50px; width: 135px; border: none; font-weight: bold "
+                        data-bs-toggle="modal"
+                        data-bs-target="#backPage">
+                    ไม่เห็นควรอนุมัติ
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@* model Next page *@
+<div class="modal fade"
+     id="nextPage"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-body text-center" style="font-size:larger">
+                ท่านยืนยันการอนุมัติสัญญานี้ใช่หรือไม่
+                <div class="p-2 mt-2 text-center"
+                     style="font-size:large">
+                    ผู้กู้และผู้ค้ำจะได้รับผลการอนุมัตินี้ทางอีเมลที่แจ้งไว้ในระบบ
+                </div>
+                <hr>
+                <div>
+                    @for (int i = 0; i < SelestReqId.Count; i++)
+                    {
+                        var item = SelestReqId[i];
+                        var GetReqCon = userService.GetVLoanRequestContract(item);
+                        var loan = userService.GetLoanType(GetReqCon?.LoanTypeId);
+
+                        <div>
+                            ชื่อ - สกุล: @userService.GetFullName(GetReqCon?.DebtorStaffId)
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                ประเภทย่อย: @loan?.LoanTypeName
+                            </div>
+                            <div class="col">
+                                จำนวนเงินที่ต้องการกู้ :
+                                @(String.Format("{0:n2}",
+                                    GetReqCon?.ContractLoanAmount != null ?
+                                    GetReqCon.ContractLoanAmount :
+                                    0)) บาท
+                            </div>
+                        </div>
+                        <hr>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ปิด
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                @onclick="()=>ConFirmPageAsync(true, SelestReqId)">
+                    ยืนยัน
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* model Back page *@
+<div class="modal fade"
+     id="backPage"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-body text-center" style="font-size:large">
+                คุณยืนยันการไม่อนมุัติสัญญานี้ใช่หรือไม่ ?
+                <div class="p-2 mt-2 text-center" style="font-size:medium">
+                    ผู้กู้และผู้ค้ำจะได้รับผลการอนุมัติสัญญานี้ทางอีเมลที่แจ้งไว้ในระบบ
+                </div>
+                <hr>
+                <div>
+                    @for (int i = 0; i < SelestReqId.Count; i++)
+                    {
+                        var item = SelestReqId[i];
+                        var GetReqCon = userService.GetVLoanRequestContract(item);
+                        var loan = userService.GetLoanType(GetReqCon?.LoanTypeId);
+
+                        <div>
+                            ชื่อ - สกุล:	 @userService.GetFullName(GetReqCon?.DebtorStaffId)
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                ประเภทย่อย: @loan?.LoanTypeName
+                            </div>
+                            <div class="col">
+                                จำนวนเงินที่ต้องการกู้ :
+                                @(String.Format("{0:n2}",
+                                    GetReqCon?.ContractLoanAmount != null ?
+                                    GetReqCon.ContractLoanAmount :
+                                    0)) บาท
+                            </div>
+                        </div>
+                        <hr>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        style="width:100px"
+                        data-bs-dismiss="modal">
+                    ยกเลิก
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        style="width:100px"
+                        data-bs-dismiss="modal"
+                @onclick="()=>ConFirmPageAsync(false, SelestReqId)">
+                    ยืนยัน
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code
+{
+
+}

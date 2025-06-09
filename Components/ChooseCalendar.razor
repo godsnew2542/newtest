@@ -1,0 +1,41 @@
+﻿@using Radzen.Blazor
+
+<div>
+    DateTimeData: @timeView.DateTimeData <br />
+    SelectDateValue: @SelectDateValue <br />
+    defaultDate: @defaultDate <br />
+    CampIdNow: @CampIdNow <br />
+</div>
+
+
+
+
+<div class="row">
+    <div class="col-12 col-xl-4 col-lg-12 col-md-12 my-2">
+        <div class="mt-2 text-center">
+            <RadzenDatePicker @bind-Value=@defaultDate
+                              Culture="@(new System.Globalization.CultureInfo(Utility.DateLanguage_EN))"
+                              DateRender=@(e => dateService.DateRender(e, Dates))
+                              Inline="true"
+                              Change="@(async(args)=>{await OnChange(args);})" />
+        </div>
+    </div>
+
+    @if (isChooseTime)
+    {
+        <div class="col-12 col-xl-8 col-lg-12 col-md-12 text-center my-2">
+            <div class="row justify-content-center">
+                <div class="card col-10">
+                    @foreach (var item in ListTime)
+                    {
+                            <div>@item</div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+
+}

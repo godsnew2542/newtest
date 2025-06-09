@@ -1,0 +1,294 @@
+﻿@page "/Admin/AgreementDetail/{RequestID:decimal}"
+
+@attribute [Authorize(Roles = "2")]
+
+<div class="container-fluid mt-5 pb-5 mb-5">
+    <div class="py-4 bg-light pb-4 shadow rounded mx-2 px-3">
+
+        <GridRow Gutter="(8,8)">
+            <GridCol Xxl="20" Xl="18" Lg="16" Md="24" Sm="24" Xs="24">
+                <div style="font-size: large; font-weight: bold;">
+                    @{
+                        bool isEdit = IsChangeContractNo(ReqCon).Result;
+                    }
+                    <HeaderDetailLoan IsEditContractNo="@isEdit" ReqCon="@ReqCon" />
+                </div>
+
+                <div class="my-3">
+                    <b>ผู้ค้ำ : </b> @(!string.IsNullOrEmpty(ReqCon?.ContractGuarantorStaffId) ? GetNameGuarantor(ReqCon) : "ไม่พบข้อมูลผู้ค้ำ")
+                </div>
+
+                <div class="mt-3">
+                    <GridRow Gutter="(8,16)">
+                        <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+                            <b>ประเภทกู้ยืม : </b> @userService.GetLoanName(userService.GetLoanType(ReqCon?.LoanTypeId))
+                        </GridCol>
+                        <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+                            <b>สถานะ :</b>
+                            @{
+                                string? currentStatusName = ReqCon?.CurrentStatusName;
+                            }
+                            @switch (ReqCon?.CurrentStatusId)
+                            {
+                                case 1:
+                                    <TagAnt color="@(PresetColor.Yellow.ToString())" message="@currentStatusName" />
+                                    break;
+
+                                case 2:
+                                    <TagAnt color="@(PresetColor.Cyan.ToString())" message="@currentStatusName" />
+                                    break;
+
+                                case 4:
+                                    <TagAnt color="@(PresetColor.GeekBlue.ToString())" message="@currentStatusName" />
+                                    break;
+
+                                case 9:
+                                    <TagAnt color="#2db7f5" message="@currentStatusName" />
+                                    break;
+
+                                case 6:
+                                    <TagAnt color="@(PresetColor.Purple.ToString())" message="@currentStatusName" />
+                                    break;
+
+                                case 7:
+                                    <TagAnt color="@(PresetColor.Lime.ToString())" message="@currentStatusName" />
+                                    break;
+
+                                case 8:
+                                    <TagAnt color="rgb(143, 201, 146)" message="@currentStatusName" />
+                                    break;
+
+                                case 80:
+                                    <TagAnt color="@(PresetColor.Orange.ToString())" message="@currentStatusName" />
+                                    break;
+
+                                case 81:
+                                    <TagAnt color="@(PresetColor.Volcano.ToString())" message="@currentStatusName" />
+                                    break;
+
+                                case 82:
+                                    <TagAnt color="@(PresetColor.Magenta.ToString())" message="@currentStatusName">
+                                        <header>
+                                            <i class="fas fa-frown me-2" style="color: #c41d7f"></i>
+                                        </header>
+                                    </TagAnt>
+                                    break;
+
+                                case 99:
+                                    <TagAnt color="@(PresetColor.Green.ToString())" message="@currentStatusName" />
+                                    break;
+
+                                case 98:
+                                    <TagAnt color="@(PresetColor.Pink.ToString())" message="@currentStatusName" />
+                                    break;
+
+                                case 3:
+                                    <TagAnt color="error" message="@currentStatusName" />
+                                    break;
+                            }
+                        </GridCol>
+
+                        <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+                            <b>ยอดเงินกู้รวมดอกเบี้ย :</b> @String.Format("{0:n2}", GetLoanAmount(ReqCon)) บาท
+                        </GridCol>
+                        <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+                            <b>ยอดเงินกู้คงเหลือ :</b> @String.Format("{0:n2}", GetBalanceTotal()) บาท
+                        </GridCol>
+
+                        <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+                            <b>จำนวนงวด :</b> @ReqCon?.ContractLoanNumInstallments  งวด
+                        </GridCol>
+                        <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+                            <b>วันที่กองคลังโอนเงิน :</b> @(ReqCon?.PaidDate != null ? dateService.ChangeDate(ReqCon.PaidDate.Value, "dd MMMM yyyy", Utility.DateLanguage_TH) : "-")
+                        </GridCol>
+
+                        <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+                            <b>หมายเหตุ : </b> @(!string.IsNullOrEmpty(ReqCon?.LoanRemark) ? ReqCon?.LoanRemark : !string.IsNullOrEmpty(ReqCon?.ContractRemark) ? ReqCon?.ContractRemark : "-")
+                        </GridCol>
+                    </GridRow>
+                </div>
+            </GridCol>
+
+            <GridCol Xxl="4" Xl="6" Lg="8" Md="24" Sm="24" Xs="24">
+                <GridRow Gutter="(8,24)" Justify="end">
+                    <GridCol Span="24">
+                        @if (ReqCon?.CurrentStatusId != 99)
+                        {
+                            <button class="btn button-color"
+                                    style="min-width:200px;"
+                                    @onclick="()=> AgreementCheck(ReqCon)">
+                                <i class="fas fa-archive fa-lg mx-3"></i>
+                                @* ดำเนินการ *@
+                                จัดการสัญญา
+                            </button>
+                        }
+                    </GridCol>
+
+                    <GridCol Span="24">
+                        @*สัญญาฉบับจริง*@
+                        <button class="btn appbar-action lightGreen"
+                                style="min-width:200px;"
+                                data-bs-toggle="modal"
+                                data-bs-target="#extralarge">
+                            <i class="far fa-file-pdf fa-lg mx-3"></i>
+                            สัญญาฉบับจริง
+                        </button>
+                    </GridCol>
+
+                    <GridCol Span="24">
+                        @*หลักฐานการกู้*@
+                        <button class="btn appbar-action"
+                                style="min-width:200px;"
+                                data-bs-toggle="modal"
+                                data-bs-target="#extralargeDoc"
+                                @onclick="@(async ()=> { await SetLoanDocAsync(); })">
+                            @* <i class="fas fa-upload fa-lg mx-3"></i> *@
+                            <i class="fa-solid fa-file-lines fa-lg mx-3"></i>
+                            หลักฐานการกู้
+                        </button>
+                    </GridCol>
+
+                    <GridCol Span="24">
+                        @if (imgOtherModel.contractAttachments.Any())
+                        {
+                            <button class="btn appbar-action"
+                                    style="min-width:200px;"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#extralargeDocOthet">
+                                @* <i class="fas fa-upload fa-lg mx-3"></i> *@
+                                @* หลักฐานปิดยอด *@
+                                <i class="fa-solid fa-file-invoice fa-lg mx-3"></i>
+                                หลักฐานปิด/โปะยอด
+                            </button>
+                        }
+                    </GridCol>
+                </GridRow>
+            </GridCol>
+        </GridRow>
+    </div>
+
+    <div class="row justify-content-center mx-2">
+        <TransactionTable DayInstallments="@DayInstallments" ContractId="@ReqCon?.ContractId" />
+    </div>
+</div>
+
+@*footer*@
+<div class="footer">
+    <div class="row py-1 col-12 ms-1">
+        <div class="col-3 text-left">
+            <button type="button"
+                    class="btn secondary-bg shadow rounded text-center"
+                    style="border-radius: 5px; width: 180px"
+                    @onclick="Back">
+                <i class="fa-solid fa-arrow-left fa-lg me-3"></i>
+                ย้อนกลับ
+            </button>
+        </div>
+        <div class="col-4 text-center"></div>
+        <div class="col-3" style="text-align:end"></div>
+    </div>
+</div>
+
+<!-- Extra large modal -->
+<div class="modal fade"
+     id="extralarge"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">เอกสารสัญญาฉบับจริง </h5>
+            </div>
+            <div class="modal-body">
+                @if (!string.IsNullOrEmpty(GetDocUrl(ReqCon)))
+                {
+                    <iframe src="@GetDocUrl(ReqCon)" style="width:100%; height:700px"></iframe>
+                }
+                else
+                {
+                    <Empty>
+                        <DescriptionTemplate>
+                            <span>ไม่พบไฟล์เอกสารสัญญานี้</span>
+                        </DescriptionTemplate>
+                    </Empty>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ปิด
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Extra large modal (extralargeDoc) -->
+<div class="modal fade"
+     id="extralargeDoc"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">หลักฐาน</h5>
+            </div>
+            <div class="modal-body">
+                @if (!LoadingResultImg)
+                {
+                    <ImgStapComponents ListDocModels="ResultDocList" />
+                }
+                else
+                {
+                    <Loading />
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ปิด
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Extra large modal (extralargeDocOthet) -->
+<div class="modal fade" id="extralargeDocOthet"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    หลักฐานปิด/โปะยอดเงินกู้ และอื่น ๆ
+                </h5>
+            </div>
+            <div class="modal-body">
+                @if (imgOtherModel.contractAttachments.Any())
+                {
+                    <ImgOtherComponents imgOther="imgOtherModel" />
+                }
+                else
+                {
+                    <Loading />
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ปิด
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+}

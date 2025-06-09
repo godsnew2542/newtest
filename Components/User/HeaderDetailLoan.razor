@@ -1,0 +1,76 @@
+﻿@if (ReqCon != null)
+{
+    <GridRow Gutter="(8,8)" Align="middle">
+
+        @if (!string.IsNullOrEmpty(ReqCon.ContractNo))
+        {
+            <GridCol Flex="@("none")">
+                <a style="color:black">
+                    [เลขที่สัญญา : @ReqCon.ContractNo]
+                </a>
+            </GridCol>
+
+            @if (ReqCon.PaidDate != null)
+            {
+                <GridCol Flex="@("none")">
+                    <a style="color:black">
+                        [วันที่กองคลังโอนเงิน : @dateService.ChangeDate(ReqCon.PaidDate, "d MMMM yyyy", Utility.DateLanguage_TH)]
+                    </a>
+                </GridCol>
+            }
+
+            @if (IsEditContractNo)
+            {
+                <GridCol Flex="@("none")">
+                    <Tooltip Placement="@Placement.Top">
+                        <TitleTemplate>
+                            แก้ไข เลขที่สัญญาหรือวันที่กองคลังโอนเงิน
+                        </TitleTemplate>
+                        <ChildContent>
+                            <Button Type="@ButtonType.Primary" Style="border-radius:8px;" OnClick="@(()=> { EditContractNoVisible = true; })">
+                                <i class="fa-solid fa-pen-to-square fa-flip-horizontal fa-lg"></i>
+                            </Button>
+                        </ChildContent>
+                    </Tooltip>
+                </GridCol>
+            }
+        }
+
+        <GridCol Flex="@("none")">
+            @GetHeaderFullName(ReqCon)
+        </GridCol>
+        <GridCol Flex="@("none")">
+            @GetHeaderLoanTypeName(ReqCon)
+        </GridCol>
+        <GridCol Flex="@("none")">
+            ยอดเงิน @(ReqCon.ContractLoanAmount != null ? $"{string.Format("{0:n2}", ReqCon?.ContractLoanAmount)} บาท" : "ไม่พบข้อมูล")
+        </GridCol>
+        <GridCol Flex="@("none")">
+            จำนวน @ReqCon.ContractLoanNumInstallments งวด
+        </GridCol>
+
+        @if (ReqCon?.ContractLoanInterest != null)
+        {
+            <GridCol Flex="@("none")">
+                ดอกเบี้ย @ReqCon?.ContractLoanInterest %
+            </GridCol>
+        }
+    </GridRow>
+}
+
+<Modal Title="@($"เลขที่สัญญา: {ReqCon?.ContractNo} วันที่กองคลังโอนเงิน: {dateService.ChangeDate(ReqCon?.PaidDate, "d MMMM yyyy", Utility.DateLanguage_TH)} ณ ปัจจุบัน")"
+       @bind-Visible="@EditContractNoVisible"
+       MaskClosable=false
+       Footer="@(null)"
+       Width="@("40%")">
+    <div>
+        <EditContractNoAndPaidDate ContractNo="@(ReqCon?.ContractNo)"
+                                   ContractId="@(ReqCon?.ContractId)"
+                                   PaidDate="@(ReqCon?.PaidDate)"
+                                   OnCallbackData="@((e)=> CallbackData(e) )" />
+    </div>
+</Modal>
+
+@code {
+
+}

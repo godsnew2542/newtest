@@ -1,0 +1,330 @@
+﻿@using Radzen.Blazor
+
+<div class="panel mt-3">
+    <div class="panel-body table-responsive mt-4 table-container"
+         style="border-top-left-radius:10px;border-top-right-radius:10px">
+        <div class=" py-3 " style="height: 60px; background-color: #367691">
+            <div class="ms-3">
+                <h6 style="color:#ffffff">รายการสัญญากู้ยืมเงิน</h6>
+            </div>
+        </div>
+        @if(ListContract != null)
+        {
+            <div class="table-responsive">
+                <table class="table table-hover border-table table-borderless">
+                    <thead style="border-bottom: solid 1px; border-color: #367691; background-color: #ffffff">
+                        <tr>
+                            <th class="text-center">เลขที่สัญญา</th>
+                            <th>ผู้กู้</th>
+							<th>ประเภทกู้ยืม</th>
+                            <th class="text-center">ยอดเงินกู้</th>
+                            <th class="text-center">งวดที่</th>
+                            <th class="text-center">ชำระต่องวด</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (ListContract.Any())
+                        {
+                            countTable = false;
+
+                            @foreach (var item in ListContract)
+                            {
+                                var colorTable = "";
+                                if (!countTable)
+                                {
+                                    colorTable = $"table-whiteColor";
+                                    countTable = true;
+                                }
+                                else
+                                {
+                                    colorTable = $"table-orangeColor";
+                                    countTable = false;
+                                }
+                                <tr class="@colorTable AgreementRow"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#confirm"
+                                    @onclick="()=> SelectData(item)">
+                                    <td class="text-center">
+                                        @item.ContractNo
+                                    </td>
+                                    <td>
+										@userService.GetFullName(item.DebtorStaffId)
+                                    </td>
+                                    <td>
+                                        @item.LoanTypeName
+                                    </td>
+                                    <td class="text-center">
+                                        @String.Format("{0:n2}", item.ContractLoanAmount)
+                                    </td>
+                                    <td class="text-center">
+										@{
+											int? InstallmentsNo = GetNumInstallmentsAsync(item.ContractId).Result;
+										}
+										@(InstallmentsNo == null ? "ไม่พบงวด" : InstallmentsNo)
+                                    </td>
+                                    <td class="text-center">
+                                        @String.Format("{0:n2}", item.ContractLoanInstallment)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr class="my-2 py-2">
+                                <td colspan="6">
+                                    <Empty>
+                                        <DescriptionTemplate>
+                                            <span>ไม่พบข้อมูล</span>
+                                        </DescriptionTemplate>
+                                    </Empty>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="panel-footer">
+                <div class="d-flex tool-bar">
+                    <div class="ml-auto d-flex justify-content-center align-items-center">
+                        <span class="form-control-user mr-2">
+                            รายการต่อหน้า
+                        </span>
+                        <label class="d-flex align-items-center text-center">
+                            <select class="form-control form-control-sm text-center" @onchange="SelectPageSizeAsync">
+                                @foreach (var LM in Footer.Limits)
+                                {
+                                    <option value="@LM">@LM</option>
+                                }
+                            </select>
+                        </label>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <span class="form-control-user mr-2 ml-2">
+                            รายการ
+                        </span>
+                        <span class="mr-2">
+                            หน้า
+                        </span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div role="group" class="btn-group">
+                            <button class="btn btn-light btn-sm"
+                                    type="button"
+                                    @onclick="@(e => NavigateToAsync("Prev"))">
+                                <i class="fas fa-chevron-left icon-primary"></i>
+                            </button>
+                            <label class="d-flex align-items-center text-center mx-1">
+                                <select class="form-control form-control-sm text-center"
+                                        @onchange="SelectCurrentPageAsync"
+                                        value="@Footer.CurrentPage">
+                                    @for (int i = 1; i <= Footer.TotalPages; i++)
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                </select>
+                            </label>
+                            <button class="btn btn-light btn-sm"
+                                    type="button"
+                                    @onclick="@(e => NavigateToAsync("Next"))">
+                                <i class="fas fa-chevron-right icon-primary"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                </div>
+        }
+        else
+        {
+            <div style="overflow: hidden;" class="pb-5">
+                    <Loading />
+            </div>
+        }
+    </div>
+</div>
+
+@* confirm*@
+<div class="modal fade" id="confirm" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">บันทึกข้อมูลชำระเงิน</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			@if (SelectRequest.Any())
+			{
+
+				<div class="modal-body">
+					<div class="my-3 mx-3 row">
+						<div class="col-6">
+
+						</div>
+						<div class="col-3 text-end">
+							<a style="font-size:medium">วันที่ชำระเงิน </a>
+						</div>
+						<div class="col-3">
+							<RadzenDatePicker Culture="@(new System.Globalization.CultureInfo("en-EN"))"
+											  @bind-Value=@DateValueCheck
+											  DateFormat="dd MMMM yyyy"
+											  Change="@(args => GetDate(args))"
+											  Class="w-100" />
+						</div>
+					</div>
+					<div>
+						<div class="mx-2 p-2">
+							<table class="table table-hover border font-color font-weight-bold"
+								   style="border-color: #2788DE">
+								<thead class="border text-center">
+									<tr>
+										<th>ชื่อ - สกุล</th>
+										<th>วันที่ชำระเงิน</th>
+										<th class="text-center">งวดที่</th>
+										<th class="text-center">เงินต้น</th>
+										<th class="text-center">ดอกเบี้ย</th>
+										<th class="text-center">รวม</th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach (var i in SelectRequest)
+									{
+										var Contract = _context.ContractMains.Where(c => c.ContractId == i.ContractId).FirstOrDefault();
+										if (i.InstallmentNo == null)
+										{
+											i.InstallmentNo = 1;
+										}
+										if (i.PrincipleAmount == null)
+										{
+											i.PrincipleAmount = 0;
+										}
+										if (i.InterestAmont == null)
+										{
+											i.InterestAmont = 0;
+										}
+
+										i.TotalAmount = ResultTotalAmount(i.PrincipleAmount, i.InterestAmont);
+
+										<tr style="height:50px;">
+											<td class="text-center">
+												@userService.GetFullNameNoTitleName(Contract?.DebtorStaffId)
+											</td>
+											<td class="text-center">
+												@dateService.ChangeDate(DateValueCheck, "dd MMMM yyyy", Utility.DateLanguage_TH)
+											</td>
+											<td class="text-center">
+												<AntDesign.InputNumber class="form-control"
+																	   Step="1"
+																	   Min="1"
+																	   Formatter="FormatNumberN0"
+																	   Parser="Utility.ParseNumber"
+																	   @bind-Value="i.InstallmentNo" />
+											</td>
+											<td class="text-center">
+												<AntDesign.InputNumber class="form-control"
+																	   Step="1"
+																	   Min="0"
+																	   Formatter="FormatNumberN2"
+																	   Parser="Utility.ParseNumber"
+																	   @bind-Value="i.PrincipleAmount" />
+											</td>
+											<td class="text-center">
+												<AntDesign.InputNumber class="form-control"
+																	   Step="1"
+																	   Min="0"
+																	   Formatter="FormatNumberN2"
+																	   Parser="Utility.ParseNumber"
+																	   @bind-Value="i.InterestAmont" />
+											</td>
+											<td class="text-center">
+												@String.Format("{0:n2}", i.TotalAmount)
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="p-2 mt-2">
+						<Tag Color="error">ผู้กู้และผู้ค้ำจะได้รับผลการอนุมัตินี้ทางอีเมลที่แจ้งไว้ในระบบ</Tag>
+					</div>
+				</div>
+			}
+			else
+			{
+				if (IsAgreementSuccess)
+				{
+					<div class="modal-body">
+						<div>
+							คุณได้ทำการชำระเงินหมดไปแล้ว
+						</div>
+						@if (SelectRequestId.Count != 0)
+						{
+							@foreach (var i in SelectRequestId)
+							{
+								<div class="row">
+									<div class="col">
+										<button class="button-color appbar-action btn">
+											ดูรายละเอียด => LoanRequestId @i
+										</button>
+									</div>
+									<div class="col">
+										<button class="button-color appbar-action btn">
+											ทำการปิดยอด(UpDate Status is 99) => LoanRequestId @i
+										</button>
+									</div>
+								</div>
+							}
+						}
+					</div>
+				}
+				else
+				{
+					<div class="modal-body">
+						ไม่มีรายการที่คุณเลือก
+					</div>
+				}
+			}
+
+			<div class="modal-footer">
+				<button type="button"
+						class="btn btn-secondary"
+						data-bs-dismiss="modal">
+					ปิด
+				</button>
+				@if (SelectRequest.Count() != 0)
+				{
+					<button type="button"
+							class="btn btn-primary"
+							data-bs-dismiss="modal"
+							@onclick="()=> ConfirmPageAsync(SelectRequest, DateValueCheck)">
+						ยืนยัน
+					</button>
+				}
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+    private bool countTable = false;
+
+	private string FormatNumberN0(decimal? data)
+	{
+		string value = "0";
+		if (data != null)
+		{
+			value = data.Value.ToString("n0");
+		}
+		return value;
+	}
+
+	private string FormatNumberN2(decimal? data)
+	{
+		string value = "0";
+		if (data != null)
+		{
+			value = data.Value.ToString("n2");
+		}
+		return value;
+	}
+}

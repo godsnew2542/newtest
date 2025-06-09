@@ -1,0 +1,105 @@
+﻿@if (ReportTransactions.Any())
+{
+    <Table @bind-PageIndex="_pageIndex"
+           TItem="VReportTransactionEditModel"
+           DataSource="@DataSet"
+           Responsive=true>
+        <ColumnDefinitions>
+            <PropertyColumn Title="ชื่อ-นามสกุล"
+                            Property="c=>c.Transaction.DebtorStaffId"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Width="@("20%")">
+                <div>
+                    @(context.Transaction.DebtorNameTh + " " + context.Transaction.DebtorSnameTh)
+                </div>
+            </PropertyColumn>
+
+            <PropertyColumn Title="ประเภทบุคลากร"
+                            Property="c=>c.Transaction.StaffTypeName"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Width="@("15%")" />
+
+            <PropertyColumn Title="เลขที่สัญญา"
+                            Property="c=>c.Transaction.ContractNo"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:center;"
+                            Width="@("15%")" />
+
+            <PropertyColumn Title="จำนวนเงินกู้"
+                            Property="c=>c.Transaction.ContractLoanAmount"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:right;"
+                            Width="@("10%")">
+                <div>
+                    @String.Format("{0:n2}", context.Transaction.ContractLoanAmount)
+                </div>
+            </PropertyColumn>
+
+            <PropertyColumn Title="จำนวนงวดผ่อน"
+                            Property="c=>c.Transaction.InstallmentNo"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:center;"
+                            Width="@("10%")">
+                <div>
+                    @(context.Transaction.InstallmentNo + "/" + context.Transaction.ContractLoanNumInstallments)
+                </div>
+            </PropertyColumn>
+
+            <PropertyColumn Title="ชำระเงินต้น"
+                            Property="c=>c.Transaction.PrincipleAmount"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:right;"
+                            Width="@("10%")">
+                <div>
+                    @String.Format("{0:n2}", context.Transaction.PrincipleAmount)
+                </div>
+            </PropertyColumn>
+
+            <PropertyColumn Title="ดอกเบี้ยจ่าย"
+                            Property="c=>c.Transaction.InterestAmont"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:right;"
+                            Width="@("10%")">
+                @context.Transaction.InterestAmont
+            </PropertyColumn>
+
+            <PropertyColumn Title="รวมจำนวนเงิน"
+                            Property="c=>c.Transaction.TotalAmount"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:right;"
+                            Width="@("10%")">
+                @String.Format("{0:n2}", context.Transaction.TotalAmount)
+            </PropertyColumn>
+        </ColumnDefinitions>
+        <FooterTemplate>
+            <GridRow Gutter="(8,8)">
+                <GridCol Flex="@("70%")">
+                </GridCol>
+                <GridCol Flex="@("10%")">
+                    <div style="text-align:right;">
+                        @String.Format("{0:n2}", DataSet.Sum(x => x.Transaction.PrincipleAmount))
+                    </div>
+                </GridCol>
+                <GridCol Flex="@("10%")">
+                    <div style="text-align:right;">
+                        @String.Format("{0:n2}", DataSet.Sum(x => x.Transaction.InterestAmont))
+                    </div>
+                </GridCol>
+                <GridCol Flex="@("10%")">
+                    <div style="text-align:right;">
+                        @String.Format("{0:n2}", DataSet.Sum(x => x.Transaction.TotalAmount))
+                    </div>
+                </GridCol>
+            </GridRow>
+        </FooterTemplate>
+    </Table>
+}
+else
+{
+    <Empty />
+}
+
+
+@code {
+
+}

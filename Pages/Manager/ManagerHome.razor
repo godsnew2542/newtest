@@ -1,0 +1,158 @@
+﻿@page "/Manager/ManagerHome"
+@attribute [Authorize(Roles = "3")]
+
+<div class="container-fluid mt-4 mb-5 pb-5">
+    <div class="row col-12 col-md-12 mt-5" style="justify-content: center">
+        <div class="col-xl-3 col-lg-4 col-md-4 col-12 card pt-4  mb-3 CardHove "
+             style="height: 300px; background-color: #9a6ec5cc;cursor:pointer ">
+            <div class="row col-12" style="height:250px">
+                <div class="col-11 text-start" style="font-size:x-large;font-weight:bold;color:white;">
+                    <a>อนุมัติ (สัญญาสมบูรณ์) </a>
+                </div>
+
+                <div class="col-11 text-end" style="font-size:x-large;font-weight:bold;color:white;margin-top:100px">
+                    <a style="font-size: xx-large">
+                        <StatCount ContractStatusID="ManageLoanRequestStatusId"
+                                   CountNoType="StatCount.CountType.LoanRequest"
+                                   AdminCampId="@(StateProvider?.CurrentUser.CapmSelectNow)" />
+                    </a><a> ฉบับ</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-lg-7 col-md-7 col-12 mb-3  text-center">
+            <div class="row mb-3 ms-3">
+                <div class="col-xl-5 col-lg-5 col-md-5 col-5 card p-2  card-border lightBlue CardHove"
+                     style="height: 140px; border-radius: 5px">
+                    <a class="text-start" style="font-size:medium;font-weight:bold;">
+                        รอพิจารณาตรวจสอบ
+                    </a>
+                    <a class="text-end py-4 fontsize" style="font-weight: bold;">
+                        <StatCount ContractStatusID="WaitingLoanConsiderStatusId"
+                                   CountNoType="StatCount.CountType.LoanRequest"
+                                   AdminCampId="@(StateProvider?.CurrentUser.CapmSelectNow)" />
+                        ฉบับ
+                    </a>
+                </div>
+
+                <div class="col-xl-5 col-lg-5 col-md-5 col-5 card p-2 ms-3 card-border lightGreen CardHove"
+                     style="height: 140px; border-radius: 5px;">
+                    <a class="text-start" style="font-size:medium;font-weight:bold;">
+                        รอทำสัญญา
+                    </a>
+                    <a class="text-end py-4 fontsize" style=" font-weight: bold;">
+                        <StatCount ContractStatusID="WaitingContractStatusId"
+                                   CountNoType="StatCount.CountType.LoanRequest"
+                                   AdminCampId="@(StateProvider?.CurrentUser.CapmSelectNow)" />
+                        ฉบับ
+                    </a>
+                </div>
+                <div class="col-xl-5 col-lg-5 col-md-5 col-5 card p-2 mt-3 card-border CardHove"
+                     style="height: 140px; border-radius: 5px; background-color: #fffae3">
+                    <a class="text-start" style="font-size: medium; font-weight: bold;">
+                        รอตรวจหลักฐาน
+                    </a>
+                    <a class="text-end py-4 fontsize" style="font-weight: bold;">
+                        <StatCount ContractStatusID="CheckDocumentsStatusId"
+                                   CountNoType="StatCount.CountType.LoanRequest"
+                                   AdminCampId="@(StateProvider?.CurrentUser.CapmSelectNow)" />
+                        ฉบับ
+                    </a>
+                </div>
+
+                <div class="col-xl-5 col-lg-5 col-md-5 col-5 card p-2 mt-3 ms-3  card-border CardHove"
+                     style="height: 140px; border-radius: 5px; background-color: #fffae3">
+                    <a class="text-start" style="font-size: medium; font-weight: bold">
+                        รอผู้กู้ส่งหลักฐาน
+                    </a>
+                    <a class="text-end py-4 fontsize" style=" font-weight: bold;">
+                        <StatCount ContractStatusID="SentDocumentsCountStatusId"
+                                   CountNoType="StatCount.CountType.LoanRequest"
+                                   AdminCampId="@(StateProvider?.CurrentUser.CapmSelectNow)" />
+                        ฉบับ
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-lg-4 col-md-4 col-5 card px-2 pt-3 mx-2 text-center CardHove"
+             style="height: 300px; border-radius: 5px; background-color: #f5986c" @onclick="PdfAllAsync">
+            <a class="align-content-center  mt-2" style="font-size: xx-large; font-weight: bold;padding-left:7px;color:white">
+                รายงาน
+            </a>
+            <a class="mt-4"><i class="fa-solid fa-file-lines" style="font-size: 48px; color: #367691; color: white"></i> </a>
+        </div>
+        <div class="col-xl-3 col-lg-5 col-md-5 col-5 card px-2 pt-3 mx-2 text-center CardHove"
+             style="height: 300px; border-radius: 5px; background-color: #f5d16c">
+            <a class="text-start" style="font-size:medium;font-weight:bold;">
+                ยอดเงินกู้ ปีงบประมาณ @FiscalYear
+            </a>
+
+            <div class="text-end mt-1" style="font-size: 40px">
+                @adminHome.SumAmountByYear(ReportAdmin)
+            </div>
+        </div>
+
+    </div>
+    <Divider />
+
+    <div class="row pt-1">
+        <div class="col-11 col-md-11  mb-2 pb-4"
+             style=" height: 50px; margin-left: 20px;cursor:default">
+            <a style="font-size:large;font-weight: bold;">
+                <i class="fas fa-file-invoice-dollar fa-lg mx-2"></i>
+                สรุปข้อมูลการพิจารณาอนุมัติ  ปีงบประมาณ @FiscalYear
+            </a>
+        </div>
+    </div>
+    <div class="row mx-2 align-center">
+        <div class="row col-xl-12 col-lg-12 col-md-12 col-sm-12">
+            <div class="col-12 mx-2">
+                <div class="row col-12 mt-3">
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-6 my-1">
+                        <div class="card p-2 font-color" style="height:180px; font-weight: bold; border-color: #2788DE">
+                            <div class=" ms-1" style="font-size: medium">
+                                ข้าราชการ
+                            </div>
+                            <div class="text-end mt-2" style="font-size:xx-large">
+                                @adminHome.GetCountStaffTypeV2(StaffType.GovernmentOfficer, ReportAdmin) ฉบับ
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-6 my-1">
+                        <div class="card p-2 font-color" style="height:180px; font-weight: bold; border-color: #2788DE">
+                            <div class="ms-1" style="font-size:medium">
+                                ลูกจ้างประจำ
+                            </div>
+                            <div class="text-end mt-2" style="font-size: xx-large">
+                                @adminHome.GetCountStaffTypeV2(StaffType.Employee, ReportAdmin) ฉบับ
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-6 my-1">
+                        <div class="card p-1 font-color" style="height:180px; font-weight: bold; border-color: #2788DE">
+                            <div class=" ms-1" style="font-size:medium">
+                                พนักงานมหาวิทยาลัย
+                            </div>
+                            <div class="text-end mt-2" style="font-size: xx-large">
+                                @adminHome.GetCountStaffTypeV2(StaffType.UniversityStaff, ReportAdmin) ฉบับ
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-6 my-1">
+                        <div class="card  p-1 font-color " style="height:180px; font-weight: bold; border-color: #2788DE">
+                            <div class=" ms-1" style="font-size:medium">
+                                พนักงานเงินรายได้
+                            </div>
+                            <div class="text-end mt-2" style="font-size: xx-large">
+                                @adminHome.GetCountStaffTypeV2(StaffType.IncomeEmployee, ReportAdmin) ฉบับ
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code { }

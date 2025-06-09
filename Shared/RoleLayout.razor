@@ -1,0 +1,50 @@
+﻿<NavLink>
+    @* <nav class="sb-sidenav-menu-nested nav" style="width:min-content">
+    <ul class="mt-2">*@
+    @if (RoleList.Any())
+    {
+        @foreach (var item in RoleList)
+        {
+            var _RoleGroup = _context.LoanGroups.Where(c => c.GroupId == item.GroupId).FirstOrDefault();
+
+            <button class="dropdown-item ms-0 px-0 my-2"
+            type="button"
+            data-bs-placement="top"
+            title="@_RoleGroup?.GroupName"
+            @onclick="()=> ChangeRoleAsync(item.GroupId, item.CampId)">
+                @_RoleGroup?.GroupName
+                @if (_RoleGroup != null && _RoleGroup?.GroupId != 1)
+                {
+                    @($"[{CampusDict[item.CampId!].CampNameThai}]")
+                }
+            </button>
+            <Divider Style="margin-bottom:12px;margin-top:12px" />
+        }
+
+        <button class="dropdown-item ms-0 px-0 my-2"
+                type="button"
+                data-bs-placement="top"
+                title="ผู้ใช้งาน"
+        @onclick="()=> ChangeRoleAsync()">
+            ผู้ใช้งาน
+        </button>
+        <Divider Style="margin-bottom:12px;margin-top:12px" />
+    }
+    else
+    {
+        var LoanGroups = GetLoanGroups();
+        @foreach (var item in LoanGroups)
+        {
+            <button class="dropdown-item ms-0 px-0 my-2"
+                    type="button"
+                    data-bs-placement="top"
+                    title="@item.GroupName"
+            @onclick="()=> ChangeRoleAsync(item.GroupId)">
+                @item.GroupName
+            </button>
+            <Divider Style="margin-bottom:12px;margin-top:12px" />
+        }
+    }
+    @*   </ul>
+    </nav>*@
+</NavLink>

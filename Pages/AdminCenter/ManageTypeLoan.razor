@@ -1,0 +1,193 @@
+﻿@page "/Admin/ManageTypeLoan"
+@attribute [Authorize(Roles = "1")]
+
+<div class="container-fluid mt-5 pb-5">
+    @if (Isloading)
+    {
+        <Loading />
+    }
+    else
+    {
+        <GridRow Gutter="(24,8)" Justify="space-around" Align="middle" Style="padding:0 20px;">
+            <GridCol Flex="@("none")">
+                <button type="button"
+                        class="btn button-style1"
+                        @onclick="DocumentStep">
+                    <i class="material-icons me-2">add_circle</i>
+                    เพิ่มข้อมูลเอกสารประกอบการกู้
+                </button>
+            </GridCol>
+            <GridCol Flex="@("none")">
+                <button type="button" class="btn button-style" @onclick="CreateLoan">
+                    <i class="material-icons me-2">add_circle</i>
+                    สร้างประเภทใหม่
+                </button>
+            </GridCol>
+            <GridCol Flex="@("auto")">
+                <GridRow Gutter="(8,8)" Justify="end">
+                    <GridCol Flex="@("auto")">
+                        <Input @bind-Value="@searchValue"
+                               DefaultValue="@searchValue"
+                               Placeholder="คำค้นหา ชื่อ-บุคลากร/รหัสบุคลากร"
+                               OnPressEnter="(e)=>OnEnter(searchValue)"
+                               Size="large"
+                               AllowClear=true>
+                        </Input>
+                    </GridCol>
+                    <GridCol Flex="@("none")">
+                        <button type="button"
+                                class="btn btn-outline-secondary primary-bg-drop simple-card"
+                                style="background-color: #367691"
+                                @onclick="()=>Submit(searchValue)">
+                            <i class="fas fa-search" style="color:white"></i>
+                        </button>
+                    </GridCol>
+                </GridRow>
+            </GridCol>
+        </GridRow>
+
+        @if (ListLoan.Any())
+        {
+            countTable = false;
+
+            <div class="panel">
+                <div class="panel-body table-responsive mt-4 table-container"
+                     style="border-top-left-radius: 10px; border-top-right-radius: 10px">
+                    <div class="table-header py-3" style="height: 60px;">
+                        <div class="ms-3">
+                            <h6 style="color:#ffffff">สวัสดิการเงินกู้</h6>
+                        </div>
+                    </div>
+                    <table class="table table-hover table-borderless">
+                        <thead class="text-center"
+                               style="border-bottom: solid 1px; border-color: #367691">
+                            <tr>
+                                <th>ประเภทกู้ยืม</th>
+                                <th>กู้ทบยอด</th>
+                                <th>วงเงินสูงสุด</th>
+                                <th>อัตราดอกเบี้ย</th>
+                                <th>จำนวนงวดสูงสุด</th>
+                                <th>สถานะ</th>
+                                <th></th>
+                                <th>รายละเอียด</th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="text-center">
+                            @for (var i = 0; i < ListLoan.Count; i++)
+                            {
+                                var item = ListLoan[i];
+                                var colorTable = "";
+
+                                if (!countTable)
+                                {
+                                    colorTable = $"table-whiteColor";
+                                    countTable = true;
+                                }
+                                else
+                                {
+                                    colorTable = $"table-orangeColor";
+                                    countTable = false;
+                                }
+
+                                <tr class="py-1 @colorTable">
+                                    <td class="ms-1 px-2 py-4 text-start">
+                                        <div>@userService.GetLoanName(item)</div>
+                                    </td>
+                                    <td class="text-center py-4">
+                                        @(item.IsReconcile == 1 ? "ได้" : "ไม่ได้")
+                                    </td>
+                                    <td class="text-center py-4">
+                                        <div>@GetLoanMaxAmount(item.LoanMaxAmount)</div>
+                                    </td>
+                                    <td class="text-center py-4">
+                                        <div>@GetLoanInterest(item.LoanInterest)</div>
+                                    </td>
+                                    <td class="text-center py-4">
+                                        @item.LoanNumInstallments
+                                    </td>
+                                    <td>
+                                        <div class="text-center font-weight-bolder py-4">
+                                            @if (item.Active == 1)
+                                            {
+                                                <i class="fas fa-check-circle fa-lg" style="color: green"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-times-circle fa-lg" style="color: red"></i>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="p-2">
+                                            <button type="button"
+                                                    class="btn appbar-action py-2"
+                                                    style="border-radius: 15px; width: 150px; text-align: center"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#confirmChecked"
+                                                    @onclick="@(() => {SelectLoan = item;})">
+                                                ปรับสถานะ
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="p-2">
+                                            <button type="button"
+                                                    class="btn"
+                                                    @onclick="() => DetailPage(item)">
+                                                <i class="material-icons " style="font-size: 36px">description</i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="card primary-bg-drop mt-5 mx-3 p-3">
+                <div class="text-center">
+                    ไม่พบชื่อประเภทกู้ยืมนี้จากการค้นหา
+                </div>
+            </div>
+        }
+    }
+
+</div>
+
+<!-- Modal Confirm ปรับเปลี่ยนสถานะ -->
+<div class="modal fade" id="confirmChecked" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content text-center">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    ปรับสถานะ
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                คุณต้องการปรับสถานะ ของประเภทที่ @SelectLoan.LoanParentId. @SelectLoan.LoanParentName หรือไม่ ?
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ยกเลิก
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="async()=> { await CheckedDataAsync(SelectLoan); }">
+                    ตกลง
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool countTable = false;
+}

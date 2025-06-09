@@ -1,0 +1,126 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@namespace LoanApp.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Loan</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="~/" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree&family=Kanit&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    @* carousel *@
+    <link rel="stylesheet" href="~/css/carousel/owl.carousel.min.css" />
+    <link rel="stylesheet" href="~/css/carousel/owl.theme.default.min.css" />
+
+    @*radzen framework*@
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/default-base.css">
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/default.css">
+
+    @* bootstrap v.5 *@
+    <link rel="stylesheet" href="~/css/bootstrap/bootstrap.min.css" />
+
+    @* icon fontawesome *@
+    @* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" /> *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="~/css/icon/fontawesome.css" />
+
+    <!-- Add the base CSS plus Solid + Brands styles **after previous versions** -->
+    <link href="~/css/icon/fontawesomeV6/fontawesome.css" rel="stylesheet">
+    <link href="~/css/icon/fontawesomeV6/brands.css" rel="stylesheet">
+    <link href="~/css/icon/fontawesomeV6/solid.css" rel="stylesheet">
+
+    <!-- update existing v5 CSS to use v6 icons and assets **after previous versions** -->
+    <link href="~/css/icon/fontawesomeV6/v5-font-face.css" rel="stylesheet" />
+
+    @* toggle *@
+    <link rel="stylesheet" href="~/css/toggle/bootstrap-toggle.css" />
+
+    @* Layout *@
+    <link rel="stylesheet" href="~/css/sideNav/Layout.css" />
+
+    @*ant design*@
+    <link href="_content/AntDesign/css/ant-design-blazor.css" rel="stylesheet" />
+
+    @* css *@
+    <link rel="stylesheet" href="~/css/stylesheet.css" />
+
+    @*fluent UI style*@
+    <link rel="stylesheet"
+          href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css" />
+
+    <link href="~/css/site.css" rel="stylesheet" />
+    <link href="~/css/images/microsoft.png" rel="" />
+
+    <link href="LoanApp.styles.css" rel="stylesheet" />
+
+    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+</head>
+<body>
+    @RenderBody()
+
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            An error has occurred. This application may no longer respond until reloaded.
+        </environment>
+        <environment include="Development">
+            An unhandled exception has occurred. See browser dev tools for details.
+        </environment>
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    @* jquery *@
+    <script src="~/js/jquery.min.js"></script>
+    @* <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.0.min.js"></script> *@
+
+    @* carousel *@
+    <script src="~/js/owl.carousel.min.js"></script>
+    <script src="~/js/popper.min.js"></script>
+
+    @*radzen Framework*@
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+
+    @* bootstrap *@
+    <script src="~/js/bootstrap.min.js"></script>
+
+    @* thaibath *@
+    <script src="~/js/thaibath.js"></script>
+
+    @* thaibath *@
+    <script src="~/js/thaibath.js"></script>
+
+    @*ant design*@
+    <script src="_content/AntDesign/js/ant-design-blazor.js"></script>
+
+    <script src="_content/AntDesign.Charts/ant-design-charts-blazor.js"></script>
+    <script src="~/js/g2plot.js"></script>
+
+    @* icon *@
+    <script defer src="~/js/icon/all.js"></script>
+
+    @* JavaScript *@
+    <script src="~/js/JavaScript.js"></script>
+
+    <environment include="Production">
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-4X0C71N72T"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+
+            gtag('config', 'G-4X0C71N72T');
+        </script>
+    </environment>
+
+    <script src="_framework/blazor.server.js"></script>
+</body>
+</html>

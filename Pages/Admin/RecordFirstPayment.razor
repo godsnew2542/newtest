@@ -1,0 +1,358 @@
+﻿@page "/Admin/RecordFirstPayment"
+@attribute [Authorize(Roles = "2")]
+
+@using Radzen.Blazor
+
+<div class="container-fluid mt-4 pb-5 mb-5">
+    <div class="mt-4 mx-2">
+        <div class="section-title" style="font-size:medium">
+            <i class="fa-solid fa-circle-dollar-to-slot fa-lg mx-1 "></i>
+            บันทึกการโอนเงินกู้ทั้งยอด (เลขที่สัญญา, วันที่โอนเงิน)
+        </div>
+    </div>
+    <div class="card rounded shadow mt-3 pb-3 px-2 mb-3">
+        <div class="row justify-content-end mt-3 mx-3">
+            <div class="col-xl-5 col-lg-5 col-md-5 col-sm-6">
+                <GridRow Gutter="(18,8)">
+                    <GridCol Flex="@("auto")">
+                        <Input @bind-Value="@SearchView"
+                               Size="@ButtonSize.Large"
+                               Placeholder="ค้นหาจาก ชื่อ-สกุล"
+                               OnPressEnter="@(async() => { await SearchDataAsync(SearchView, TypeID); })"
+                               AllowClear=true />
+                    </GridCol>
+                    <GridCol Flex="@("none")">
+                        <Button Style="border-radius:8px; background:#367691"
+                                Size="@ButtonSize.Large"
+                                OnClick="@(async()=>{ await SearchDataAsync(SearchView, TypeID); })">
+                            <i class="fas fa-search" style="color: #ffffff "></i>
+                        </Button>
+                    </GridCol>
+                </GridRow>
+            </div>
+        </div>
+
+        <div class="mt-2">
+            <FirstPaymentTable Search="Search"
+                               StatusId="AllStatusId"
+                               LoanTypeID="TypeID"
+                               SetChildData="SetCurrentData"
+                               AdminCampId="@(StateProvider?.CurrentUser.CapmSelectNow)"
+                               @ref="RefFirstPaymentTable">
+            </FirstPaymentTable>
+        </div>
+    </div>
+</div>
+
+@*footer*@
+<div class="footer">
+    <div class="row py-1 col-12">
+        <div class="col-xl-1 col-lg-2 col-md-3" style="text-align:end">
+            <div class="font-color font-weight-bolder">
+                <i class="fas fa-filter me-1"></i>
+                ประเภทกู้ยืม
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-3 col-md-3">
+            <select class="form-select form-select-sm"
+                    @onchange="SelectLoanTypeIDAsync">
+                @for (var i = 0; i < LoanTypeList.Count; i++)
+                {
+                    var item = LoanTypeList[i];
+                    <option value="@item.LoanTypeId">@item.LoanTypeName</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-xl-7 col-lg-4 col-md-5" style="text-align:end">
+            @if (ListRecordFirstPayment.Any())
+            {
+                <button class="btn button-color shadow rounded text-center"
+                        style="color:white;border-radius:20px;width:170px"
+                        data-bs-toggle="modal"
+                        data-bs-target="#extralarge"
+                        @onclick="CheckRecordFirstPayment">
+                    ดำเนินการ
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+
+<!-- Extra large modal
+    ===== MaskClosable == false in bootstrap ======
+     data-bs-backdrop="static"
+     aria-labelledby="staticBackdropLabel"
+-->
+<div class="modal fade"
+     id="extralarge"
+     tabindex="-1"
+     data-bs-backdrop="static"
+     aria-labelledby="staticBackdropLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">รายการที่ดำเนินการ</h5>
+            </div>
+            <div class="modal-body">
+                @if (!IsLoading)
+                {
+                    <div>
+                        @if (ListDistinctRecord.Any() || ListDistinctDb.Any())
+                        {
+                            <div class="row col-12 text-left">
+                                <div class="col-3 text-left">
+                                    <h6>โปรดตรวจสอบและแก้ไข</h6>
+                                </div>
+                                <div class="col-4 row">
+                                    <div class="col-1">
+                                        <i class="fa-solid fa-square" style="color:darkseagreen"></i>
+                                    </div>
+                                    <div class="col text-left">
+                                        <h6>เลขที่สัญญาระบุซ้ำกับในฐานข้อมูล</h6>
+                                    </div>
+                                </div>
+                                <div class="col-4 row">
+                                    <div class="col-1">
+                                        <i class="fa-solid fa-square" style="color:salmon"></i>
+                                    </div>
+                                    <div class="col text-left">
+                                        <h6>เลขที่สัญญาระบุซ้ำกัน</h6>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <table class="table table-hover table-borderless">
+                                <thead class="table-header"
+                                       style="border-bottom: solid 1px; border-color: #367691">
+                                    <tr>
+                                        <th class="text-center">เลขที่สัญญา</th>
+                                        <th>ผู้กู้</th>
+                                        <th>ประเภทกู้ยืม</th>
+                                        <th class="text-center">เลขที่สัญญา</th>
+                                        <th>ผู้กู้</th>
+                                        <th>ประเภทกู้ยืม</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var distinctItem in ListDistinctRecord)
+                                    {
+                                        <tr class="my-2 py-2">
+                                            <td class="text-center">
+                                                <Input Placeholder="ระบุเลขที่สัญญา"
+                                                       TValue="string"
+                                                       DefaultValue="@distinctItem.ContractNo"
+                                                       @bind-Value="@distinctItem.ContractNo"
+                                                       AllowClear="true"
+                                                       MaxLength=20
+                                                       ShowCount=true />
+
+                                                @* <input type="text"
+                                    class="text-center"
+                                    style="border:none"
+                                    placeholder="ระบุเลขที่สัญญา"
+                                    value="@distinctItem.ContractNo"
+                                    @onchange="@((ChangeEventArgs e) => { distinctItem.ContractNo = e.Value.ToString(); })" /> *@
+                                            </td>
+                                            <td>
+                                                @userService.GetFullName(GetContractMain(distinctItem.ContractId).DebtorStaffId)
+                                            </td>
+                                            <td>
+                                                @(userService.GetLoanSubName(
+                                                    userService.GetLoanType(
+                                                    (byte?)GetContractMain(distinctItem.ContractId).LoanTypeId)))
+                                            </td>
+                                            <td class="text-center">
+                                                <Input Placeholder="ระบุเลขที่สัญญา"
+                                                       TValue="string"
+                                                       DefaultValue="@distinctItem.DistinctContractNo"
+                                                       @bind-Value="@distinctItem.DistinctContractNo"
+                                                       AllowClear="true"
+                                                       MaxLength=20
+                                                       ShowCount=true />
+
+                                                @* <input type="text"
+                                    style="border:none"
+                                    class="text-center"
+                                    placeholder="ระบุเลขที่สัญญา"
+                                    value="@distinctItem.DistinctContractNo"
+                                    @onchange="@((ChangeEventArgs e) => { distinctItem.DistinctContractNo = e.Value.ToString(); })" /> *@
+                                            </td>
+                                            <td>
+                                                @userService.GetFullName(GetContractMain(distinctItem.DistinctContractId).DebtorStaffId)
+                                            </td>
+                                            <td>
+                                                @(userService.GetLoanSubName(
+                                                    userService.GetLoanType(
+                                                    (byte?)GetContractMain(distinctItem.DistinctContractId).LoanTypeId)))
+                                            </td>
+                                            <td>
+                                                <button class="btn button-color shadow rounded text-center"
+                                                        style="color:white;border-radius:20px;width:120px"
+                                                        @onclick="() => ChangeContractNo(distinctItem)">
+                                                    ยืนยัน
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+
+                                    @foreach (var distinctDB in ListDistinctDb)
+                                    {
+                                        <tr class="my-2 py-2">
+                                            <td class="text-center">
+                                                @distinctDB.ContractNo
+                                            </td>
+                                            <td>
+                                                @userService.GetFullName(GetContractMain(distinctDB.ContractId).DebtorStaffId)
+                                            </td>
+                                            <td>
+                                                @(userService.GetLoanSubName(
+                                                    userService.GetLoanType(
+                                                    (byte?)GetContractMain(distinctDB.ContractId).LoanTypeId)))
+                                            </td>
+                                            <td class="text-center">
+                                                <Input Placeholder="ระบุเลขที่สัญญา"
+                                                       TValue="string"
+                                                       DefaultValue="@distinctDB.DistinctContractNo"
+                                                       @bind-Value="@distinctDB.DistinctContractNo"
+                                                       AllowClear="true"
+                                                       MaxLength=20
+                                                       ShowCount=true />
+
+                                                @* <input type="text"
+                                    style="border:none"
+                                    class="text-center"
+                                    placeholder="ระบุเลขที่สัญญา"
+                                    value="@DistinctDB.DistinctContractNo"
+                                    @onchange="@((ChangeEventArgs e) => { DistinctDB.DistinctContractNo = e.Value.ToString(); })" /> *@
+                                            </td>
+                                            <td>
+                                                @userService.GetFullName(GetContractMain(distinctDB.DistinctContractId).DebtorStaffId)
+                                            </td>
+                                            <td>
+                                                @(userService.GetLoanSubName(
+                                                    userService.GetLoanType(
+                                                    (byte?)GetContractMain(distinctDB.DistinctContractId).LoanTypeId)))
+                                            </td>
+                                            <td>
+                                                <button class="btn button-color shadow rounded text-center"
+                                                        style="color:white;border-radius:20px;width:120px"
+                                                        @onclick="() => ChangeContractNo(distinctDB)">
+                                                    ยืนยัน
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <div class="row align-content-end justify-content-end my-2">
+                                <div class="col-3 text-end">
+                                    <a style="font-size:medium">วันที่กองคลังโอนเงิน </a>
+                                </div>
+                                <div class="col-3 text-end">
+                                    <RadzenDatePicker Culture="@(new System.Globalization.CultureInfo("en-EN"))"
+                                                      @bind-Value=@PaymentTime
+                                                      DateFormat="dd MMMM yyyy"
+                                                      Change="@(args => NewOnChange(args))"
+                                                      Class="w-100" />
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-2">
+                        <div class="text-left" >
+                            <h6 style="color:red">*** โปรดตรวจสอบรายการที่ดำเนินการ</h6>
+                        </div>
+
+                        <Table @bind-PageIndex="_pageIndex"
+                               TItem="SetNewRecordFirstPaymentModel"
+                               DataSource="@ListRecordFirstPayment"
+                               Responsive=true
+                               RowClassName="@(x => AddBackgroundColor(x.Data) )"
+                               HidePagination="@(ListRecordFirstPayment.Count() >= 10 ? false : true)">
+
+                            @{
+                                var _ConMain = GetContractMain(context.ContractId);
+                                var loan = userService.GetLoanType((byte?)_ConMain.LoanTypeId);
+                            }
+
+                            <PropertyColumn Title="เลขที่สัญญา"
+                                            Property="c=>c.ContractNo"
+                                            HeaderStyle="text-align:center; font-weight:bold;" />
+
+                            <PropertyColumn Title="ชื่อ-สกุล"
+                                            Property="c=>c.ContractId"
+                                            HeaderStyle="text-align:center; font-weight:bold;">
+                                @userService.GetFullName(_ConMain.DebtorStaffId)
+                            </PropertyColumn>
+
+                            <ActionColumn Title="ประเภทกู้ยืม"
+                                          HeaderStyle="text-align:center; font-weight:bold;">
+                                @userService.GetLoanSubName(loan)
+                            </ActionColumn>
+
+                            <ActionColumn Title="ยอดเงินกู้"
+                                          HeaderStyle="text-align:center; font-weight:bold;">
+                                @String.Format("{0:n2}", _ConMain.LoanAmount)
+                            </ActionColumn>
+                        </Table>
+                    </div>
+                }
+                else
+                {
+                    <Loading Message="ระบบกำลังประมวลผล กรุณารอสักครู่" />
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                        @onclick="@(()=>RefreshUi(ListRecordFirstPayment))">
+                    ยกเลิก
+                </button>
+                @if (!ListDistinctRecord.Any() && !ListDistinctDb.Any())
+                {
+                    <button type="button"
+                            class="btn button-color"
+                            data-bs-dismiss="modal"
+                            @onclick="()=> SaveToDbAsync(ListRecordFirstPayment)">
+                        ยืนยัน
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style scoped>
+    :root .first-payment-bg-salmon {
+        background-color: salmon !important;
+    }
+
+    :root .ant-table-tbody > tr.ant-table-row.first-payment-bg-salmon:hover > td, .ant-table-tbody > tr > td.ant-table-cell-row-hover {
+        background-color: salmon !important;
+    }
+
+    :root .first-payment-bg-darkseagreen {
+        background-color: darkseagreen !important;
+    }
+
+    :root .ant-table-tbody > tr.ant-table-row.first-payment-bg-darkseagreen:hover > td, .ant-table-tbody > tr > td.ant-table-cell-row-hover {
+        background: darkseagreen !important;
+    }
+</style>
+
+@code {
+    private bool countTable = false;
+    private int _pageIndex { get; set; } = 1;
+
+}

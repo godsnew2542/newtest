@@ -1,0 +1,18 @@
+﻿body {
+}
+
+.primary-bg {
+    background-color: #003c71;
+    color: white;
+}
+
+.secondary-bg {
+    background-color: #dbe8ee;
+    color: #003c71;
+}
+.input-group-text {
+    padding: 0.25rem 0.75rem;
+}
+
+
+

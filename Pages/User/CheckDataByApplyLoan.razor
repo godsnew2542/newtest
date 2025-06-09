@@ -1,0 +1,364 @@
+﻿@page "/CheckDataByApplyLoan"
+@attribute [Authorize(Roles = "0")]
+
+<div class="container-fluid mt-4 mb-5 pb-5">
+    <div class="mt-4 mb-2 px-5 py-3">
+        <StepsAnt Stepes="@StepsUser.Steps" Current="StepsUser.Current" />
+    </div>
+
+    @if (!IsLoading)
+    {
+        <div class="card bg-white px-4 pb-5 mt-4" style="border-radius:10px">
+            @* รายละเอียดการกู้เงิน *@
+            <div>
+                <div class="section-title d-sm-flex justify-content-between mb-4 mt-4 mx-2 py-2"
+                     style="border:solid 1px">
+                    <h5 class="mb-0 py-2 px-1 ms-1 font-color">
+                        <strong>รายละเอียดและเอกสารประกอบคำขอกู้</strong>
+                    </h5>
+                </div>
+                <div class="row">
+                    <div class="mt-3 ps-5 pt-1 col-xl-6 col-lg-6 col-md-12 col-12">
+                        <div>
+                            <b>ประเภทกู้ยืม</b> : @userService.GetLoanName(loanData)
+                        </div>
+                        <br />
+                        <div>
+                            <b>จำนวนเงินที่ต้องการกู้</b> : @String.Format("{0:n2}", info.LoanAmount) บาท
+                        </div>
+                        <br />
+                        <div>
+                            <b>
+                                อัตราดอกเบี้ย(ต่อปี)
+                            </b> :
+                            @(loanData == null ?
+                                "" :
+                                loanData.LoanInterest == 0 ?
+                                "ไม่มี" :
+                                loanData.LoanInterest + "%")
+                        </div>
+                        <br />
+                        <div>
+                            <b>ผ่อนชำระเดือนละ</b> : @String.Format("{0:n2}", info.LoanMonthlyInstallment) บาท
+                        </div>
+                        <br />
+                        <div>
+                            <b>ผ่อนชำระจำนวน</b> : @info.LoanNumInstallments งวด
+                        </div>
+                        <div class="mt-4"></div>
+                    </div>
+
+                    <div class="mt-3 pt-1 col-xl-2 col-lg-2 col-md-6 col-6">
+                        @* Open PDF *@
+                        @if (IsMobile)
+                        {
+                            <button style="background-color:transparent;border: none; font-size: medium; font-weight: bold; text-decoration: underline; color: #2788de"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#extralarge"
+                                    @onclick="@(async () => { await DownloadPdfAsync(); })">
+                                <i class="fa-regular fa-file-pdf fa-lg mx-2"></i>
+                                ดาวน์โหลดแบบคำขอกู้ PDF
+                            </button>
+                        }
+                        else
+                        {
+                            <button style="background-color:transparent;border: none; font-size: medium; font-weight: bold; color: #2788de"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#extralarge"
+                                    @onclick="OpenPdfAsync">
+                                <div><i class="fa-regular fa-file-pdf fa-5x mx-2 my-2"></i></div>
+                                แสดงแบบคำขอกู้
+                            </button>
+                        }
+                    </div>
+                </div>
+
+            </div>
+
+            @* ข้อมูลผู้กู้ *@
+            <div>
+                <div class="section-title d-sm-flex justify-content-between mb-4 mt-3 mx-2 py-2"
+                     style="border: solid 1px">
+                    <h5 class=" mb-0 py-2 px-1 ms-1 font-color">
+                        <strong>ข้อมูลผู้กู้</strong>
+                    </h5>
+                </div>
+
+                <div class="mt-3 ms-4 mb-2">
+                    <GridRow Gutter="(8,8)">
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            <b>ชื่อ-สกุล </b>: @userService.GetFullName(StaffDetail?.StaffId)
+                        </GridCol>
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            <b>ประเภทบุคลากร </b>: @StaffDetail?.StaffTypeName
+                        </GridCol>
+
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            <b>ตำแหน่ง</b>: @StaffDetail?.PosNameThai
+                        </GridCol>
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            <b>ส่วนงาน</b>: @StaffDetail?.FacNameThai
+                        </GridCol>
+
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            <b>วันที่เริ่มการทำงาน</b>: @ChangeDate(StaffDetail?.StaffAcceptDate, model_month.Th)
+                        </GridCol>
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            <b>วันที่สิ้นสุดการทำงาน</b>: @ChangeDate(StaffDetail?.StaffEnd, model_month.Th)
+                        </GridCol>
+
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            <b>สถานภาพสมรส</b>: @StaffDetail?.MarriedNameThai
+                        </GridCol>
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            <b>เงินเดือน</b>: @String.Format("{0:n2}", StaffDetail?.Salary) บาท
+                        </GridCol>
+
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            @{
+                                string? MobileTel = userService.GetMobileTelFromLoanStaffDetail(AuthState_StaffID);
+                            }
+
+                            <b>เบอร์โทรศัพท์มือถือ</b>: @(!string.IsNullOrEmpty(MobileTel) ? MobileTel : " - ")
+                        </GridCol>
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            @{
+                                string? OfficeTel = userService.GetOfficeTelFromLoanStaffDetail(AuthState_StaffID);
+                            }
+
+                            <b>เบอร์โทรที่ทำงาน</b>: @(!string.IsNullOrEmpty(OfficeTel) ? OfficeTel : " - ")
+                        </GridCol>
+
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            <b>รหัสเงินเดือน</b>: @GetStaffSalaryId(StaffDetail?.StaffId)
+                        </GridCol>
+                    </GridRow>
+                </div>
+            </div>
+
+            @* ข้อมูลคู่สมรสของผู้กู้ *@
+            @if (StaffDetail?.MarriedId == "2" || !string.IsNullOrEmpty(StaffFamilies?.FamilyPartnerFname))
+            {
+                <div>
+                    <div class="section-title d-sm-flex justify-content-between mb-4 mt-2 mx-2 py-2"
+                         style="border: solid 1px">
+                        <h5 class=" mb-0 py-2 px-1 ms-1 font-color">
+                            <strong>ข้อมูลคู่สมรสผู้กู้</strong>
+                        </h5>
+                    </div>
+                    <div class="mt-3 ms-4 mb-2">
+                        <GridRow Gutter="(8,8)">
+                            <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                                @{
+                                    var familieFullName = $"{StaffFamilies?.FamilyPartnerFname} {(!string.IsNullOrEmpty(StaffFamilies?.FamilyPartnerMname) ? $"{StaffFamilies?.FamilyPartnerMname} " : "")}{StaffFamilies?.FamilyPartnerOldsname}";
+                                }
+
+                                <b>ชื่อ-สกุล</b>: @(familieFullName.Trim() != "" ? familieFullName : "ไม่พบข้อมูล")
+                            </GridCol>
+                        </GridRow>
+                    </div>
+                </div>
+            }
+
+            @* ข้อมูลผู้ค้ำ *@
+            <div>
+                <div class="section-title d-sm-flex justify-content-between mb-4 mt-2 mx-2 py-2"
+                     style="border: solid 1px">
+                    <h5 class="mb-0 py-2 px-1 ms-1 font-color">
+                        <strong>ข้อมูลผู้ค้ำ</strong>
+                    </h5>
+                </div>
+                <div class="mt-3 ms-4 mb-2">
+                    <GridRow Gutter="(8,8)">
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            <b>ชื่อ-สกุล</b>: @userService.GetFullName(GuarantorDetail?.StaffId)
+                        </GridCol>
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            <b>ประเภทบุคลากร</b>: @GuarantorDetail?.StaffTypeName
+                        </GridCol>
+
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            <b>ตำแหน่ง</b>: @GuarantorDetail?.PosNameThai
+                        </GridCol>
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                            <b>ส่วนงาน</b>: @GuarantorDetail?.FacNameThai
+                        </GridCol>
+                    </GridRow>
+                </div>
+            </div>
+
+            @* ข้อมูลทายาทของผู้กู้ *@
+            @if (StaffChild.Any())
+            {
+                <div>
+                    <div class="section-title d-sm-flex justify-content-between mb-4 mt-2 mx-2 py-2"
+                         style="border: solid 1px">
+                        <h5 class=" mb-0 py-2 px-1 ms-1 font-color">
+                            <strong>ข้อมูลทายาทผู้กู้</strong>
+                        </h5>
+                    </div>
+
+                    <div class="mt-3 ms-4 mb-2">
+                        <GridRow Gutter="(8,8)">
+                            @foreach (var child in StaffChild)
+                            {
+                                <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                                    <b>ชื่อ-สกุล</b>: @child.ChildFname @child.ChildSname
+                                </GridCol>
+
+                                @*   <div class="row pt-1">
+                    <div class="col-xs-12 col-lg-6">
+                    <b>ชื่อ-สกุล</b>: @child.ChildFname @child.ChildSname
+                    </div>
+                    </div> *@
+                            }
+                        </GridRow>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <Loading />
+    }
+</div>
+
+@*footer*@
+<div class="footer">
+    <div class="row col-12">
+        <div class="col-xl-4 col-lg-4 col-md-5 col-5 text-start">
+            <button class="btn secondary-bg shadow rounded text-center"
+                    style="border-radius:20px;width:160px"
+                    @onclick="BackPage">
+                <i class="fa-solid fa-arrow-left fa-lg me-3"></i>
+                ย้อนกลับ
+            </button>
+        </div>
+        <div class="col-xl-6 col-lg-5 col-md-7 col-7 text-end">
+            <button class="btn button-color shadow rounded text-center"
+                    style="color:white;border-radius:20px;width:160px"
+                    data-bs-toggle="modal"
+                    data-bs-target="#nextPage">
+                ส่งคำขอกู้
+            </button>
+        </div>
+    </div>
+</div>
+
+@* model Next page *@
+<div class="modal fade" id="nextPage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @if (loanData != null)
+            {
+                <div class="modal-body">
+                    คุณยืนยันการยื่นคำขอกู้ @(loanData.LoanParentName != loanData.LoanTypeName ?
+                $"{loanData.LoanParentName} ({loanData.LoanTypeName})" :
+                loanData.LoanParentName)
+                    จำนวน @String.Format("{0:n2}", info.LoanAmount) บาท
+                    ใช่หรือไม่ ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        ยกเลิก
+                    </button>
+                    <button type="button"
+                            class="btn btn-primary"
+                            data-bs-dismiss="modal"
+                            @onclick="NextPageAsync">
+                        ยืนยัน
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Extra large modal -->
+<div class="modal fade"
+     id="extralarge"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true"
+     data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    แบบคำขอกู้และเอกสารประกอบคำขอกู้
+                </h5>
+            </div>
+            <div class="modal-body">
+                @if (!IsMobile)
+                {
+                    @if (!string.IsNullOrEmpty(LoanAttrachmentHTML))
+                    {
+                        <div>
+                            <PreviewPdf Url="@LoanAttrachmentHTML" Height="500px" />
+                        </div>
+                    }
+                    else
+                    {
+                        <Loading Message="ระบบกำลังประมวลผล กรุณารอสักครู่" />
+                    }
+                }
+
+                <div class="row">
+                    @if (FileUpload.Any())
+                    {
+                        @for (int i = 0; i < FileUpload.Count; i++)
+                        {
+                            UploadModel ListUpload = FileUpload[i];
+                            var extension = Path.GetExtension(ListUpload.Url);
+
+                            if (extension == ".pdf")
+                            {
+                                <div class="my-2 col-12">
+                                    <div class="my-2 font-weight-bold" style="color:black">
+                                        @GetAttachmentTypeName(ListUpload.AttachmentTypeId)
+                                    </div>
+                                    <iframe src="@GetUrl(ListUpload.Url)" style="width:100%; height:500px"></iframe>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center p-2 col-6">
+                                    <img src="@GetUrl(ListUpload.Url)" style="width:auto; height:200px;">
+                                    <div class="my-2 font-weight-bold" style="color:black">
+                                        @GetAttachmentTypeName(ListUpload.AttachmentTypeId)
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn button-color" data-bs-dismiss="modal">
+                    ปิด
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Document*@
+<div class="d-none">
+    <RequestAttrachment Loan="@loanData"
+                        TitleDocument="แบบคำขอสวัสดิการ"
+                        StaffDetail="@StaffDetail"
+                        Other="@info"
+                        StaffAssress="StaffAssress"
+                        Option="OptionLoanAgreement"
+                        @ref="RefRequestAttrachment" />
+</div>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div>@Message</div>
+}
+
+@code { }

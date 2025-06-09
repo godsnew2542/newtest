@@ -1,0 +1,298 @@
+﻿@page "/AgreementDetail"
+@page "/AgreementDetail/{RequestID:decimal}"
+@page "/AgreementDetail/{RequestID:decimal}/{StepID:decimal}"
+@page "/AgreementDetail/{StaffID}/{RequestID:decimal}/{StepID:decimal}"
+
+@page "/Admin/AgreementDetail/{StaffID}/{RequestID:decimal}/{StepID:decimal}/{FromPage:int}"
+
+@page "/{newRole:int}/AgreementDetail/{StaffID}/{RequestID:decimal}/{StepID:decimal}/{FromPage:int}/{rootPage:int}/{rootRequestID:decimal}"
+
+@page "/{newRole:int}/AgreementDetail/{StaffID}/{RequestID:decimal}/{rootPage:int}/{rootRequestID:decimal}"
+
+@page "/{Role}/AgreementDetail/{StaffID}/{RequestID:decimal}/{StepID:decimal}/{FromPage:int}"
+
+@attribute [Authorize(Roles = "0,2")]
+
+@if (loading)
+{
+    <Loading />
+}
+else
+{
+    <div class="container-fluid mt-3 mb-5 pb-5">
+        <div class="row justify-content-between pt-3 bg-light  shadow rounded mx-2">
+            <div class="col-xl-8 col-lg-8 col-md-8 col-sm-8 mt-3">
+                <div style="font-size:large; font-weight: bold; color: #2788DE">
+                    ผู้กู้ : @userService.GetFullName(Request?.DebtorStaffId)
+                    <a style="color: black">
+                        [เลขที่สัญญา :
+                        @(!string.IsNullOrEmpty(Request?.ContractNo) ?
+                            Request?.ContractNo
+                            : "ไม่พบเลขที่สัญญา")]
+                    </a>
+                    <a style="color: black">
+                        [StaffId :
+                        @(!string.IsNullOrEmpty(Request?.DebtorStaffId) ?
+                            Request?.DebtorStaffId :
+                            "ไม่พบ StaffId")]
+                    </a>
+                </div>
+                <div class="row my-3">
+                    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12">
+                        @if (Request?.ContractGuarantorStaffId != null)
+                        {
+                            <b>ผู้ค้ำ :</b> @GetNameGuarantorAsync(Request).Result
+                        }
+                        else
+                        {
+                            <a>ไม่พบข้อมูลผู้ค้ำ</a>
+                        }
+                    </div>
+                    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12">
+                        <b>สถานะ :</b>
+                        @{
+                            string? CurrentStatusName = Request?.CurrentStatusName;
+                        }
+                        @switch (Request?.CurrentStatusId)
+                        {
+                            case 1:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Yellow.ToString())"
+                                                   message="@CurrentStatusName" />
+                                break;
+
+                            case 2:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Cyan.ToString())"
+                                                   message="@CurrentStatusName" />
+                                break;
+
+                            case 4:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.GeekBlue.ToString())"
+                                                   message="@CurrentStatusName" />
+                                break;
+
+                            case 9:
+                                <LoanApp.Components.Ant.TagAnt color="#2db7f5"
+                                                   message="@CurrentStatusName" />
+                                break;
+
+                            case 6:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Purple.ToString())"
+                                                   message="@CurrentStatusName" />
+                                break;
+
+                            case 7:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Lime.ToString())"
+                                                   message="@CurrentStatusName" />
+                                break;
+
+                            case 8:
+                                <LoanApp.Components.Ant.TagAnt color="rgb(143, 201, 146)"
+                                                   message="@CurrentStatusName" />
+                                break;
+
+                            case 80:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Orange.ToString())"
+                                                   message="@CurrentStatusName" />
+                                break;
+
+                            case 81:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Volcano.ToString())"
+                                                   message="@CurrentStatusName" />
+                                break;
+
+                            case 82:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Magenta.ToString())"
+                                                   message="@CurrentStatusName">
+                                    <header>
+                                        <i class="fas fa-frown me-2" style="color: #c41d7f"></i>
+                                    </header>
+                                </LoanApp.Components.Ant.TagAnt>
+                                break;
+
+                            case 99:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Green.ToString())"
+                                                   message="@CurrentStatusName" />
+                                break;
+
+                            case 3:
+                                <LoanApp.Components.Ant.TagAnt color="error"
+                                                   message="@CurrentStatusName" />
+                                break;
+
+                            default:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Pink.ToString())"
+                                                   message="@CurrentStatusName" />
+                                break;
+                        }
+                    </div>
+                </div>
+                <div class="row my-2">
+                    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12"
+                         style="font-weight: bold">
+                        @GetLoanAmount(Request)
+                    </div>
+                    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12"
+                         style="font-weight: bold">
+                        ยอดเงินกู้คงเหลือ : @String.Format("{0:n2}", GetBalanceTotal()) บาท
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12">
+                        @{
+                            LoanType? loanType = userService.GetLoanType(Request?.LoanTypeId);
+                        }
+                        <b>ประเภทกู้ยืม :</b> @(loanType != null ? userService.GetLoanName(loanType) : "-")
+                    </div>
+                    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12">
+                        <b>จำนวนงวด :</b> @Request?.ContractLoanNumInstallments  งวด
+                    </div>
+                </div>
+                <div class="row my-2">
+                    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12">
+                        <b>วันที่กองคลังโอนเงิน :</b> @(Request?.PaidDate != null ?
+                    dateService.ChangeDate(Request.PaidDate, "dd MMMM yyyy", Utility.DateLanguage_TH) : "-")
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12">
+                <div class="row">
+                    @*สัญญาฉบับจริง*@
+                    <div class="pt-4 text-end col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                        @if (IsMobile && !string.IsNullOrEmpty(HrefPath))
+                        {
+                            <a href="@HrefPath"
+                               target="_blank"
+                               class="btn appbar-action"
+                               style="width:200px">
+                                ดาวน์โหลด PDF
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="btn lightGreen"
+                                    style="width: 200px;"
+                            @onclick="PdfAgreement">
+                                <i class="far fa-file-pdf fa-lg mx-3"></i>
+                                สัญญาฉบับจริง
+                            </button>
+                        }
+                    </div>
+
+                    @*หลักฐานการกู้*@
+                    <div class="pt-4 text-end col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                        <button class="btn appbar-action"
+                                style="width:200px;"
+                                data-bs-toggle="modal"
+                                data-bs-target="#extralargeDoc"
+                            @onclick="@(async ()=> { await SetLoanDocAsync(); })">
+                            <i class="fas fa-upload fa-lg mx-3"></i>
+                            หลักฐานการกู้
+                        </button>
+                    </div>
+
+                    @*หลักฐานการปิดยอด*@
+                    @if (imgOtherModel.contractAttachments.Any())
+                    {
+                        <div class="pt-4 text-end col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                            <button class="btn appbar-action"
+                                    style="width:200px;"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#extralargeDocOthet">
+                                <i class="fas fa-upload fa-lg mx-3"></i>
+                                หลักฐานปิดยอด
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <TransactionTable DayInstallments="@DayInstallments" ContractId="@Request?.ContractId" />
+            </div>
+        </div>
+    </div>
+
+    @*footer*@
+    <div class="footer">
+        <div class="row py-1 col-12 ms-1">
+            <div class="col-3 text-left">
+                <button type="button"
+                        class="btn secondary-bg shadow rounded text-center"
+                        style="border-radius: 5px;width:180px"
+                    @onclick="Back">
+                    <i class="fa-solid fa-arrow-left fa-lg me-3"></i>
+                    ย้อนกลับ
+                </button>
+            </div>
+            <div class="col-4 text-center"></div>
+            <div class="col-3" style="text-align:end"></div>
+        </div>
+    </div>
+}
+
+<!-- Extra large modal (extralargeDoc) -->
+<div class="modal fade"
+     id="extralargeDoc"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">หลักฐาน</h5>
+            </div>
+            <div class="modal-body">
+                @if (!LoadingResultImg)
+                {
+                    <ImgStapComponents ListDocModels="ResultDocList" />
+                }
+                else
+                {
+                    <Loading />
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ปิด
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Extra large modal (extralargeDocOthet) -->
+<div class="modal fade"
+     id="extralargeDocOthet"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">หลักฐานปิดยอด/อื่นๆ</h5>
+            </div>
+            <div class="modal-body">
+                @if (imgOtherModel.contractAttachments.Any())
+                {
+                    <ImgOtherComponents imgOther="imgOtherModel" />
+                }
+                else
+                {
+                    <Loading />
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ปิด
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code { }

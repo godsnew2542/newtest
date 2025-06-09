@@ -1,0 +1,122 @@
+﻿@page "/Message"
+
+<div class="container-fluid mt-4 pb-5 mb-5">
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="card bg-white text-center col-6 py-3 px-3 mt-5 mx-2 shadow rounded">
+            <div>
+                @* Icon *@
+                @if (MessageData.Icon)
+                {
+                    <div class="mt-5">
+                        <i class="fas fa-check-circle fa-9x" style="color:green"></i>
+                    </div>
+                }
+                else
+                {
+                    <div class="mt-5">
+                        <i class="fas fa-times-circle fa-9x" style="color:red"></i>
+                    </div>
+                }
+
+                <div class="mt-5">
+                    @* Action *@
+                    <div>
+                        @if (!string.IsNullOrEmpty(MessageData.Action))
+                        {
+                            <div class="h3" style=@($"color:{(MessageData.Icon ? "green" : "red")}; font-weight:bolder;")>
+                                @MessageData.Action
+                            </div>
+                            @*  if (MessageData.Icon)
+                        {
+                        <div class="h3" style="color:green;font-weight:bolder">
+                        @MessageData.Action
+                        </div>
+                        }
+                        else
+                        {
+                        <div class="h3" style="color:red;font-weight:bolder">
+                        @MessageData.Action
+                        </div>
+                        } *@
+                        }
+                    </div>
+
+                    @* Title *@
+                    <div>
+                        @if (!string.IsNullOrEmpty(MessageData.Title))
+                        {
+                            <div class="mt-4">
+                                @MessageData.Title
+                            </div>
+                        }
+                        else if (MessageData.TitleHtmlText != null)
+                        {
+                            <div class="mt-4">
+                                @((MarkupString)@MessageData.TitleHtmlText)
+                            </div>
+                        }
+                    </div>
+
+                    @* Message *@
+                    <div>
+                        @if (MessageData.Message.Any())
+                        {
+                            <div class="card bg-light shadow rounded p-3 mt-3 mx-3">
+                                <div class="text-start ms-3 my-1 mx-2">
+                                    @MessageData.TitleMessage
+                                </div>
+                                @for (int i = 0; i < MessageData.Message.Count; i++)
+                                {
+                                    var item = MessageData.Message[i];
+                                    <div class="text-start ms-3 my-1 mx-2">
+                                        - @item
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    @* HtmlText *@
+                    <div>
+                        @if (!string.IsNullOrEmpty(MessageData.HtmlText))
+                        {
+                            <div class="card bg-light shadow rounded p-3 mt-3 mx-3">
+                                @((MarkupString)@MessageData.HtmlText)
+                            </div>
+                        }
+                    </div>
+
+                    @* Remark *@
+                    <div>
+                        @if (!string.IsNullOrEmpty(MessageData.Remark))
+                        {
+                            <div class="mt-4" style="color:black">
+                                @MessageData.Remark
+                            </div>
+                        }
+                    </div>
+                </div>
+                @if (!MessageData.ButtonHidden)
+                {
+                    <div class="mt-5 mb-3 pb-4">
+                        <button type="button"
+                                @onclick="()=>BackHomeAsync(MessageData.ToPage)"
+                                class="btn  text-light shadow rounded"
+                                style="background-color:green">
+                            @MessageData.ButtonText
+                        </button>
+                    </div>
+                }
+
+            </div>
+        </div>
+        <div class="col-3"></div>
+    </div>
+</div>
+
+
+@code
+{
+
+}

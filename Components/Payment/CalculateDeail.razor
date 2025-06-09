@@ -1,0 +1,80 @@
+﻿@if (ModelApplyLoan != null && (ModelApplyLoan.LoanTypeID != null && ModelApplyLoan.LoanTypeID != 0))
+{
+    <div class="ms-4 p-2">
+        <div class="p-2">
+            <GridRow Gutter="(16,8)">
+                <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                    <b>ยอดเงินกู้ </b> : @string.Format("{0:n2}", @ModelApplyLoan.LoanAmount) บาท
+                </GridCol>
+                <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                    <b>จำนวนงวด</b> : @ModelApplyLoan.LoanNumInstallments งวด
+                </GridCol>
+
+                <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                    <b>ดอกเบี้ย</b> : @loan?.LoanInterest %
+                </GridCol>
+                <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                    <b>รวมชำระทั้งหมด</b> : @String.Format("{0:n2}", @TotalAmount) บาท
+                </GridCol>
+            </GridRow>
+        </div>
+    </div>
+
+    <div class="mx-2 p-2">
+        <Table TItem="PaymentTransaction"
+               DataSource="@transactions"
+               Responsive=true
+               HidePagination=true
+               PageSize="@transactions.Count()">
+            <PropertyColumn Title="งวดที่"
+                            Property="c=>c.InstallmentNo"
+                            Class="font-color-edit"
+                            HeaderStyle="text-align:center; font-weight:bold; color:#2788de;"
+                            Style="text-align:center;" />
+            <ActionColumn Title="วันที่"
+                          Class="font-color-edit"
+                          HeaderStyle="text-align:center; font-weight:bold; color:#2788de;">
+                @dateService.ChangeDate(context.PayDate, "d MMMM yyyy", Utility.DateLanguage_TH)
+            </ActionColumn>
+            <PropertyColumn Title="เงินต้น"
+                            Property="c=>c.PrincipleAmount"
+                            Class="font-color-edit"
+                            HeaderStyle="text-align:center; font-weight:bold; color:#2788de;"
+                            Style="text-align:center;">
+                @String.Format("{0:n2}", context.PrincipleAmount)
+            </PropertyColumn>
+            <PropertyColumn Title="ดอกเบี้ย"
+                            Property="c=>c.InterestAmont"
+                            Class="font-color-edit"
+                            HeaderStyle="text-align:center; font-weight:bold; color:#2788de;"
+                            Style="text-align:center;">
+                @String.Format("{0:n2}", context.InterestAmont)
+            </PropertyColumn>
+            <PropertyColumn Title="ผ่อนชำระต่องวด"
+                            Property="c=>c.TotalAmount"
+                            Class="font-color-edit"
+                            HeaderStyle="text-align:center; font-weight:bold; color:#2788de;"
+                            Style="text-align:center;">
+                @String.Format("{0:n2}", context.TotalAmount)
+            </PropertyColumn>
+            <PropertyColumn Title="คงเหลือ"
+                            Property="c=>c.BalanceAmount"
+                            Class="font-color-edit"
+                            HeaderStyle="text-align:center; font-weight:bold; color:#2788de;"
+                            Style="text-align:center;">
+                @String.Format("{0:n2}", context.BalanceAmount)
+            </PropertyColumn>
+        </Table>
+    </div>
+}
+
+<style scoped>
+    .font-color-edit {
+        color: #2788de;
+        font-weight: bold;
+    }
+</style>
+
+@code {
+
+}

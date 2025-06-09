@@ -1,0 +1,39 @@
+﻿@using Microsoft.Extensions.Logging
+@inject ILogger<Error> Logger
+
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
+@inject IPsuoAuth2Services OAuth2Services
+@inject IUserService UserService
+
+<CascadingValue Value=this>
+    @ChildContent
+</CascadingValue>
+
+<div role="dialog" tabindex="-1" class="modal fade" id="ErrorMessageModal">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #ec4d4d; color: #fff;">
+                <h6 class="modal-title">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    @Title
+                </h6>
+                <a  href="#" class="close" aria-label="Close" @onclick="CloseModal" @onclick:preventDefault>
+                    <span aria-hidden="true">×</span>
+                </a>
+            </div>
+            <div class="modal-body" style="padding-top: 8px;">
+                <div style="font-size: 0.8rem;">
+                    @((MarkupString)Detail)
+                    <br />
+                    Time : @DateTime.Now.ToString()
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code 
+{
+	
+}

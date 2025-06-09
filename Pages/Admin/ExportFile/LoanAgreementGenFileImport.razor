@@ -1,0 +1,108 @@
+﻿@page "/Admin/LoanAgreementGenFileImport"
+
+@attribute [Authorize(Roles = "2")]
+
+@if (Loading)
+{
+    <Loading Message="กำลังประมาณผล" />
+}
+else
+{
+    <div class="container-fluid mt-3 pb-5 mb-5">
+        <div class="section-title d-sm-flex justify-content-between mb-4 mt-3 mx-2 py-2">
+            <div class=" mb-0 py-2 px-1 ms-1 font-color" style="font-size:medium">
+                <i class="fa-solid fa-file-export mx-2 fa-lg"></i>
+                <strong>หักชำระเงินกู้รายเดือน</strong>
+            </div>
+        </div>
+
+        <div class="mx-2 py-3">
+            <div style="margin: 0px 20px;">
+                <GridRow Gutter="(8,8)" Align="middle">
+                    <GridCol Flex="@("auto")">
+                        <GridRow Gutter="(16,8)">
+                            <GridCol Flex="@("none")">
+                                <GridRow Gutter="(8,8)">
+                                    <GridCol Flex="@("none")">
+                                        <h6>
+                                            จากเดือน:
+                                        </h6>
+                                    </GridCol>
+                                    <GridCol Flex="@("auto")">
+                                        <DatePicker @bind-Value="StartDate"
+                                                    TValue="DateTime?"
+                                                    Picker="@DatePickerType.Month"
+                                                    Locale="@Utility.DatePicker_TH"
+                                                    CultureInfo="@Utility.TH"
+                                                    OnChange="@((e)=>{ SetStartDate(e?.Date); })"
+                                                    Size="@DatePickerSize.Large"
+                                                    AllowClear=true
+                                                    Style="width:280px;" />
+                                    </GridCol>
+                                </GridRow>
+                            </GridCol>
+                            <GridCol Flex="@("none")">
+                                <GridRow Gutter="(8,8)" Align="middle">
+                                    <GridCol Flex="@("none")">
+                                        <h6>
+                                            ถึงเดือน:
+                                        </h6>
+                                    </GridCol>
+                                    <GridCol Flex="@("auto")">
+                                        <DatePicker @bind-Value="EndDate"
+                                                    TValue="DateTime?"
+                                                    Picker="@DatePickerType.Month"
+                                                    Locale="@Utility.DatePicker_TH"
+                                                    CultureInfo="@Utility.TH"
+                                                    OnChange="@((e)=>{ SetEndDate(e?.Date); })"
+                                                    Size="@DatePickerSize.Large"
+                                                    AllowClear=true
+                                                    Style="width:280px;" />
+                                    </GridCol>
+                                </GridRow>
+                            </GridCol>
+                        </GridRow>
+                    </GridCol>
+                    <GridCol Flex="@("none")">
+                        <div class="mx-5">
+                            <Checkbox @bind-Checked="isKeepLoanSuccess">
+                                @($"{(isKeepLoanSuccess ? "ต้องการข้อมมูลที่สิ้นสุดไปแล้ว" : "ไม่ต้องการข้อมมูลที่สิ้นสุดไปแล้ว")}")
+                            </Checkbox>
+                        </div>
+                    </GridCol>
+                    <GridCol Flex="@("none")">
+                        <Button Type="@ButtonType.Primary" Size="@ButtonSize.Large" OnClick="@(()=> PerViewData())">
+                            แสดงข้อมูล
+                        </Button>
+                    </GridCol>
+                </GridRow>
+            </div>
+        </div>
+
+        @if (StartDateTemp != null || EndDateTemp != null)
+        {
+            <GridRow Gutter="(8,8)">
+                <GridCol Flex="@("auto")">
+                    <div style="text-align:center;">
+                        <h6 style="font-weight:bold;">
+                            สรุปข้อมูลหักชำระเงินกู้รายเดือน เดือน @dateService.ChangeDate(StartDateTemp, "MMMM yyyy", Utility.DateLanguage_TH) ถึง @dateService.ChangeDate(EndDateTemp, "MMMM yyyy", Utility.DateLanguage_TH) จำนวนข้อมูล @ReportData.Count() รายการ @(!string.IsNullOrEmpty(disPlayLoanSuccess) ? $" แบบ{disPlayLoanSuccess}" : "")
+                        </h6>
+                    </div>
+                </GridCol>
+                <GridCol Flex="@("none")">
+                    <Button Type="@ButtonType.Primary" Size="@ButtonSize.Large" OnClick="@(()=> DowloadData())">
+                        ดาวน์โหลดข้อมูล
+                    </Button>
+                </GridCol>
+            </GridRow>
+
+            <br />
+
+            <ReportLoanForMonth ReportTransactions="ReportData" @ref="ReportLoanMonthRef" />
+        }
+    </div>
+}
+
+@code {
+
+    }

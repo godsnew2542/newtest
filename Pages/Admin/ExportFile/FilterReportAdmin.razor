@@ -1,0 +1,186 @@
+﻿@page "/Admin/FilterReportAdmin"
+@page "/{Role}/FilterReportAdmin"
+@attribute [Authorize(Roles = "1,2,3")]
+
+@if (isError)
+{
+    <div class="container-fluid mt-3 mb-5 pb-5">
+        <div class="text-center">
+            <h1>
+                เกิดข้อผิดลาด StateProvider = null
+            </h1>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid mt-3 mb-5 pb-5">
+        <div class="section-title d-sm-flex justify-content-between mb-4 mt-3 mx-2 py-2">
+            <div class=" mb-0 py-2 px-1 ms-1 font-color" style="font-size:medium">
+                <i class="fa-solid fa-file-export mx-2 fa-lg"></i>
+                <strong>
+                    รายงานการกู้ยืมสวัสดิการรายปีงบประมาณ
+                </strong>
+            </div>
+        </div>
+
+        <div class="card secondary-bg mt-2 mx-2 py-3">
+            @* เลื่อกวิทยาเขต *@
+            @if (IsShowCampus)
+            {
+                <div class="row col-12 mx-1 mt-2">
+                    <div class="col-xl-1 col-lg-2 col-md-2 col-6 text-start ">
+                        <div class="font-color" style="font-weight:bold;font-size:medium">
+                            วิทยาเขต	:
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-3 col-md-5 col-6">
+                        <select class="form-select form-select-sm"
+                                id="camp-id"
+                                @onchange="SelectCampus">
+                            @foreach (var Campus in ListCampus)
+                            {
+                                <option value="@Campus.CampId">@Campus.CampNameThai</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            }
+
+            @* เลือกปี *@
+            <div class="row col-12 mx-1 mt-3">
+                <div class="row cols-xl-6 col-lg-8 col-md-12 col-12  text-start ">
+                    <div class="col-xl-2 col-lg-4 col-md-3 col-sm-6 font-color" style="font-weight:bold;font-size:medium">
+                        ปีงบประมาณ<a style="color:red">*</a> :
+                    </div>
+                    <div class="col-xl-4 col-lg-4 col-md-5 col-sm-6">
+                        <select class="form-select form-select-sm"
+                                id="start-year"
+                                @onchange="SelectStartYear">
+                            @foreach (var year in LoanYear)
+                            {
+                                <option value="@year.Year">@year.Name</option>
+                            }
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col" style="color:red">
+                </div>
+            </div>
+
+
+            @* เลือกประเภท *@
+            <div class="mx-1" style="padding-right:12px;">
+                <GridRow Gutter="(16,8)" Justify="end">
+                    <GridCol Flex="@("none")">
+                        <Button Type="@ButtonType.Primary"
+                                Style="border-radius:8px; width:120px; background-color:#2788de; border:none;"
+                                Size="@ButtonSize.Large"
+                                OnClick="@(async()=> { await SetOrClearCheckedAsync(true); })">
+                            เลือกทั้งหมด
+                        </Button>
+                    </GridCol>
+                    <GridCol Flex="@("none")">
+                        <Button Type="@ButtonType.Primary"
+                                Style="border-radius:8px; width:120px; background-color:#FF1818; border:none;"
+                                Size="@ButtonSize.Large"
+                                OnClick="@(async()=> { await SetOrClearCheckedAsync(false); })">
+                            ล้างทั้งหมด
+                        </Button>
+                    </GridCol>
+                </GridRow>
+            </div>
+
+            @* <div class="row col-12 mx-1">
+        <div class="col-xl-2 col-lg-4 col-md-4 col-2">
+        </div>
+        <div class="col-xl-10 col-lg-8 col-md-8 col-10 p-2  text-end">
+        <button type="button"
+        class="btn font-color shadow rounded text-center  bg-white"
+        style="border-radius: 5px"
+        @onclick="()=> SetOrClearCheckedAsync(true)">
+        เลือกทั้งหมด
+        </button>
+        <button type="button"
+        class="btn font-color shadow rounded text-center  bg-white"
+        style="border-radius: 5px"
+        @onclick="()=> SetOrClearCheckedAsync(false)">
+        ล้างทั้งหมด
+        </button>
+        </div>
+        </div> *@
+
+            <div class="mx-2 p-2">
+                <div class="row col-12 mt-2">
+                    <div class="col-xl-2 col-lg-4 col-md-6 col-6 text-center">
+                        <h6 style="font-weight:bold;">
+                            เลือก
+                        </h6>
+                    </div>
+                    <div class="col-xl-5 col-lg-4 col-md-3 col-3  p-1 text-center">
+                        <h6 style="font-weight:bold;">
+                            ประเภทกู้ยืม
+                        </h6>
+                    </div>
+                    <div class="col-xl-5 col-lg-4 col-md-3 col-3 text-center  p-1">
+                        <h6 style="font-weight:bold;">
+                            สถานะ
+                        </h6>
+                    </div>
+                </div>
+
+                @foreach (var loan in Loans)
+                {
+                    <div class="row col-12 mt-2">
+                        <div class="col-xl-2 col-lg-4 col-md-6 col-6 text-center">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   value="@loan.LoanTypeId"
+                                   id="@loan.LoanTypeId"
+                                   @onchange="eventArgs =>{ CheckboxClicked(loan.LoanTypeId, eventArgs.Value); }">
+                        </div>
+                        <div class="col-xl-5 col-lg-4 col-md-3 col-3  p-1">
+                            @userService.GetLoanName(loan)
+                        </div>
+                        <div class="col-xl-5 col-lg-4 col-md-3 col-3 text-center  p-1">
+                            @GetLoanActive(loan.Active)
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <div class="row py-1 px-1 col-12 ms-1">
+            <div class="col-3 text-left">
+                <button type="button"
+                        class="btn secondary-bg shadow rounded text-center buttonsize"
+                        style="border-radius: 5px"
+                        @onclick="BackPage">
+                    <i class="fa-solid fa-arrow-left fa-lg me-3"></i> ย้อนกลับ
+                </button>
+            </div>
+            <div class="col-4 text-center mx-2"></div>
+            <div class="col-3 text-center">
+                <Button Type="@ButtonType.Primary"
+                        Size="@ButtonSize.Large"
+                        OnClick="@(async()=> await OpenReportAsync())">
+                    แสดงข้อมูล
+                </Button>
+                @*  <button type="button"
+            class="btn button-color shadow rounded text-center buttonsize"
+            style="border-radius: 5px"
+            @onclick="OpenReportAsync">
+            แสดงรายงาน
+            </button> *@
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+
+}

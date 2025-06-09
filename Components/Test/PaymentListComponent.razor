@@ -1,0 +1,124 @@
+﻿@using Radzen.Blazor
+@using Microsoft.EntityFrameworkCore;
+@using LoanApp.Services.IServices;
+
+<div>
+	<div class="row">
+		<div class="col-4">
+			<div class="mb-3 row">
+				<label class="form-label font-weight-bold">
+					วันได้เงิน
+				</label>
+				<div class="col-sm-10">
+					<RadzenDatePicker Culture="@(new System.Globalization.CultureInfo("en-EN"))"
+									  @bind-Value=@PaymentTime
+									  DateFormat="dd MMMM yyyy"
+									  Change="@(args => NewOnChange(args))"
+									  Class="w-100" />
+				</div>
+			</div>
+		</div>
+		<div class="col-4">
+			<div class="mb-3">
+				<label class="form-label font-weight-bold">
+					จำนวนงวด
+				</label>
+				<div class="input-group">
+					<AntDesign.InputNumber @bind-Value="ModelApplyLoan.LoanNumInstallments"
+										   class="form-control"
+										   aria-describedby="basic-LoanNumInstallments"
+										   Min="0" />
+				</div>
+			</div>
+		</div>
+		<div class="col-4">
+			<div class="mb-3">
+				<label class="form-label font-weight-bold">
+					ดอกเบี้ย
+				</label>
+				<div class="input-group">
+					<input type="text"
+						   class="form-control"
+						   value="@ModelApplyLoan.LoanInterest"
+						   @onchange="@(async(ChangeEventArgs e) => { @ModelApplyLoan.LoanInterest = Convert.ToDecimal(e.Value.ToString()); })" />
+				</div>
+			</div>
+		</div>
+		<div class="col-4">
+			<div class="mb-3">
+				<label class="form-label font-weight-bold">
+					จำนวนเงิน
+				</label>
+				<div class="input-group">
+					<AntDesign.InputNumber Step="1000"
+										   Min="0"
+										   class="form-control"
+										   aria-describedby="basic-LoanAmount"
+										   Formatter="Utility.FormatNumber"
+										   Parser="Utility.ParseNumber"
+										   @bind-Value="ModelApplyLoan.LoanAmount" />
+				</div>
+			</div>
+		</div>
+		<div class="col-4">
+			<div class="mb-3">
+				<label class="form-label font-weight-bold">
+					contractID
+				</label>
+				<div class="input-group">
+					<AntDesign.InputNumber @bind-Value="ContractId"
+										   class="form-control"
+										   aria-describedby="basic-LoanNumInstallments" />
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<button class="btn button-color shadow rounded text-center"
+			style="color:white;border-radius:20px;width:170px"
+			@onclick="OpenPayment">
+		คำนวณ
+	</button>
+	@if (InstallmentList.Count != 0 && InstallmentList[0].ContractId != null)
+	{
+		ContractMain? main = _context.ContractMains
+		.Where(c => c.ContractId == InstallmentList[0].ContractId)
+		.FirstOrDefault();
+
+		if (main != null)
+		{
+			<div>
+				<button class="btn button-color shadow rounded text-center"
+						style="color:white;border-radius:20px;width:170px"
+						@onclick="()=>UpdateData(InstallmentList, main)">
+					อัปเดต
+				</button>
+				สามารถอัปเดตข้อมูลได้ <br />
+				ชื่อ : @userService.GetFullName(main.DebtorStaffId) <br />
+				ผู้ค้ำ : @userService.GetFullName(main.GuarantorStaffId) <br />
+			</div>
+		}
+	}
+	<div>
+		@foreach (var i in InstallmentList)
+		{
+			<div>
+				{ ContractId => @i.ContractId }
+				{ InstallmentNo => @i.InstallmentNo}
+				{ DueDate => @i.DueDate}
+				{ PrincipleAmount => @i.PrincipleAmount}
+				{ InterestAmont => @i.InterestAmont}
+				{ TotalAmount => @i.TotalAmount}
+				{ InstallmentId => @i.InstallmentId}
+			</div>
+		}
+	</div>
+</div>
+
+
+
+@code {
+	
+
+	
+}

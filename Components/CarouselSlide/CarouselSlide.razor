@@ -1,0 +1,124 @@
+﻿<div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        @for (int i = 0; i < ListOverview.Count; i++)
+        {
+            var index = i + 1;
+            if (i == 0)
+            {
+                <button type="button"
+                        class="active"
+                        aria-current="true"
+                        data-bs-target="#carouselExampleCaptions"
+                        data-bs-slide-to="@i"
+                        aria-label="Slide @index">
+                </button>
+            }
+            else
+            {
+                <button type="button"
+                        data-bs-target="#carouselExampleCaptions"
+                        data-bs-slide-to="@i"
+                        aria-label="Slide @index">
+                </button>
+            }
+        }
+    </div>
+
+    <div class="carousel-inner mx-2 mb-3 pb-3">
+
+        @for (int i = 0; i < ListOverview.Count; i++)
+        {
+            var Overview = ListOverview[i];
+
+            if (i == 0)
+            {
+                <div class="carousel-item active">
+                    <div class="row col-12">
+                        @foreach (var x in Overview)
+                        {
+                            var loan = userService.GetLoanType(x.LoanTypeId);
+                            <div class="col-xl-4 col-lg-6 col-md-12 col-12 mb-3">
+                                <div class="card shadow border-start-primary  p-1" style="height: 220px; border-radius: 15px">
+                                    <div class="card-body">
+                                        <div class="text-uppercase font-color fw-bold mb-2" style="font-size:medium">
+                                            <span>@userService.GetLoanSubName(loan)</span>
+                                        </div>
+                                        <div class=" card cardcarou p-2" style="border:none;border-radius:15px">
+                                            <div class="fw-bold h5 mt-1">
+                                                คงเหลือ <span>@String.Format("{0:n2}", GetBalanceAmount(x.ContractId)) ฿</span>
+                                            </div>
+                                            <div class="mt-1">
+                                                <Progress StrokeLinecap=ProgressStrokeLinecap.Square Percent=@GetPercent(x.ContractLoanTotalAmount, x.ContractId) />
+                                            </div>
+                                            <div class="fw-bold text-end mt-1" style="font-size:medium">
+                                                <span>ยอดเงินกู้ @String.Format("{0:n2}", @x.LoanRequestLoanAmount) ฿</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="carousel-item">
+                    <div class="row col-12">
+                        @foreach (var x in Overview)
+                        {
+                            var loan = userService.GetLoanType(x.LoanTypeId);
+
+                            <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-3 p-1">
+                                <div class="card shadow border-start-primary  p-1" style="height: 220px; border-radius: 15px">
+                                    <div class="card-body">
+                                        <div class="text-uppercase font-color fw-bold mb-2" style="font-size:medium">
+                                            <span>@userService.GetLoanSubName(loan)</span>
+                                        </div>
+                                        <div class=" card cardcarou p-2" style="border:none;border-radius:15px">
+                                            <div class="fw-bold h5 mt-1">
+                                                <span>@String.Format("{0:n2}", GetBalanceAmount(x.ContractId)) ฿</span>
+                                            </div>
+                                            <div class="mt-1">
+                                                <Progress StrokeLinecap=ProgressStrokeLinecap.Square Percent=@GetPercent(x.ContractLoanTotalAmount, x.ContractId) />
+                                            </div>
+                                            <div class="fw-bold text-end mt-1" style="font-size:medium">
+                                                <span>ยอดเงินกู้ @String.Format("{0:n2}", @x.LoanRequestLoanAmount) ฿</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <button class="carousel-control-prev"
+            type="button"
+            data-bs-target="#carouselExampleCaptions"
+            data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"
+              aria-hidden="true">
+        </span>
+        <span class="visually-hidden">
+            Previous
+        </span>
+    </button>
+
+    <button class="carousel-control-next"
+            type="button"
+            data-bs-target="#carouselExampleCaptions"
+            data-bs-slide="next">
+        <span class="carousel-control-next-icon"
+              aria-hidden="true">
+        </span>
+        <span class="visually-hidden">
+            Next
+        </span>
+    </button>
+</div>

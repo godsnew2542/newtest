@@ -1,0 +1,80 @@
+﻿@if (TypeDataByStaff.Any())
+{
+    <Table TItem="TypeDataByStaffModel"
+           DataSource="TypeDataByStaff"
+           Responsive=true
+           HidePagination="@(TypeDataByStaff.Count() >= 10 ? false : true)">
+        <ColumnDefinitions>
+            <PropertyColumn Title="ประเภทบุคลากร"
+                            Width="40%"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Property="c=>c.StaffTypeName" />
+            <PropertyColumn Title="รายการ"
+                            Width="15%"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:center;"
+                            Property="c=>c.Count">
+                @String.Format("{0:n0}", context.Count)
+            </PropertyColumn>
+            <PropertyColumn Title="เงินต้น"
+                            Width="15%"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:right;"
+                            Property="c=>c.SumPrincipleAmount">
+                @String.Format("{0:n2}", context.SumPrincipleAmount)
+            </PropertyColumn>
+            <PropertyColumn Title="ดอกเบี้ย"
+                            Width="15%"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:right;"
+                            Property="c=>c.SumInterestAmont">
+                @String.Format("{0:n2}", context.SumInterestAmont)
+            </PropertyColumn>
+            <PropertyColumn Title="รวมจำนวนเงิน"
+                            Width="15%"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:right;"
+                            Property="c=>c.SumTotalAmount">
+                @String.Format("{0:n2}", context.SumTotalAmount)
+            </PropertyColumn>
+        </ColumnDefinitions>
+
+        <FooterTemplate>
+            <GridRow Gutter="(8,8)">
+                <GridCol Flex="@("40%")">
+                    <div style="font-weight:bold;">
+                        รวมจำนวนเงินทุกประเภทบุคลากร
+                    </div>
+                </GridCol>
+                <GridCol Flex="@("15%")">
+                    <div style="text-align:center; font-weight:bold;">
+                        @String.Format("{0:n0}", TypeDataByStaff.Sum(x => x.Count))
+                    </div>
+                </GridCol>
+                <GridCol Flex="@("15%")">
+                    <div style="text-align:right; font-weight:bold;">
+                        @String.Format("{0:n2}", TypeDataByStaff.Sum(x => x.SumPrincipleAmount))
+                    </div>
+                </GridCol>
+                <GridCol Flex="@("15%")">
+                    <div style="text-align:right; font-weight:bold;">
+                        @String.Format("{0:n2}", TypeDataByStaff.Sum(x => x.SumInterestAmont))
+                    </div>
+                </GridCol>
+                <GridCol Flex="@("15%")">
+                    <div style="text-align:right; font-weight:bold;">
+                        @String.Format("{0:n2}", TypeDataByStaff.Sum(x => x.SumTotalAmount))
+                    </div>
+                </GridCol>
+            </GridRow>
+        </FooterTemplate>
+    </Table>
+}
+else
+{
+    <Empty />
+}
+
+@code {
+
+}

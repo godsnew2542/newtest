@@ -1,0 +1,216 @@
+﻿@page "/Admin/AdminHome"
+@attribute [Authorize(Roles = "2")]
+
+<div class="container-lg">
+    <div class="mt-3 mb-5">
+        @if (!loading)
+        {
+            <div class="row col-12 col-md-12 mx-2 mt-5">
+                <div class="col-lg-4 col-12 card pt-4  mb-3 CardHove"
+                     style="height: 300px; background-color: #9a6ec5cc;cursor:pointer"
+                     @onclick="()=> ToPageManageLoanRequest()">
+                    <div class="row col-12" style="height:250px">
+                        <div class="col-11 text-start" style="font-size:x-large;font-weight:bold;color:white;">
+                            <a>คำขอกู้ระหว่างดำเนินการ</a>
+                        </div>
+
+                        <div class="col-11 text-end" style="font-size:xx-large;font-weight:bold;color:white;margin-top:100px">
+                            <a style="font-size:40px ">
+                                <StatCount ContractStatusID="ManageLoanRequestStatusId"
+                                           CountNoType="StatCount.CountType.LoanRequest"
+                                           AdminCampId="@(UserProvider?.CurrentUser.CapmSelectNow)" />
+                            </a>
+                            <a> ฉบับ</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-lg-4 col-md-6 col-12 mb-3">
+                    <div class="row mb-3 ms-1">
+                        <div class="col-lg-5 col-md-5 col-5 card p-2 card-border lightBlue CardHove"
+                             style="height: 140px; border-radius: 5px"
+                             @onclick="()=> ToPageManageLoanRequest(1m)">
+                            <a class="text-start" style="font-size:medium;font-weight:bold;">
+                                รอพิจารณาตรวจสอบ
+                            </a>
+                            <a class="text-end py-4 fontsize" style="font-weight: bold;">
+                                <StatCount ContractStatusID="WaitingLoanConsiderStatusId" CountNoType="StatCount.CountType.LoanRequest" AdminCampId="@(UserProvider?.CurrentUser.CapmSelectNow)" />
+                                ฉบับ
+                            </a>
+                        </div>
+
+                        <div class="col-lg-5 col-md-5 col-5 card ms-4 p-2 card-border lightGreen CardHove"
+                             style="height: 140px; border-radius: 5px;"
+                             @onclick="()=> ToPageManageLoanRequest(4m)">
+                            <a class="text-start" style="font-size:medium;font-weight:bold;">
+                                รอทำสัญญา
+                            </a>
+                            <a class="text-end py-4 fontsize" style=" font-weight: bold;">
+                                <StatCount ContractStatusID="WaitingContractStatusId" CountNoType="StatCount.CountType.LoanRequest" AdminCampId="@(UserProvider?.CurrentUser.CapmSelectNow)" />
+                                ฉบับ
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row ms-1">
+                        <div class="col-lg-5 col-md-5 col-5 card p-2 card-border CardHove"
+                             style="height: 140px; border-radius: 5px; background-color: #ff9191" @onclick="ToPageAppointment">
+                            <a class="text-center" style="font-size: medium; font-weight: bold;color:white">
+                                จัดการนัดหมาย
+                            </a>
+                            <a class="text-center py-4 me-2" style="font-size: 25px; font-weight: bold;">
+                                <i class="fa-solid fa-calendar-days fa-2x" style="color:white"></i>
+                            </a>
+                        </div>
+
+                        <div class="col-lg-5 col-md-5 col-5 card ms-4 p-2 card-border CardHove"
+                             style="height: 140px; border-radius: 5px; background-color: #abd7bb" @onclick="ToPageCheckloan">
+                            <a class="text-center" style="font-size: medium; font-weight: bold; color: white">
+                                ตรวจสอบสิทธิ์การกู้
+                            </a>
+                            <a class="text-center py-4 me-2" style="font-size: 25px; font-weight: bold;">
+                                <i class="fas fa-user-check fa-2x" style="color: white"></i>
+
+
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 col-12 mb-3">
+                    <div class="row mb-3">
+                        <div class="col-lg-5 col-md-5 col-5 card p-2 card-border CardHove"
+                             style="height: 140px; border-radius: 5px; background-color: #fffae3"
+                             @onclick="()=> ToPageManageLoanAgreement(7m)">
+                            <a class="text-start" style="font-size: medium; font-weight: bold;">
+                                รอตรวจหลักฐาน
+                            </a>
+                            <a class="text-end py-4 fontsize" style="font-weight: bold;">
+                                <StatCount ContractStatusID="CheckDocumentsStatusId" CountNoType="StatCount.CountType.LoanRequest" AdminCampId="@(UserProvider?.CurrentUser.CapmSelectNow)" />
+                                ฉบับ
+                            </a>
+                        </div>
+
+                        <div class="col-lg-5 col-md-5 col-5 card ms-4 p-2 card-border CardHove"
+                             style="height: 140px; border-radius: 5px; background-color: #fffae3"
+                             @onclick="()=> ToPageManageLoanAgreement(6m)">
+                            <a class="text-start" style="font-size: medium; font-weight: bold">
+                                รอผู้กู้ส่งหลักฐาน
+                            </a>
+                            <a class="text-end py-4 fontsize" style=" font-weight: bold;">
+                                <StatCount ContractStatusID="SentDocumentsCountStatusId" CountNoType="StatCount.CountType.LoanRequest" AdminCampId="@(UserProvider?.CurrentUser.CapmSelectNow)" />
+                                ฉบับ
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5 col-md-5 col-5 card p-2 card-border CardHove"
+                             style="height: 140px;border-radius:5px" @onclick="ToPageRecordFirstPayment">
+                            <a class="text-center" style="font-size: medium; font-weight: bold">
+                                บันทึกโอนเงิน
+                            </a>
+                            <a class="text-center py-4 me-2" style="font-size: 25px; font-weight: bold;">
+                                <i class="fa-solid fa-circle-dollar-to-slot fa-2x " style="color: #367691"></i>
+                            </a>
+                        </div>
+
+                        <div class="col-lg-5 col-md-5 col-5 card ms-4 p-2 card-border CardHove"
+                             style="height: 140px;border-radius:5px" @onclick="ToPageRecordPayment">
+                            <a class="text-center" style="font-size: medium; font-weight: bold">
+                                บันทึกชำระเงิน
+                            </a>
+                            <a class="text-center py-4 me-2" style="font-size: 25px; font-weight: bold;">
+                                <i class="fa-solid fa-hand-holding-dollar fa-2x " style="color: #367691"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <Divider />
+
+            @*dashboard*@
+            <div class="row pt-1">
+                <div class="col-11 col-md-11  mb-3 pb-4"
+                     style=" height: 50px; margin-left: 20px;cursor:default">
+                    <a style="font-size:large;font-weight: bold;">
+                        <i class="fas fa-file-invoice-dollar fa-lg mx-2"></i>
+                        สรุปข้อมูลการกู้ยืมเงิน  ปีงบประมาณ @FiscalYear
+                    </a>
+                </div>
+            </div>
+            <div class="row col-md-12 col-12" style="justify-content:center">
+                <div class="col-xl-3 col-lg-4 col-md-4 col-11 card pt-4 card-border mb-3"
+                     style="height: 200px; background-color: #ffedd7">
+                    <div style="font-size: x-large; font-weight: bold; padding-left: 7px; cursor:default">
+                    </div>
+                    <div style="font-size: xx-large; font-weight: bold; padding-top: 10%; text-align: end ;cursor:default">
+                        @SumAmountByYear(ReportAdmin)
+                        @* @String.Format("{0:n2}", AmountByYear) ฿ *@
+                    </div>
+                </div>
+
+                <div class="col-xl-6 col-lg-4 col-md-4 col-12 mb-3 ">
+                    <div class="row" style="justify-content:center">
+                        <div class="col-md-5 col-5 card mx-2 p-2 card-border"
+                             style="height: 95px; border-radius: 5px; background-color: #ffedd7">
+                            <div class="fontType" style="font-weight: bold; cursor: default">
+                                ข้าราชการ
+                            </div>
+                            <div style="font-size: x-large; font-weight: bold; text-align: end; cursor: default">
+                                @GetCountStaffTypeV2(StaffType.GovernmentOfficer, ReportAdmin) ฉบับ
+                            </div>
+                        </div>
+                        <div class="col-md-5 col-5 card mx-2 p-2 card-border"
+                             style="height: 95px; border-radius: 5px;background-color: #ffedd7">
+                            <div class="fontType" style="font-weight: bold; cursor: default">
+                                พนักงานเงินรายได้
+                            </div>
+                            <div style="font-size: x-large; font-weight: bold; text-align: end; cursor: default">
+                                @GetCountStaffTypeV2(StaffType.IncomeEmployee, ReportAdmin) ฉบับ
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="justify-content:center">
+                        <div class="col-md-5 col-5 card mx-2 p-2 mt-2 card-border"
+                             style="height: 95px; border-radius: 5px; background-color: #ffedd7">
+                            <div class="fontType" style="font-weight: bold; cursor: default">
+                                พนักงานมหาวิทยาลัย
+                            </div>
+                            <div style="font-size: x-large; font-weight: bold; text-align: end; cursor: default">
+                                @GetCountStaffTypeV2(StaffType.UniversityStaff, ReportAdmin) ฉบับ
+                            </div>
+                        </div>
+                        <div class="col-md-5 col-5 card mx-2 p-2 mt-2 card-border"
+                             style="height: 95px; border-radius: 5px; background-color: #ffedd7">
+                            <div class="fontType" style="font-weight: bold; cursor: default">
+                                ลูกจ้างประจำ
+                            </div>
+                            <div style="font-size: x-large; font-weight: bold; text-align: end; cursor: default">
+                                @GetCountStaffTypeV2(StaffType.Employee, ReportAdmin) ฉบับ
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-2 col-lg-3 col-md-3 col-10 card px-2 pt-3 mx-2 text-center CardHove"
+                     style="height: 200px; border-radius: 5px; background-color: #f5986c"
+                     @onclick="PdfAllAsync">
+                    <a class="align-content-center  mt-2" style="font-size: xx-large; font-weight: bold;padding-left:7px;color:white">
+                        รายงาน
+                    </a>
+                    <a class="mt-4">
+                        <i class="fa-solid fa-file-lines"
+                           style="font-size: 48px; color: #367691; color: white">
+                        </i>
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <Loading />
+        }
+    </div>
+</div>
+
+@code { }

@@ -1,0 +1,126 @@
+﻿<div>
+    <div class="card pt-3 pb-4 mt-5 mb-3 shadow rounded">
+        <div class="font-color">
+            <div class="row pt-4">
+                <div class="col-6 " style="padding-left: 100px">
+                    <a style="font-size:larger">ยอดเงินกู้</a>
+                </div>
+                <div class="col-6" style="text-align:end;padding-right:90px">
+                    <a style="font-size:larger">
+                        @String.Format("{0:n2}", FormOption.LoanAmount) บาท
+                    </a>
+                </div>
+            </div>
+            <div class="row pt-4">
+                <div class="col-6 " style="padding-left: 100px">
+                    <a style="font-size:larger">อัตราดอกเบี้ย</a>
+                </div>
+                <div class="col-6" style="text-align:end;padding-right:90px">
+                    <a style="font-size:larger">
+                        @FormOption.ChangeGuarantor.LoanInterest %
+                    </a>
+                </div>
+            </div>
+            <div class="row pt-4">
+                <div class="col-6 " style="padding-left: 100px">
+                    <a style="font-size:larger">ผ่อนชำระสูงสุด</a>
+                </div>
+                <div class="col-6" style="text-align:end;padding-right:90px">
+                    <a style="font-size:larger">
+                        @FormOption.ChangeGuarantor.LoanNumInstallments งวด
+                    </a>
+                </div>
+            </div>
+            <div class="row pt-4">
+                <div class="col-6 " style="padding-left: 100px">
+                    <a style="font-size:larger">ผ่อนชำระเดือนละ</a>
+                </div>
+                <div class="col-6" style="text-align:end;padding-right:90px">
+                    <a style="font-size:larger">
+                        @(String.Format("{0:n2}",
+                            (FormOption.ChangeGuarantor.LoanInstallment == null ?
+                            " - " :
+                            FormOption.ChangeGuarantor.LoanInstallment))) บาท
+                    </a>
+                </div>
+            </div>
+            <div class="row pt-4">
+                <div class="col-6 " style="padding-left: 100px">
+                    <a style="font-size:larger">ยอดเงินกู้คงเหลือ</a>
+                </div>
+                <div class="col-6" style="text-align:end;padding-right:90px">
+                    <a style="font-size:larger">
+                        @(String.Format("{0:n2}",
+                            FormOption.ChangeGuarantor.BalanceAmount != null ?
+                            FormOption.ChangeGuarantor.BalanceAmount :
+                            0)) บาท
+                    </a>
+                </div>
+            </div>
+
+            <div class="row pt-4">
+                <div class="col-6 " style="padding-left: 100px">
+                    <a style="font-size:larger">ชื่อ-สกุล ผู้ค้ำปัจจุบัน</a>
+                </div>
+                <div class="col-6" style="text-align:end;padding-right:90px">
+                    <a style="font-size:larger">
+                        @{
+                            var FullName = userService.GetFullName(FormOption.ChangeGuarantor.GuarantorStaffIdNow);
+                        }
+                        @(!string.IsNullOrEmpty(FullName) ? FullName : " - ")
+                    </a>
+                </div>
+            </div>
+
+            <div class="row pt-4">
+                <div class="col-4" style="padding-left: 100px">
+                    <a style="font-size:larger">ชื่อ-สกุล ผู้ค้ำใหม่</a>
+                </div>
+                <div class="col-8" style="text-align:end;padding-right:90px">
+                    <div class="input-group">
+                        <input type="search"
+                               class="bg-white font-color p-2 simple-card col-xl-11 col-lg-10 col-md-10 col-10"
+                               placeholder="ค้นหาจากชื่อ-สกุล"
+                               name="searchbar"
+                               value="@ModelApplyLoan.Guarantor"
+                               @onchange="@(async(ChangeEventArgs e) => { ModelApplyLoan.Guarantor = e.Value.ToString(); await FindGuarantorAsync(); })" />
+                        <button type="button"
+                                class="btn btn-outline-secondary col-xl-1 col-lg-2 col-md-2 col-2"
+                                @onclick="FindGuarantorAsync">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    @if (GuarantorList.Count != 0)
+                    {
+                        <div class="overflow-auto my-2" style="height:200px;">
+                            <ul>
+                                @for (var i = 0; i < GuarantorList.Count; i++)
+                                {
+                                    var people = GuarantorList[i];
+                                    var fullName = $"{people.StaffNameThai} {people.StaffSnameThai} ( {people.FacNameThai} )";
+
+                                    <li @onclick="()=>ChangeValGuarantorAsync(people)">
+                                        <a class="dropdown-item">@fullName</a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="row pt-4">
+                <div class="col-6 " style="padding-left: 100px">
+                    <a style="font-size:larger">วันที่ทำรายการ</a>
+                </div>
+                <div class="col-6" style="text-align:end;padding-right:90px">
+                    <a style="font-size:larger">@dateService.ChangeDate(FormOption.DateNow, "dd MMMM yyyy", Utility.DateLanguage_TH)</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+}

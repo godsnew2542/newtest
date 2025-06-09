@@ -1,0 +1,131 @@
+﻿@page "/uploaddoc"
+@page "/uploaddoc/{LoadID:decimal}"
+@page "/uploaddoc/Edit/{StapID:decimal}"
+
+<div class="container-fluid mt-5 mb-5 pb-5">
+    <div class="mt-4 mb-2 px-5 py-3">
+        <StepsAnt Stepes="@StepsUser.Steps" Current="StepsUser.Current" />
+    </div>
+
+    @if (ItemUploadImg.Any())
+    {
+        <div class="card shadow d-sm-flex justify-content-between mb-4 mt-3">
+            <div class="card-header py-3">
+                <h6 class=" mb-0 py-2 px-1 ms-1 font-color">
+                    <strong>
+                        @GetLoanType(LoanTypeID).Result
+                        &nbsp;&nbsp;ยอดเงิน
+                        @String.Format("{0:n2}", @LoanRequestAmount) บาท
+                        &nbsp;&nbsp; จำนวน @LoanRequestNumInstall  งวด
+                    </strong>
+                </h6>
+            </div>
+
+            <div class="mt-2 px-2 py-3 mb-5">
+                <div class="mx-2 my-1">
+                    <Alert Type="@AlertType.Warning" Message="เซ็นสำเนาถูกต้องพร้อมวัตถุประสงค์การใช้เอกสารทุกครั้ง เพื่อป้องกันการถูกแอบอ้าง" ShowIcon="true" />
+                </div>
+
+                @for (var i = 0; i < ItemUploadImg.Count; i++)
+                {
+                    var item = ItemUploadImg[i];
+                    var index = i + 1;
+                    var AttTypeId = item.AttachmentTypeId;
+                    var GenId = $"Upload_{index}";
+                    var myFile = $"my_file{index}";
+
+                   @*  <div class="row mt-3 mb-3 px-1">
+                        <div class="col-12">
+                            <div class="card p-2 shadow rounded"
+                                 style="border-radius: 5px;font-size:large;font-weight:bold">
+                                <div class="row ms-2">
+                                    <div class="col-xl-10 col-lg-9 col-md-9 col-sm-3 font-color ps-2">
+                                        @item.AttachmentNameThai
+                                        <a style="color:red">*</a>
+                                    </div>
+                                    <div class="col justify-content-end align-content-end text-end">
+                                        <button class="btn text-end"
+                                                style="border:none"
+                                                id="@GenId" @onclick="()=> GeneratePDFService.OpenTypeFileAsync(GenId, myFile)">
+                                            | <i class="fa-solid fa-upload mx-1"></i>
+                                            อัปโหลดไฟล์
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> *@
+                    <div class="mt-3 mb-3 px-1">
+                        <div class="card p-2 shadow rounded"
+                             style="border-radius: 5px;">
+                            <GridRow Gutter="(8,8)">
+                                <GridCol Flex="@("auto")">
+                                    <div class="ms-2 font-color ps-2" style="font-size:large; font-weight:bold;">
+                                        @item.AttachmentNameThai
+                                        <a style="color:red">*</a>
+                                    </div>
+                                </GridCol>
+                                <GridCol Flex="@("none")">
+                                    <LoanApp.Components.Upload.UploadV2 OnUploadCallback="SetCurrentData" AttachmentTypeId="@AttTypeId" Title="อัปโหลดไฟล์" />
+                                </GridCol>
+                            </GridRow>
+                        </div>
+                    </div>
+
+                    @* <NewUpload SetChildData="SetCurrentData" AttachmentTypeId="@AttTypeId" MyFile="@myFile" /> *@
+
+                    <div class="mt-3 mb-3">
+                        @if (resultInfoList.Any())
+                        {
+                            var NoImg = true;
+                            foreach (var img in resultInfoList)
+                            {
+                                if (item.AttachmentTypeId == img.AttachmentTypeId)
+                                {
+                                    <ListUpload listModel="img" ListId="CurrentRemoveListAsync" />
+                                    NoImg = false;
+                                }
+                            }
+
+                            if (NoImg)
+                            {
+                                <div class="col-xxl-10 col-xl-9 col-lg-8 col-md-7 col-sm-12 mt-2"
+                                     style="color:grey;font-size:medium">
+                                    ยังไม่มีเอกสาร
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-xxl-10 col-xl-9 col-lg-8 col-md-7 col-sm-12 mt-2"
+                                 style="color: grey; font-size: medium">
+                                ยังไม่มีเอกสาร
+                            </div>
+                        }
+                    </div>
+                }
+
+            </div>
+        </div>
+    }
+</div>
+
+@*footer*@
+<div class="footer">
+    <div class="row">
+        <div class="col-xl-4 col-lg-4 col-md-5 col-4 text-start">
+            <button class="btn secondary-bg shadow rounded text-center"
+                    style="border-radius:20px;width:170px"
+                    @onclick="BackPage">
+                <i class="fa-solid fa-arrow-left fa-lg me-3"></i> ย้อนกลับ
+            </button>
+        </div>
+        <div class="col-xl-6 col-lg-5 col-md-7 col-8 text-end">
+            <button class="btn button-color shadow rounded text-center"
+                    style="color:white;border-radius:20px;width:170px"
+                    @onclick="NextPageAsync">
+                ถัดไป <i class="fa-solid fa-arrow-right fa-lg ms-3"></i>
+            </button>
+        </div>
+    </div>
+</div>

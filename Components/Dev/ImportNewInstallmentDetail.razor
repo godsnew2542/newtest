@@ -1,0 +1,33 @@
+﻿<div>
+    @if (Isloading)
+    {
+        <Loading Message="กำลังประมวลผลข้อมูล" />
+    }
+    else
+    {
+        <GridRow Gutter="(8,8)">
+            <GridCol Flex="@("none")">
+                ตรวจสอบการเพิ่มข้อมูลใน Table InstallmentDetail:
+            </GridCol>
+            <GridCol Flex="@("auto")">
+                <UploadV2 FileTypes="@(new List<string>(){"xlsx"})" OnUploadCallback="Callback" Title="อัปโหลดไฟล์" />
+            </GridCol>
+            <GridCol Flex="@("none")">
+                <Button Type="@ButtonType.Primary" OnClick="GenNewInstallmentDetail">
+                    บันทึก
+                </Button>
+            </GridCol>
+        </GridRow>
+
+        @if (ResultFile != null)
+        {
+            <div>
+                <ListUpload listModel="ResultFile" SelectFileCallback="FileCallback" />
+            </div>
+        }
+    }
+</div>
+
+@code {
+
+}

@@ -1,0 +1,256 @@
+﻿@page "/Admin/CloseAppointment"
+@using Radzen.Blazor
+@attribute [Authorize(Roles = "2")]
+
+<div class="container-fluid mt-4 mb-5 pb-5">
+    <div class="mt-4 mx-1">
+        <div class="section-title" style="font-size:medium">
+            <i class="fa-regular fa-calendar-xmark fa-lg me-2"></i> ปิดวันที่ทำสัญญา
+        </div>
+    </div>
+
+    @if (string.IsNullOrEmpty(adminCampId))
+    {
+        <div>
+            <Loading />
+        </div>
+    }
+    else
+    {
+        <div class="card shadow d-sm-flex justify-content-between mb-4 mt-4">
+            <GridRow Class="my-3" Gutter="(8,8)">
+                <GridCol Xxl="10" Xl="10" Lg="12" Md="24" Sm="24" Xs="24">
+                    <div class="text-center">
+                        <RadzenDatePicker @bind-Value="tempDate"
+                                          Culture="@(new System.Globalization.CultureInfo(Utility.DateLanguage_EN))"
+                                          DateRender=@(e => dateService.DateRender(e, dates))
+                                          TValue="DateTime?"
+                                          Inline="true"
+                                          Change="@(args => OnChange(args))" />
+
+                        <div class="my-1">
+                            <Button Class="button-color shadow rounded"
+                                    Style="height:40px; width:120px; border:none; font-size:medium;"
+                                    OnClick="@(async()=>await onSearchDate(tempDate))">
+                                ค้นหา
+                            </Button>
+                        </div>
+
+                        <div class="py-1 mx-1" style="background-color:#e9edf0;">
+                            <div class="my-2">
+                                <GridRow Gutter="(8,8)" Justify="center">
+                                    <GridCol Flex="@("none")">
+                                        <div style="width:15px; height: 15px; background-color:yellow"></div>
+                                    </GridCol>
+                                    <GridCol Flex="@("none")">
+                                        ไม่สามารถปิดวันที่ทำสัญญาได้ เนื่องจาก มีผู้กู้นัดหมาบแล้ว
+                                    </GridCol>
+                                </GridRow>
+                            </div>
+                            <div class="my-2">
+                                <GridRow Gutter="(8,8)" Justify="center">
+                                    <GridCol Flex="@("none")">
+                                        <div style="width:15px; height: 15px; background-color:#ff6d41"></div>
+                                    </GridCol>
+                                    <GridCol Flex="@("none")">
+                                        ไม่สามารถปิดวันที่ทำสัญญาได้ เนื่องจาก พบข้อผิดพลาด
+                                    </GridCol>
+                                </GridRow>
+                            </div>
+                        </div>
+                    </div>
+                </GridCol>
+                <GridCol Xxl="14" Xl="14" Lg="12" Md="24" Sm="24" Xs="24">
+                    <div class="text-center" style="font-size:medium">
+                        ข้อมูลเวลาที่สามารถปิดการทำสัญญาได้
+                        <Space Style="font-weight:bold;">
+                            ณ วันที่ @(dateService.ChangeDate(selectDate, "d MMMM yyyy", Utility.DateLanguage_TH))
+                        </Space>
+                    </div>
+
+                    <div class="mx-1 mt-2">
+                        <GridRow Gutter="(8,8)">
+                            @for (int i = 0; i < listTime.Count; i++)
+                            {
+                                var item = listTime[i];
+                                int timeInt = Utility.TimeInt[i];
+
+                                int? countData = GetTimeValue(timeInt, item, requestContracts);
+                                bool? isAdd = CheckAdminSchedule(timeInt, item, meetingSchedules);
+
+                                <GridCol Xxl="12" Xl="24" Lg="24" Md="24" Sm="24" Xs="24">
+                                    <Card Title="@($"เวลา {item} น.")" Style="@(countData == null ? "background-color: #ff6d41;" : countData > 0 ? "background-color: yellow;" : "")">
+                                        <Body>
+                                            @if (countData == null || countData > 0)
+                                            {
+                                                <p class="text-center">
+                                                    @(countData == null ? "Error" : $"จำนวนผู้กู้ที่ทำสัญญา จำนวน {countData} ราย")
+                                                </p>
+                                            }
+                                            else
+                                            {
+                                                <div class="text-end">
+                                                    @if (isAdd == true)
+                                                    {
+                                                        <Button Class="lightBlue"
+                                                                Style="border:none; font-size:small;"
+                                                                OnClick="@(()=>onCloseSchedule(timeInt, item))">
+                                                            ปิดวันที่ทำสัญญา
+                                                        </Button>
+                                                    }
+                                                    else if (isAdd == false)
+                                                    {
+                                                        <Button Class="error-button"
+                                                                Style="border:none; font-size:small;"
+                                                                OnClick="@(()=>onDeleteSchedule(timeInt, item))">
+                                                            เปิดวันที่ทำสัญญา
+                                                        </Button>
+                                                    }
+                                                </div>
+                                            }
+                                        </Body>
+                                    </Card>
+                                </GridCol>
+                            }
+                        </GridRow>
+                    </div>
+                </GridCol>
+            </GridRow>
+        </div>
+    }
+
+</div>
+
+<Modal Title="@($"ยืนยันการ ปิดวันที่ทำสัญญา")"
+       @bind-Visible="@closeScheduleVisible"
+       MaskClosable=false
+       Footer="@(null)"
+       Width="@(isMobile? "100%":"50%")">
+    <div>
+        <p style="font-size:medium;">
+            ปิดวันที่ทำสัญญา ณ @(dateService.ChangeDate(loanMeetingSchedule?.ScheduleDate, "วันที่ d MMMM yyyy เวลา HH.mm น. ", Utility.DateLanguage_TH))
+            @if (!string.IsNullOrEmpty(loanMeetingSchedule?.CampusId))
+            {
+                @cCampuses.FirstOrDefault(x => x.CampId == loanMeetingSchedule.CampusId)?.CampNameThai
+            }
+        </p>
+
+        <GridRow Gutter="(8,8)" Justify="end">
+            <GridCol Flex="@("none")">
+                <Button Type="@ButtonType.Primary" OnClick="@HandleCancelCloseSchedule" Danger>
+                    ปิด
+                </Button>
+            </GridCol>
+            @if (loanMeetingSchedule != null)
+            {
+                <GridCol Flex="@("none")">
+                    <Button Type="@ButtonType.Primary" OnClick="@(()=>HandleOkCloseSchedule(loanMeetingSchedule))">
+                        ยืนยัน
+                    </Button>
+                </GridCol>
+            }
+        </GridRow>
+    </div>
+</Modal>
+
+<Modal Title="@($"ยืนยันการ เปิดวันที่ทำสัญญา")"
+       @bind-Visible="@deleteScheduleVisible"
+       MaskClosable=false
+       Footer="@(null)"
+       Width="@(isMobile? "100%":"50%")">
+    <div>
+        <p style="font-size:medium;">
+            เปิดวันที่ทำสัญญา ณ @(dateService.ChangeDate(loanMeetingSchedule?.ScheduleDate, "วันที่ d MMMM yyyy เวลา HH.mm น. ", Utility.DateLanguage_TH))
+            @if (!string.IsNullOrEmpty(loanMeetingSchedule?.CampusId))
+            {
+                @cCampuses.FirstOrDefault(x => x.CampId == loanMeetingSchedule.CampusId)?.CampNameThai
+            }
+        </p>
+
+        <GridRow Gutter="(8,8)" Justify="end">
+            <GridCol Flex="@("none")">
+                <Button Type="@ButtonType.Primary" OnClick="@HandleCancelDeleteSchedule" Danger>
+                    ปิด
+                </Button>
+            </GridCol>
+            @if (loanMeetingSchedule != null)
+            {
+                <GridCol Flex="@("none")">
+                    <Button Type="@ButtonType.Primary" OnClick="@(()=>HandleOkDeleteSchedule(loanMeetingSchedule))">
+                        ยืนยัน
+                    </Button>
+                </GridCol>
+            }
+        </GridRow>
+    </div>
+</Modal>
+
+
+<style scoped>
+    :root .ant-card-head {
+        min-height: 0px !important;
+    }
+
+    :root .ant-card-head-title {
+        padding: 8px 0px !important;
+    }
+
+    :root .ant-card-body {
+        padding: 10px !important;
+    }
+
+    :root .button-color {
+        background-color: #366691 !important;
+        color: white !important;
+        text-align: center !important;
+    }
+
+        :root .button-color:hover,
+        :root .button-color:focus,
+        :root .button-color:active {
+            background-color: #366691 !important;
+            color: white !important;
+            box-shadow: none !important;
+            border-color: inherit !important;
+            outline: none !important;
+        }
+
+    :root .lightBlue {
+        background-color: #4aaed5 !important;
+        color: white !important;
+        text-align: center !important;
+    }
+
+        :root .lightBlue:hover,
+        :root .lightBlue:focus,
+        :root .lightBlue:active {
+            background-color: #4aaed5 !important;
+            color: white !important;
+            box-shadow: none !important;
+            border-color: inherit !important;
+            outline: none !important;
+        }
+
+    :root .error-button {
+        background-color: #FF1818 !important;
+        color: white !important;
+        text-align: center !important;
+        border-radius: inherit !important;
+    }
+
+        :root .error-button:hover,
+        :root .error-button:focus,
+        :root .error-button:active {
+            background-color: #FF1818 !important;
+            color: white !important;
+            box-shadow: none !important;
+            border-color: inherit !important;
+            outline: none !important;
+            border-radius: inherit !important;
+        }
+
+</style>
+
+@code {
+
+}

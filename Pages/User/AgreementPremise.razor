@@ -1,0 +1,253 @@
+﻿@page "/AgreementPremise/{RequestID:decimal}/{StepID:decimal}"
+@page "/AgreementPremise/{RequestID:decimal}/{StepID:decimal}/{EditUpload:bool}"
+@page "/{Role}/AgreementPremise/{RequestID:decimal}/{StepID:decimal}/{FromPage:int}"
+@page "/{Role}/AgreementPremise/{RequestID:decimal}/{StepID:decimal}/{FromPage:int}/{EditUpload:bool}"
+@attribute [Authorize(Roles = "0,2")]
+
+@using LoanApp.Components.Admin;
+
+<div class="container-fluid mt-4 pb-5 mb-5">
+    <div class="card shadow d-sm-flex justify-content-between mb-4 mt-4">
+        <Card Style="background-color: rgba(0, 0, 0, 0.03);">
+            <Body>
+                <h6 class="mb-0 py-2 px-1 ms-1 font-color" style="font-weight:bold;">
+                    @{
+                        bool isEdit = IsChangeContractNo(Request).Result;
+                    }
+                    <HeaderDetailLoan IsEditContractNo="@isEdit" ReqCon="@Request" />
+                    @* <GridRow Gutter="(8,8)" Align="middle">
+                        <GridCol Flex="@("none")">
+                            <a style="color:black">[เลขที่สัญญา : @Request?.ContractNo]</a>
+                        </GridCol>
+                        @if (isEdit)
+                        {
+                            <GridCol Flex="@("none")">
+                                <Tooltip Placement="@Placement.Top">
+                                    <TitleTemplate>
+                                        แก้ไข เลขที่สัญญาหรือวันที่กองคลังโอนเงิน
+                                    </TitleTemplate>
+                                    <ChildContent>
+                                        <Button Type="@ButtonType.Primary" Style="border-radius:8px;" OnClick="@(()=> { EditContractNoVisible = true; })">
+                                            <i class="fa-solid fa-pen-to-square fa-flip-horizontal fa-lg"></i>
+                                        </Button>
+                                    </ChildContent>
+                                </Tooltip>
+                            </GridCol>
+                        }
+                        <GridCol Flex="@("none")">
+                            @GetHeaderFullNameAndLoanTypeName()
+                        </GridCol>
+                        <GridCol Flex="@("none")">
+                            ยอดเงิน @(Request?.ContractLoanAmount != null ? $"{string.Format("{0:n2}", Request?.ContractLoanAmount)} บาท" : "ไม่พบข้อมูล")
+                        </GridCol>
+                        <GridCol Flex="@("none")">
+                            จำนวน @Request?.ContractLoanNumInstallments งวด
+                        </GridCol>
+                    </GridRow> *@
+                </h6>
+            </Body>
+        </Card>
+
+        <div class="mt-2 px-2 py-3 mb-5">
+            <div class="mx-2 my-1">
+                <Alert Type="@AlertType.Warning"
+                       Message="เซ็นสำเนาถูกต้องพร้อมวัตถุประสงค์การใช้เอกสารทุกครั้ง เพื่อป้องกันการถูกแอบอ้าง"
+                       ShowIcon="true" />
+            </div>
+
+            @if (ItemUpload.Any())
+            {
+                for (var i = 0; i < ItemUpload.Count; i++)
+                {
+                    var item = ItemUpload[i];
+                    var index = i + 1;
+                    var AttTypeId = item.AttachmentTypeId;
+                    var GenId = $"Upload_{index}";
+                    var myFile = $"my_file{index}";
+
+                    <div class="row mt-3 mb-3 px-1">
+                        <div class="col-12">
+                            <div class="card p-2 shadow rounded" style="border-radius: 5px;height:50px;font-size:large;font-weight:bold">
+                                <div class="row ms-2">
+                                    <div class="col-xl-10 col-lg-9 col-md-9 col-sm-3 font-color ps-2">
+                                        @item.AttachmentNameThai
+                                        @if (ReqDocList.Contains(item.AttachmentTypeId))
+                                        {
+                                            <a style="color: red">*</a>
+                                        }
+                                        <button class="btn text-end"
+                                                style="border:none"
+                                                @onclick="()=> ShowImgAsync(ResultInfoList, AttTypeId, item)"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#extralargeDocEye">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="col justify-content-end align-content-end">
+                                        <button class="btn text-end"
+                                                style="border:none"
+                                                id="@GenId"
+                                                @onclick="()=> GeneratePDFService.OpenTypeFileAsync(GenId, myFile)">
+                                            | <i class="fa-solid fa-upload mx-1"></i>
+                                            อัปโหลดไฟล์
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <NewUpload SetChildData="@((DTEventArgs e)=>{SetCurrentData(e);})" AttachmentTypeId="@AttTypeId" MyFile="@myFile" />
+
+                    <div class="mt-3 mb-3">
+                        @if (ResultInfoList.Any())
+                        {
+                            var NoImg = true;
+                            foreach (var img in ResultInfoList)
+                            {
+                                if (item.AttachmentTypeId == img.AttachmentTypeId)
+                                {
+                                    NoImg = false;
+                                    <ListUpload listModel="img" ListId="CurrentRemoveListAsync" />
+                                }
+                            }
+
+                            if (NoImg)
+                            {
+                                <div class="col-xxl-10 col-xl-9 col-lg-8 col-md-7 col-sm-12 mt-2"
+                                     style="color:grey;font-size:medium">
+                                    ยังไม่มีเอกสาร
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-xxl-10 col-xl-9 col-lg-8 col-md-7 col-sm-12 mt-2"
+                                 style="color: grey; font-size: medium">
+                                ยังไม่มีเอกสาร
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@*footer*@
+<div class="footer">
+    <div class="row py-1 ms-1">
+        <div class="col-4 col-md-4 col-lg-3 col-xl-4  text-left">
+            <button type="button"
+                    class="btn buttonsize secondary-bg shadow rounded text-center"
+                    style="border-radius: 5px"
+                    @onclick="Back">
+                <i class="fa-solid fa-arrow-left fa-lg me-3"></i>
+                ย้อนกลับ
+            </button>
+        </div>
+        <div class="col-4 col-md-4 col-lg-3 col-xl-3 text-center"></div>
+
+        <div class="col-4 col-md-4 col-lg-3 col-xl-3" style="text-align:end">
+            <button type="button"
+                    class="btn buttonsize button-color shadow rounded text-center"
+                    style="border-radius:5px"
+                    data-bs-toggle="modal"
+                    data-bs-target="#Confirmdoc"
+                    @onclick="CheckIsFileSuccess">
+                ดำเนินการ
+            </button>
+        </div>
+
+    </div>
+</div>
+
+@* model confirm page *@
+<div class="modal fade"
+     id="Confirmdoc"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @if (IsFileSuccess != null)
+            {
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalLabel">
+                        @(IsFileSuccess == true ?
+                            "คุณได้ตรวจเอกสารหลักฐานแล้ว และยืนยันการดำเนินการใช่หรือไม่ ?" :
+                            "กรุณาอัปโหลดหลักฐานให้ครบถ้วน")
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" />
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        ยกเลิก
+                    </button>
+                    @if (IsFileSuccess == true)
+                    {
+                        <button type="button"
+                                class="btn btn-primary"
+                                data-bs-dismiss="modal"
+                                @onclick="()=> ConfirmdocAsync(ResultInfoList)">
+                            ยืนยัน
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- extralargeDocEye modal -->
+<div class="modal fade"
+     id="extralargeDocEye"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-body">
+                @if (!LoadingResultImg)
+                {
+                    <ImgStapComponents ListDocModels="ResultDocList" />
+                }
+                else
+                {
+                    <Loading />
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ปิด
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<Modal Title="@($"เลขที่สัญญา: {Request?.ContractNo} วันที่กองคลังโอนเงิน: {dateService.ChangeDate(Request?.PaidDate, "d MMMM yyyy", Utility.DateLanguage_TH)} ณ ปัจจุบัน")"
+       @bind-Visible="@EditContractNoVisible"
+       MaskClosable=false
+       Footer="@(null)"
+       Width="@("40%")">
+    <div>
+        <EditContractNoAndPaidDate ContractNo="@(Request?.ContractNo)"
+                                   ContractId="@(Request?.ContractId)"
+                                   PaidDate="@(Request?.PaidDate)"
+                                   OnCallbackData="@((e)=> CallbackData(e) )" />
+    </div>
+</Modal>
+
+<style scoped>
+    :root .ant-card-body {
+        padding: 1rem !important;
+    }
+</style>
+
+@code {
+}

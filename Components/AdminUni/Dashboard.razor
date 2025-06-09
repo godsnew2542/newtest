@@ -1,0 +1,77 @@
+﻿@if (!string.IsNullOrEmpty(Title))
+{
+    <div>
+        <h4>@Title</h4>
+    </div>
+}
+
+<div>
+    <GridRow Gutter="(16,8)" Justify="center" Align="middle">
+        <GridCol Xxl="6" Xl="6" Lg="8" Md="22" Sm="22" Xs="22" Style="height: 200px; background-color: #ffedd7; border-radius: 5px;">
+            <div class="pt-4 mb-3" style="padding: 24px 12px 0px 12px;">
+                <div style="font-size: xx-large; font-weight: bold; padding-top: 10%; text-align: end ;cursor:default">
+                    @adminHome.SumAmountByYear(ReportData)
+                </div>
+            </div>
+        </GridCol>
+
+        <GridCol Xxl="12" Xl="12" Lg="14" Md="22" Sm="22" Xs="22">
+            <GridRow Gutter="(16,8)" Justify="center" Align="middle">
+                <GridCol Span="20">
+                    <GridRow Gutter="(8,8)">
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="12" Sm="12" Xs="24">
+                            <div style="height: 95px; background-color: #ffedd7; border-radius: 5px; padding:8px;">
+                                <div style="font-size: medium; font-weight: bold; cursor: default">
+                                    ข้าราชการ
+                                </div>
+                                <div style="font-size: x-large; font-weight: bold; text-align: end; cursor: default">
+                                    @adminHome.GetCountStaffTypeV2(StaffType.GovernmentOfficer, ReportData) ฉบับ
+                                </div>
+                            </div>
+                        </GridCol>
+
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="12" Sm="12" Xs="24">
+                            <div style="height: 95px; background-color: #ffedd7; border-radius: 5px; padding:8px;">
+                                <div style="font-size: medium; font-weight: bold; cursor: default">
+                                    พนักงานเงินรายได้
+                                </div>
+                                <div style="font-size: x-large; font-weight: bold; text-align: end; cursor: default">
+                                    @adminHome.GetCountStaffTypeV2(StaffType.IncomeEmployee, ReportData) ฉบับ
+                                </div>
+                            </div>
+                        </GridCol>
+                    </GridRow>
+                </GridCol>
+
+                <GridCol Span="20">
+                    <GridRow Gutter="(8,8)">
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="12" Sm="12" Xs="24">
+                            <div style="height: 95px; background-color: #ffedd7; border-radius: 5px; padding:8px;">
+                                <div style="font-size: medium; font-weight: bold; cursor: default">
+                                    พนักงานมหาวิทยาลัย
+                                </div>
+                                <div style="font-size: x-large; font-weight: bold; text-align: end; cursor: default">
+                                    @adminHome.GetCountStaffTypeV2(StaffType.UniversityStaff, ReportData) ฉบับ
+                                </div>
+                            </div>
+                        </GridCol>
+
+                        <GridCol Xxl="12" Xl="12" Lg="12" Md="12" Sm="12" Xs="24">
+                            <div style="height: 95px; background-color: #ffedd7; border-radius: 5px; padding:8px;">
+                                <div style="font-size: medium; font-weight: bold; cursor: default">
+                                    ลูกจ้างประจำ
+                                </div>
+                                <div style="font-size: x-large; font-weight: bold; text-align: end; cursor: default">
+                                    @adminHome.GetCountStaffTypeV2(StaffType.Employee, ReportData) ฉบับ
+                                </div>
+                            </div>
+                        </GridCol>
+                    </GridRow>
+                </GridCol>
+            </GridRow>
+        </GridCol>
+    </GridRow>
+</div>
+@code {
+
+}

@@ -1,0 +1,126 @@
+﻿@page "/User/ContactUs"
+@attribute [Authorize(Roles = "0")]
+
+<div class="container-fluid mt-2 mb-5 pb-5">
+
+    <UserManualComponents Url="Files/Manual/Loan_User_Manual/LOAN_User_Manual/index.html" />
+
+    <div class="my-3">
+        <Card>
+            <TitleTemplate>
+                <GridRow Gutter="(8,8)" Align="middle">
+                    <GridCol Flex="@("auto")">
+                        <div class="font-color" style="font-size:medium">
+                            <i class="fa-solid fa-address-book fa-lg mx-2"></i>
+                            <strong>ติดต่อเรา</strong>
+                        </div>
+                    </GridCol>
+                </GridRow>
+            </TitleTemplate>
+        </Card>
+    </div>
+
+    <GridRow Gutter="(16,16)">
+        @* วิทยาเขต หาดใหญ่ *@
+        <GridCol Xxl="8" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+            <Card Bordered=false Style="@(StaffDetail?.CampId == "01" ? BgColor : "")">
+                <Body>
+                    <GridRow Gutter="(8,8)">
+                        <GridCol Flex="@("auto")">
+                            <h6>
+                                <strong>
+                                    วิทยาเขต หาดใหญ่
+                                </strong>
+                            </h6>
+                        </GridCol>
+                        @if (StaffDetail?.CampId == "01")
+                        {
+                            <GridCol Flex="@("none")">
+                                <i class="fa-solid fa-star fa-2xl" style="color: #FFD43B;"></i>
+                            </GridCol>
+                        }
+                    </GridRow>
+
+                    <div class="ms-1">
+                        <h6 class="py-1 px-1">
+                            ข้อมูลการโอนเงินกู้ กองคลัง โทร. 2135-6 
+                        </h6>
+                        <h6 class="py-1 px-1">
+                            ข้อมูลการชำระยอดกู้/ปิดยอด กองคลัง โทร. 2142
+                        </h6>
+                        <h6 class="py-1 px-1">
+                            ข้อมูลสวัสดิการเงินกู้ กองบริหารทรัพยากรบุคคล โทร. 2053 
+                        </h6>
+                    </div>
+                </Body>
+            </Card>
+        </GridCol>
+
+        @* วิทยาเขต ภูเก็ต *@
+        <GridCol Xxl="8" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+            <Card Bordered=false Style="@(StaffDetail?.CampId == "03" ? BgColor : "")">
+                <Body>
+                    <GridRow Gutter="(8,8)">
+                        <GridCol Flex="@("auto")">
+                            <h6>
+                                <strong>
+                                    วิทยาเขต ภูเก็ต
+                                </strong>
+                            </h6>
+                        </GridCol>
+                        @if (StaffDetail?.CampId == "03")
+                        {
+                            <GridCol Flex="@("none")">
+                                <i class="fa-solid fa-star fa-2xl" style="color: #FFD43B;"></i>
+                            </GridCol>
+                        }
+                    </GridRow>
+
+                    <div class="ms-1">
+                        <h6 class="py-1 px-1">
+                            ข้อมูลการโอนเงินกู้ งานคลังและทรัพย์สิน โทร. 6072
+                        </h6>
+                        <h6 class="py-1 px-1">
+                            ข้อมูลการชำระยอดกู้/ปิดยอด งานคลังและทรัพย์สิน โทร. 6530
+                        </h6>
+                        <h6 class="py-1 px-1">
+                            ข้อมูลสวัสดิการเงินกู้ งานบริหารและพัฒนาทรัพยากรมนุษย์ โทร. 6083
+                        </h6>
+                    </div>
+
+
+                </Body>
+            </Card>
+        </GridCol>
+    </GridRow>
+
+    @*     <div class="card shadow d-sm-flex justify-content-between mb-4 mt-3">
+    <div class="mx-2 my-2">
+    <h6 class="py-2 px-1 ms-1 font-color">
+    <strong>
+    ข้อมูลการโอนเงินกู้ กองคลัง โทร. 2135-6 
+    </strong>
+    </h6>
+    <h6 class="py-2 px-1 ms-1 font-color">
+    <strong>
+    ข้อมูลการชำระยอดกู้/ปิดยอด กองคลัง โทร. 2142
+    </strong>
+    </h6>
+    <h6 class="py-2 px-1 ms-1 font-color">
+    <strong>
+    ข้อมูลสวัสดิการเงินกู้ กองบริหารทรัพยากรบุคคล โทร. 2053 
+    </strong>
+    </h6>
+    </div>
+    </div> *@
+</div>
+
+<style scoped>
+    :root .ant-card {
+        border-radius: 8px !important;
+    }
+</style>
+
+@code {
+
+}

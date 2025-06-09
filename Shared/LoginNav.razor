@@ -1,0 +1,25 @@
+﻿<GridRow Gutter="(8,8)">
+    <GridCol Flex="@("none")">
+        <NavLink class="nav-link p-0 m-0" @onclick="SignIn">
+            <button type="button" class="btn button-style button-color">
+                <i class="material-icons me-2">account_circle</i>
+                เข้าสู่ระบบ
+            </button>
+        </NavLink>
+    </GridCol>
+   @*  @if (TestNotice)
+    {
+        <GridCol Flex="@("none")">
+            <NavLink class="nav-link p-0 m-0" @onclick="SignInThaId">
+                <button type="button" class="btn button-style button-color ">
+                    <img src="@imgThaID" style="height:24px; margin-right:5px;" />
+                    แอปพลิเคชัน ThaID
+                </button>
+            </NavLink>
+        </GridCol>
+    } *@
+</GridRow>
+
+@code {
+
+}

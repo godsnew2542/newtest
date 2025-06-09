@@ -1,0 +1,256 @@
+﻿@page "/Doc/ReportAdmin"
+
+<div id="pdf-ReportAdmin">
+    <div class="px-5">
+
+        @if (ListReportAdminV2.Any())
+        {
+            <div class="mt-2">
+                @for (int x = 0; x < ListReportAdminV2.Count; x++)
+                {
+                    var data = ListReportAdminV2[x];
+                    var index = x + 1;
+
+                    <h4 class="text-center mt-5" style="font-weight:bold;font-size:large">
+                        @Title
+                    </h4>
+
+                    <table class="table table-bordered mt-3">
+                        <thead class="text-center">
+                            <tr style="font-weight:bold">
+                                <td rowspan="2" class="text-center">
+                                    ประเภทสวัสดิการ
+                                </td>
+                                <td rowspan="2">
+                                    ปีงบ
+                                </td>
+                                <td colspan="4">
+                                    ประเภทบุคลากร
+                                </td>
+                                <td rowspan="2">
+                                    รวม
+                                </td>
+                                <td rowspan="2">
+                                    รวมเงินกู้
+                                </td>
+                            <tr>
+                                <td>
+                                    ขก
+                                </td>
+                                <td>
+                                    พ.ม.
+                                </td>
+                                <td>
+                                    เงินรายได้
+                                </td>
+                                <td>
+                                    ลูกจ้าง
+                                </td>
+                            </tr>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in data.ReportAdminList)
+                            {
+                                <tr class="text-center">
+                                    <td class="text-start">
+                                        @item.LoanTypeName
+                                    </td>
+                                    <td>
+                                        @GetYear(item.FiscalYears, 543)
+                                    </td>
+                                    <td>
+                                        @item.SumGovernmentOfficer
+                                    </td>
+                                    <td>
+                                        @item.SumUniversityStaff
+                                    </td>
+                                    <td>
+                                        @item.SumIncomeEmployee
+                                    </td>
+                                    <td>
+                                        @item.SumEmployee
+                                    </td>
+                                    <td>
+                                        @item.SumLoanAgreement
+                                    </td>
+                                    <td class="text-end">
+                                        @String.Format("{0:n2}", item.SumLoanAmount)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="text-center">
+                                <td colspan="2" class="text-end pe-3">
+                                    รวม
+                                </td>
+                                <td>
+                                    @data.ReportAdminList.Sum(x => x.SumGovernmentOfficer)
+                                </td>
+                                <td>
+                                    @data.ReportAdminList.Sum(x => x.SumUniversityStaff)
+                                </td>
+                                <td>
+                                    @data.ReportAdminList.Sum(x => x.SumIncomeEmployee)
+                                </td>
+                                <td>
+                                    @data.ReportAdminList.Sum(x => x.SumEmployee)
+                                </td>
+                                <td>
+                                    @data.ReportAdminList.Sum(x => x.SumLoanAgreement)
+                                </td>
+                                <td class="text-end">
+                                    @String.Format("{0:n2}", data.ReportAdminList.Sum(x => x.SumLoanAmount))
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    @*
+            @if (ListReportAdminV2.Count != index)
+            {
+            <div class="page-break" style="margin:20px ;padding:20px"></div>
+            } *@
+                }
+                <p>
+                    *** วันที่กองคลังโอนเงิน <br />
+                    ข้อมูลจากระบบ ณ วันที่ @dateService.ChangeDate(DateTime.Now, "dd MMMM yyyy HH.mm น.", Utility.DateLanguage_TH)
+                </p>
+
+            </div>
+        }
+
+        @if (ListReportAdmin.Any())
+        {
+            <div class="mt-2">
+                @for (int x = 0; x < ListReportAdmin.Count; x++)
+                {
+                    var ReportAdmin = ListReportAdmin[x];
+                    var index = x + 1;
+                    ReportAdmin.SumGovernmentOfficer = 0;
+                    ReportAdmin.SumUniversityStaff = 0;
+                    ReportAdmin.SumIncomeEmployee = 0;
+                    ReportAdmin.SumEmployee = 0;
+                    ReportAdmin.SumLoanAgreement = 0;
+                    ReportAdmin.SumLoanAmount = 0;
+
+                    <h4 class="text-center mt-5" style="font-weight:bold;font-size:large">
+                        @Title
+                    </h4>
+                    <table class="table table-bordered mt-3">
+                        <thead>
+                            <tr style="font-weight:bold">
+                                <td rowspan="2" class="text-center">
+                                    ประเภทสวัสดิการ
+                                </td>
+                                <td rowspan="2">
+                                    ปีงบ
+                                </td>
+                                <td colspan="4">
+                                    ประเภทบุคลากร
+                                </td>
+                                <td rowspan="2">
+                                    รวม
+                                </td>
+                                <td rowspan="2">
+                                    รวมเงินกู้
+                                </td>
+                            <tr>
+                                <td>
+                                    ขก
+                                </td>
+                                <td>
+                                    พ.ม.
+                                </td>
+                                <td>
+                                    เงินรายได้
+                                </td>
+                                <td>
+                                    ลูกจ้าง
+                                </td>
+                            </tr>
+                            </tr>
+                        </thead>
+
+                        <tbody class="text-center">
+                            @for (var i = 0; i < ReportAdmin.BuddhistCalendar.Count; i++)
+                            {
+                                var year = ReportAdmin.BuddhistCalendar[i];
+                                ReportAdmin.SumGovernmentOfficer = ReportAdmin.SumGovernmentOfficer + ReportAdmin.CountGovernmentOfficer[i];
+                                ReportAdmin.SumUniversityStaff = ReportAdmin.SumUniversityStaff + ReportAdmin.CountUniversityStaff[i];
+                                ReportAdmin.SumIncomeEmployee = ReportAdmin.SumIncomeEmployee + ReportAdmin.CountIncomeEmployee[i];
+                                ReportAdmin.SumEmployee = ReportAdmin.SumEmployee + ReportAdmin.CountEmployee[i];
+                                ReportAdmin.SumLoanAgreement = ReportAdmin.SumLoanAgreement + ReportAdmin.CountLoanAgreement[i];
+                                ReportAdmin.SumLoanAmount = ReportAdmin.SumLoanAmount + ReportAdmin.CountLoanAmount[i];
+
+                                <tr class="text-start">
+                                    @if (i == 0)
+                                    {
+                                        <td rowspan="@ReportAdmin.BuddhistCalendar.Count">
+                                            @ReportAdmin.LoanTypeName
+                                        </td>
+                                    }
+                                    <td>
+                                        @GetYear(year, 543)
+                                    </td>
+                                    <td>
+                                        @ReportAdmin.CountGovernmentOfficer[i]
+                                    </td>
+                                    <td>
+                                        @ReportAdmin.CountUniversityStaff[i]
+                                    </td>
+                                    <td>
+                                        @ReportAdmin.CountIncomeEmployee[i]
+                                    </td>
+                                    <td>
+                                        @ReportAdmin.CountEmployee[i]
+                                    </td>
+                                    <td>
+                                        @ReportAdmin.CountLoanAgreement[i]
+                                    </td>
+                                    <td>
+                                        @String.Format("{0:n2}", ReportAdmin.CountLoanAmount[i])
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2" class="text-end mr">
+                                    รวม
+                                </td>
+                                <td>
+                                    @ReportAdmin.SumGovernmentOfficer
+                                </td>
+                                <td>
+                                    @ReportAdmin.SumUniversityStaff
+                                </td>
+                                <td>
+                                    @ReportAdmin.SumIncomeEmployee
+                                </td>
+                                <td>
+                                    @ReportAdmin.SumEmployee
+                                </td>
+                                <td>
+                                    @ReportAdmin.SumLoanAgreement
+                                </td>
+                                <td>
+                                    @String.Format("{0:n2}", ReportAdmin.SumLoanAmount)
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    @if (ListReportAdmin.Count != index)
+                    {
+                        <div class="page-break" style="margin:20px ;padding:20px"></div>
+                    }
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+
+}

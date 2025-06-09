@@ -1,0 +1,75 @@
+﻿<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid">
+        @if (IsMobile)
+        {
+            <div class="nav-link appbar-title" style="color: #2788DE;font-size:small" aria-current="page">
+                ระบบสวัสดิการเงินกู้ ม.อ.
+                @* @if (testNotice)
+            {
+            <span class="text-danger">ระบบทดสอบ</span>
+            } *@
+            </div>
+            <span class="navbar-text">
+                @* <NavLink class="nav-link" @onclick="SignIn">
+            <button type="button" class="btn button-style button-color ">
+            <i class="material-icons me-2">account_circle</i>
+            เข้าสู่ระบบ
+            </button>
+            </NavLink> *@
+
+                <LoginNav TestNotice="@testNotice" />
+            </span>
+        }
+        else
+        {
+            <a class="navbar-brand">
+                <img src="https://www.computing.psu.ac.th/th/wp-content/uploads/2018/03/Logo-PSU-TH-01-1024x724.png" width="120" height="90" alt="" />
+
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link appbar-title" style="color: #2788DE;" aria-current="page">
+                            ระบบสวัสดิการเงินกู้
+                            @if (testNotice)
+                            {
+                                <span class="text-danger">ระบบทดสอบ</span>
+                            }
+                        </a>
+                    </li>
+                </ul>
+                <span class="navbar-text">
+                    <LoginNav TestNotice="@testNotice" />
+
+                   @*  <GridRow Gutter="(8,8)">
+                        <GridCol Flex="@("none")">
+                            <NavLink class="nav-link p-0 m-0" @onclick="SignIn">
+                                <button type="button" class="btn button-style button-color">
+                                    <i class="material-icons me-2">account_circle</i>
+                                    เข้าสู่ระบบ
+                                </button>
+                            </NavLink>
+                        </GridCol>
+                        @if (testNotice)
+                        {
+                            <GridCol Flex="@("none")">
+                                <NavLink class="nav-link p-0 m-0" @onclick="SignInThaId">
+                                    <button type="button" class="btn button-style button-color ">
+                                        <i class="material-icons me-2">account_circle</i>
+                                        ThaID
+                                    </button>
+                                </NavLink>
+                            </GridCol>
+                        }
+                    </GridRow> *@
+                </span>
+            </div>
+        }
+
+    </div>
+</nav>
+
+@code { }

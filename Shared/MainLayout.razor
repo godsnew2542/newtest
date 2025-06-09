@@ -1,0 +1,364 @@
+﻿@inherits LayoutComponentBase
+
+<AuthorizeView>
+    <Authorized>
+        @* <div class="@NavMenuCssClass"> *@
+        <div class="@($"sb-nav-fixed {(collapseNavMenu ? "sb-sidenav-toggled" : "")}")">
+            @*-------nav bar green---------*@
+            <nav class="sb-topnav navbar navbar-expand navbar-green">
+                <!-- Sidebar Toggle-->
+                <button class="btn btn-link btn-sm  me-4 ms-lg-4 ms-2 me-lg-0"
+                        id="sidebarToggle"
+                        href="#!"
+                        @onclick="@(()=>ToggleNavMenu())">
+                    <i class="fas fa-bars fa-xl"></i>
+                </button>
+
+                <!-- Navbar Brand-->
+                @if (IsMobile)
+                {
+                    <!-- button role-->
+                    <div class=" ms-auto me-2  my-2 my-md-0 p-1">
+                        <div>
+                            <ul class="navbar-nav">
+                                @if (testNotice)
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link">
+                                            <span class="text-danger">ระบบทดสอบ</span>
+                                        </a>
+                                    </li>
+                                }
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle"
+                                       style="font-weight:bold"
+                                       id="navbarDropdown"
+                                       href="#"
+                                       role="button"
+                                       data-bs-toggle="dropdown"
+                                       aria-expanded="false">
+                                        @GetRole(Role)
+                                        <i class="fa-solid fa-user-lock ms-1"></i>
+                                    </a>
+                                    @*style="width:180px"*@
+                                    <ul class="dropdown-menu dropdown-menu-end ms-1 p-1" aria-labelledby="navbarDropdown">
+                                        <li style="background-color: #367691; color: #ffffff ">
+                                            <a class="dropdown-itemnone text-center" style="font-size:medium">
+                                                เลือกบทบาท
+                                            </a>
+                                        </li>
+                                        <li style="color: #003C71 ;margin-top:3px">
+                                            <a class="dropdown-itemnone">
+                                                <RoleLayout SetChildData="SetCurrentDataAsync" />
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Navbar-->
+                    <div class="ms-2 me-2  my-2 my-md-0">
+                        <div>
+                            <ul class="navbar-nav">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle"
+                                       style="font-weight:bold"
+                                       id="navbarDropdown"
+                                       href="#"
+                                       role="button"
+                                       data-bs-toggle="dropdown"
+                                       aria-expanded="false">
+                                        <img class="border rounded-circle img-profile"
+                                             src="data:image/jpeg;base64, @GetUserImgURL(StaffID)">
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end ms-1 p-1" aria-labelledby="navbarDropdown">
+                                        <li style="background-color: #c1edcc; color: #003C71 ">
+                                            <a class="dropdown-itemnone">
+                                                @GetFullName()
+                                            </a>
+                                        </li>
+                                        <li style="background-color: #c1edcc; color: #003C71 ">
+                                            <a class="dropdown-itemnone">
+                                                วิทยาเขต : @GetCampusByStaffId()
+                                            </a>
+                                        </li>
+                                        <li style="background-color: #c1edcc; color: #003C71 ">
+                                            <a class="dropdown-itemnone">
+                                                ตำแหน่ง : @GetPositionByStaffId()
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider" />
+                                        </li>
+                                        <li style="background-color: #f4f7cd; color: #003C71 ">
+                                            <a class="dropdown-itemnone">
+                                                บทบาท : @GetRole(Role, true)
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider" />
+                                        </li>
+                                        <li style="text-align:center">
+                                            <a class="dropdown-item"
+                                               href="SignOut"
+                                               @onclick="@(async()=> {await LoanApp.Shared.EmptyLayout.SignOut(userService, _authStateTask, psuoAuth2Services);})">
+                                                ออกจากระบบ
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <a class="navbar-brand p-lg-2 ms-lg-3 ms-0 " style="cursor:default">
+                        ระบบสวัสดิการเงินกู้ <br /> มหาวิทยาลัยสงขลานครินทร์
+                        @if (testNotice)
+                        {
+                            <span class="text-danger">ระบบทดสอบ</span>
+                        }
+                    </a>
+                    <!-- button role-->
+                    <div class="ms-auto me-2  my-2 my-md-0 p-1">
+                        <div>
+                            <ul class="navbar-nav">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle"
+                                       style="font-weight: bold; font-size: medium"
+                                       id="navbarDropdown"
+                                       href="#"
+                                       role="button"
+                                       data-bs-toggle="dropdown"
+                                       aria-expanded="false">
+                                        @GetRole(Role)
+                                        <i class="fa-solid fa-user-lock"></i>
+                                    </a>
+
+                                    @*style="width:180px"*@
+                                    <ul class="dropdown-menu dropdown-menu-end ms-1 p-1" aria-labelledby="navbarDropdown">
+                                        <li style="background-color: #367691; color: #ffffff ">
+                                            <a class="dropdown-itemnone text-center" style="font-size:medium">
+                                                เลือกบทบาท
+                                            </a>
+
+                                        </li>
+                                        <li style="color: #003C71;margin-top:3px ">
+                                            <a class="dropdown-itemnone">
+                                                <RoleLayout SetChildData="SetCurrentDataAsync" />
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Navbar-->
+                    <div class="ms-2 me-2  my-2 my-md-0">
+                        <div>
+                            <ul class="navbar-nav">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle"
+                                       style="font-weight: bold; font-size:medium"
+                                       id="navbarDropdown"
+                                       href="#"
+                                       role="button"
+                                       data-bs-toggle="dropdown"
+                                       aria-expanded="false">
+                                        @userService.GetFullNameNoTitleName(StaffID)
+
+                                        <img class="border rounded-circle img-profile"
+                                             src="data:image/jpeg;base64, @GetImage">
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end ms-1 p-1" aria-labelledby="navbarDropdown">
+                                        <li style="background-color: #c1edcc; color: #003C71 ">
+                                            <a class="dropdown-itemnone">
+                                                @GetFullName()
+                                            </a>
+                                        </li>
+                                        <li style="background-color: #c1edcc; color: #003C71 ">
+                                            <a class="dropdown-itemnone">
+                                                วิทยาเขต : @GetCampusByStaffId()
+                                            </a>
+                                        </li>
+                                        <li style="background-color: #c1edcc; color: #003C71 ">
+                                            <a class="dropdown-itemnone">
+                                                ตำแหน่ง : @GetPositionByStaffId()
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider" />
+                                        </li>
+                                        <li style="background-color: #f4f7cd; color: #003C71 ">
+                                            <a class="dropdown-itemnone">
+                                                บทบาท : @GetRole(Role, true)
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider" />
+                                        </li>
+                                        <li style="text-align:center">
+                                            <a class="dropdown-item"
+                                               href="SignOut"
+                                               @onclick="@(async()=> {await LoanApp.Shared.EmptyLayout.SignOut(userService, _authStateTask, psuoAuth2Services);})">
+                                                ออกจากระบบ
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                }
+            </nav>
+
+            @if (Role.Name == "user")
+            {
+                <div id="layoutSidenav">
+                    <div id="layoutSidenav_nav">
+                        @*-------nav bar blue---------*@
+                        @*<nav class="sb-sidenav accordion sb-sidenav-blue" id="sidenavAccordion">*@
+
+                        @*-------nav bar light---------*@
+                        @*<nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">*@
+
+                        @*-------nav bar light---------*@
+                        <nav class="sb-sidenav accordion sb-sidenav-green" id="sidenavAccordion">
+                            @*<NavUser SetChildData="SetCurrentData" />*@
+                            <NavUser />
+                            <SideNavFooter role="@Role.Name" />
+                        </nav>
+                    </div>
+                    <div id="layoutSidenav_content">
+                        <main>
+                            <CascadingValue Value="@this">
+                                @Body
+                            </CascadingValue>
+                        </main>
+                    </div>
+                </div>
+            }
+            else if (Role.Name == "adminUni")
+            {
+                <div id="layoutSidenav">
+                    <div id="layoutSidenav_nav">
+                        @*-------nav bar blue---------*@
+                        @*<nav class="sb-sidenav accordion sb-sidenav-blue" id="sidenavAccordion">*@
+
+                        @*-------nav bar light---------*@
+                        @*<nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">*@
+
+                        @*-------nav bar light---------*@
+                        <nav class="sb-sidenav accordion sb-sidenav-green" id="sidenavAccordion">
+                            @*<NavAdminUni SetChildData="SetCurrentData" />*@
+                            <NavAdminUni />
+                            <SideNavFooter role="@Role.Name" />
+                        </nav>
+                    </div>
+                    <div id="layoutSidenav_content">
+                        <main>
+                            <CascadingValue Value="@this">
+                                @Body
+                            </CascadingValue>
+                        </main>
+                    </div>
+                </div>
+            }
+            else if (Role.Name == "adminCampus")
+            {
+                <div id="layoutSidenav">
+                    <div id="layoutSidenav_nav">
+                        @*-------nav bar blue---------*@
+                        @*<nav class="sb-sidenav accordion sb-sidenav-blue" id="sidenavAccordion">*@
+
+                        @*-------nav bar light---------*@
+                        @*<nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">*@
+
+                        @*-------nav bar light---------*@
+                        <nav class="sb-sidenav accordion sb-sidenav-green" id="sidenavAccordion">
+                            @*<NavAdminCampus SetChildData="SetCurrentData" />*@
+                            <NavAdminCampus />
+                            <SideNavFooter role="@Role.Name" />
+                        </nav>
+                    </div>
+                    <div id="layoutSidenav_content">
+                        <main>
+                            <CascadingValue Value="@this">
+                                @Body
+                            </CascadingValue>
+                        </main>
+                    </div>
+                </div>
+            }
+            else if (Role.Name == "manager")
+            {
+                <div id="layoutSidenav">
+                    <div id="layoutSidenav_nav">
+                        @*-------nav bar blue---------*@
+                        @*<nav class="sb-sidenav accordion sb-sidenav-blue" id="sidenavAccordion">*@
+
+                        @*-------nav bar light---------*@
+                        @*<nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">*@
+
+                        @*-------nav bar light---------*@
+                        <nav class="sb-sidenav accordion sb-sidenav-green" id="sidenavAccordion">
+                            @*<NavManager SetChildData="SetCurrentData" />*@
+                            <NavManager />
+                            <SideNavFooter role="@Role.Name" />
+                        </nav>
+                    </div>
+                    <div id="layoutSidenav_content">
+                        <main>
+                            <CascadingValue Value="@this">
+                                @Body
+                            </CascadingValue>
+                        </main>
+                    </div>
+                </div>
+            }
+            else if (Role.Name == "treasury")
+            {
+                <div id="layoutSidenav">
+                    <div id="layoutSidenav_nav">
+                        @*-------nav bar blue---------*@
+                        @*<nav class="sb-sidenav accordion sb-sidenav-blue" id="sidenavAccordion">*@
+
+                        @*-------nav bar light---------*@
+                        @*<nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">*@
+
+                        @*-------nav bar light---------*@
+                        <nav class="sb-sidenav accordion sb-sidenav-green" id="sidenavAccordion">
+                            @*<NavTreasury SetChildData="SetCurrentData" />*@
+                            <NavTreasury />
+                            <SideNavFooter role="@Role.Name" />
+                        </nav>
+                    </div>
+                    <div id="layoutSidenav_content">
+                        <main>
+                            <CascadingValue Value="@this">
+                                @Body
+                            </CascadingValue>
+                        </main>
+                    </div>
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="page" style="height:100%">
+            <div class="main">
+                <NavIndex />
+                <div>
+                    @Body
+                </div>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+
+}

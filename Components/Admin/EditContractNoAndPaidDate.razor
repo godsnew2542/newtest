@@ -1,0 +1,61 @@
+﻿@using Radzen.Blazor
+
+@if (!string.IsNullOrEmpty(ContractNo))
+{
+    <GridRow Gutter="(8,8)" Align="middle">
+        <GridCol Flex="@("none")">
+            เลขที่สัญญา:
+        </GridCol>
+        <GridCol Flex="@("auto")">
+            <Input Placeholder="ระบุเลขที่สัญญา"
+                   @bind-Value="@NewContractNo"
+                   AllowClear="true"
+                   MaxLength=20
+                   ShowCount=true />
+        </GridCol>
+        <GridCol Flex="@("none")">
+            <Button Type="@ButtonType.Primary"
+                    Style="border-radius:8px;"
+                    OnClick="@(async()=>{await ValidationContractNo(NewContractNo, ContractId);})">
+                ตรวจสอบและบันทึก
+            </Button>
+        </GridCol>
+    </GridRow>
+}
+
+@if (!string.IsNullOrEmpty(ContractNo) && PaidDate != null)
+{
+    <br />
+}
+
+@if (PaidDate != null)
+{
+    <GridRow Gutter="(8,8)" Align="middle">
+        <GridCol Flex="@("none")">
+            วันที่กองคลังโอนเงิน:
+        </GridCol>
+        <GridCol Flex="@("auto")">
+            <RadzenDatePicker @bind-Value=@PaymentTime
+                              Culture="@(new System.Globalization.CultureInfo(Utility.DateLanguage_EN))"
+                              DateFormat="dd MMMM yyyy"
+                              Change="@(args => NewOnChange(args))"
+                              Class="w-100" />
+        </GridCol>
+        <GridCol Flex="@("none")">
+            <Popconfirm Placement="@Placement.Bottom"
+                        Title="@("ยืนยันการเปลี่ยนแปลง วันที่กองคลังโอนเงิน หรือไม่ ?")"
+                        OnConfirm="@(async () => { await ValidationPaidDate(PaymentTime, ContractId); })"
+                        OkText="ยืนยัน"
+                        CancelText="ยกเลิก">
+                <Button Type="@ButtonType.Primary"
+                        Style="border-radius:8px;">
+                    บันทึก
+                </Button>
+            </Popconfirm>
+        </GridCol>
+    </GridRow>
+}
+
+@code {
+
+}

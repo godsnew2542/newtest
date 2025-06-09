@@ -1,0 +1,403 @@
+﻿@page "/Guarantor"
+@attribute [Authorize(Roles = "0")]
+
+<div class="container-fluid mt-2 mb-5 pb-5">
+    <UserManualComponents Url="Files/Manual/Guarantor/Guarantor_Manual" />
+
+    <div class="mb-4 mt-2 ms-3 py-2">
+        <Card>
+            <TitleTemplate>
+                <GridRow Gutter="(8,8)" Align="middle">
+                    <GridCol Flex="@("auto")">
+                        <div class="font-color" style="font-size:medium">
+                            <i class="fas fa-handshake fa-lg mx-2"></i>
+                            <strong>การค้ำประกัน</strong>
+                        </div>
+                    </GridCol>
+
+                    @if (LoanAgreementGuaran.Any())
+                    {
+                        <GridCol Flex="@("none")">
+                            <Button Type="@ButtonType.Primary" OnClick="@(async()=>{await TopageLoanAgreementOld();})">สัญญาค้ำประกัน (StaffId เก่า)</Button>
+                        </GridCol>
+                    }
+                </GridRow>
+            </TitleTemplate>
+        </Card>
+    </div>
+
+    @if (!ListLoanNow.Any() && !ListLoanSuccess.Any())
+    {
+        <div class="text-center mt-4">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 align-items-center">
+                <Empty Class="mt-5" Style="height:200px">
+                    <DescriptionTemplate>
+                        <span>ไม่พบข้อมูลการค้ำประกัน</span>
+                    </DescriptionTemplate>
+                </Empty>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div>
+            <div class="mx-2 col-12 col-md-12 mt-2">
+                <div class="table-header py-3" style="height: 60px;">
+                    <div class="ms-3">
+                        สัญญาที่คงอยู่@(ListLoanNow.Any() ? $"จำนวน {ListLoanNow.Count()} ฉบับ" : "")
+                    </div>
+                </div>
+
+                <Table TItem="VLoanRequestContract"
+                       DataSource="ListLoanNow"
+                       Responsive=true
+                       Context="agreement"
+                       OnRowClick="@((e)=>{SeeDetail(e);})"
+                       HidePagination="@(ListLoanNow.Count() >= 10 ? false : true)"
+                       Class="table-hover-cursor">
+                    <PropertyColumn Title="เลขที่สัญญา"
+                                    Property="c=>c.ContractNo"
+                                    HeaderStyle="text-align:center; font-weight:bold;"
+                                    Style="text-align:center;">
+                        @(!string.IsNullOrEmpty(agreement.ContractNo) ? agreement.ContractNo : "-")
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="ชื่อผู้กู้"
+                                    Property="c=>c.DebtorStaffId"
+                                    HeaderStyle="text-align:center; font-weight:bold;">
+                        @(userService.GetNameForDebtor(agreement)?.FullNameTh)
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="ประเภทกู้ยืม"
+                                    Property="c=>c.LoanTypeName"
+                                    HeaderStyle="text-align:center; font-weight:bold;" />
+
+                    <PropertyColumn Title="ยอดเงินกู้"
+                                    Property="c=>c.LoanRequestLoanAmount"
+                                    HeaderStyle="text-align:center; font-weight:bold;"
+                                    Style="text-align:center;">
+                        @string.Format("{0:n2}", (agreement.ContractLoanAmount != null ? agreement.ContractLoanAmount : agreement.LoanRequestLoanAmount))
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="จำนวนงวด"
+                                    Property="c=>c.LoanRequestNumInstallments"
+                                    HeaderStyle="text-align:center; font-weight:bold;"
+                                    Style="text-align:center;">
+                        @(agreement.ContractLoanNumInstallments != null ? agreement.ContractLoanNumInstallments : agreement.LoanRequestNumInstallments)
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="ผ่อนชำระเดือนละ"
+                                    Property="c=>c.LoanRequestLoanInstallment"
+                                    HeaderStyle="text-align:center; font-weight:bold;"
+                                    Style="text-align:center;">
+                        @string.Format("{0:n2}", (agreement.ContractLoanInstallment != null ? agreement.ContractLoanInstallment : agreement.LoanRequestLoanInstallment))
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="สถานะ"
+                                    Property="c=>c.CurrentStatusId"
+                                    HeaderStyle="text-align:center; font-weight:bold;">
+                        @switch (agreement.CurrentStatusId)
+                        {
+                            case 1:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Yellow.ToString())"
+                                                               message="@userService.GetStatusNameFromVLoanRequestContract(agreement)" />
+                                break;
+
+                            case 2:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Cyan.ToString())"
+                                                               message="@userService.GetStatusNameFromVLoanRequestContract(agreement)" />
+                                break;
+
+                            case 4:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.GeekBlue.ToString())"
+                                                               message="@userService.GetStatusNameFromVLoanRequestContract(agreement)" />
+                                break;
+
+                            case 9:
+                                <LoanApp.Components.Ant.TagAnt color="#2db7f5"
+                                                               message="@userService.GetStatusNameFromVLoanRequestContract(agreement)" />
+                                break;
+
+                            case 6:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Purple.ToString())"
+                                                               message="@userService.GetStatusNameFromVLoanRequestContract(agreement)" />
+                                break;
+
+                            case 7:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Lime.ToString())"
+                                                               message="@userService.GetStatusNameFromVLoanRequestContract(agreement)" />
+                                break;
+
+                            case 8:
+                                <LoanApp.Components.Ant.TagAnt color="rgb(143, 201, 146)"
+                                                               message="@userService.GetStatusNameFromVLoanRequestContract(agreement)">
+                                    <header>
+                                        <i class="fas fa-check-circle me-2" style="color:white"></i>
+                                    </header>
+                                </LoanApp.Components.Ant.TagAnt>
+                                break;
+
+                            case 80:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Orange.ToString())"
+                                                               message="@userService.GetStatusNameFromVLoanRequestContract(agreement)">
+                                    <header>
+                                        <i class="fas fa-frown me-2" style="color: #d46b08"></i>
+                                    </header>
+                                </LoanApp.Components.Ant.TagAnt>
+                                break;
+
+                            case 81:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Volcano.ToString())"
+                                                               message="@userService.GetStatusNameFromVLoanRequestContract(agreement)">
+                                    <header>
+                                        <i class="fas fa-frown me-2" style="color: #d4380d"></i>
+                                    </header>
+                                </LoanApp.Components.Ant.TagAnt>
+                                break;
+
+                            case 200:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Gold.ToString())"
+                                                               message="@userService.GetStatusNameFromVLoanRequestContract(agreement)" />
+                                break;
+
+                            default:
+                                <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Magenta.ToString())"
+                                                               message="@userService.GetStatusNameFromVLoanRequestContract(agreement)">
+                                    <header>
+                                        <i class="fas fa-frown me-2" style="color: #c41d7f"></i>
+                                    </header>
+                                </LoanApp.Components.Ant.TagAnt>
+                                break;
+                        }
+                    </PropertyColumn>
+
+                    <ActionColumn Title="หมายเหตุ"
+                                  HeaderStyle="text-align:center; font-weight:bold;"
+                                  Style="text-align:center;">
+                        @* รอพิจารณาการกู้ *@
+                        @if (agreement.CurrentStatusId == 1)
+                        {
+                            <div>
+                                วันที่ยื่นคำขอกู้ @dateService.ChangeDate(dateService.ConvertToDateTime(agreement.LoanRequestDate), FormathDate, Utility.DateLanguage_TH)
+                            </div>
+                        }
+
+                        @* อนุมัติ และระบุวันนัดหมาย *@
+                        @if (agreement.CurrentStatusId == 2)
+                        {
+                            <div>
+                                วันที่อนุมัติคำขอ @dateService.ChangeDate(dateService.ConvertToDateTime(agreement.AdminRecordDate), FormathDate, Utility.DateLanguage_TH)
+                            </div>
+                        }
+
+                        @* รอทำสัญญา *@
+                        @if (agreement.CurrentStatusId == 4)
+                        {
+                            if (agreement.ContractDate != null)
+                            {
+                                <div>
+                                    วันที่นัดหมาย
+                                    @(dateService.ChangeDate(
+                                        dateService.ConvertToDateTime(agreement.ContractDate),
+                                        FormathDate,
+                                        Utility.DateLanguage_TH))
+                                    เวลา
+                                    @(dateService.ChangeDate(
+                                        dateService.ConvertToDateTime(agreement.ContractDate),
+                                        FormathTime,
+                                        Utility.DateLanguage_TH)) น.
+                                </div>
+
+                            }
+                            else
+                            {
+                                <div>
+                                    ไม่พบวันที่นัดหมาย
+                                </div>
+                            }
+                        }
+
+                        @* เช็นสัญญาเสร็จสิ้น *@
+                        @if (agreement.CurrentStatusId == 9)
+                        {
+                            <div>
+                                @*ส่งเอกสารภายใน 30 วันนับจากวันที่ได้รับเงิน*@
+                                วันที่ทำสัญญา
+                                @(agreement.AdminUploadDate != null ?
+                                    dateService.ChangeDate(
+                                    dateService.ConvertToDateTime(agreement.AdminUploadDate),
+                                    FormathDate,
+                                    Utility.DateLanguage_TH) :
+                                    " - ")
+                            </div>
+                        }
+
+                        @if (agreement.CurrentStatusId == 6 || agreement.CurrentStatusId == 7)
+                        {
+                            <div>
+                                วันที่ได้รับเงิน
+                                @(agreement.PaidDate != null ?
+                                    dateService.ChangeDate(
+                                    dateService.ConvertToDateTime(agreement.PaidDate),
+                                    FormathDate,
+                                    Utility.DateLanguage_TH) :
+                                    dateService.ChangeDate(
+                                    dateService.ConvertToDateTime(agreement.ContractDate),
+                                    FormathDate,
+                                    Utility.DateLanguage_TH))
+                            </div>
+                        }
+                    </ActionColumn>
+                </Table>
+            </div>
+
+            @if (!LoanCheckbook)
+            {
+                <div class="mx-2 col-12 col-md-12 pb-3 mt-3">
+                    <div class="table-header py-3" style="height: 60px">
+                        <div class="ms-3">
+                            สัญญาที่สิ้นสุดแล้ว@(ListLoanSuccess.Any() ? $"จำนวน {ListLoanSuccess.Count()} ฉบับ" : "")
+                        </div>
+                    </div>
+
+                    <Table TItem="VLoanRequestContract"
+                           DataSource="ListLoanSuccess"
+                           Responsive=true
+                           Context="agreement"
+                           OnRowClick="@((e)=>{SeeDetail(e);})"
+                           HidePagination="@(ListLoanSuccess.Count() >= 10 ? false : true)"
+                           Class="table-hover-cursor">
+                        <PropertyColumn Title="เลขที่สัญญา"
+                                        Property="c=>c.ContractNo"
+                                        HeaderStyle="text-align:center; font-weight:bold;"
+                                        Style="text-align:center;">
+                            @(!string.IsNullOrEmpty(agreement.ContractNo) ? agreement.ContractNo : "-")
+                        </PropertyColumn>
+
+                        <PropertyColumn Title="ชื่อผู้กู้"
+                                        Property="c=>c.DebtorStaffId"
+                                        HeaderStyle="text-align:center; font-weight:bold;">
+                            @(userService.GetNameForDebtor(agreement)?.FullNameTh)
+                        </PropertyColumn>
+
+                        <PropertyColumn Title="ประเภทกู้ยืม"
+                                        Property="c=>c.LoanTypeName"
+                                        HeaderStyle="text-align:center; font-weight:bold;" />
+
+                        <PropertyColumn Title="ยอดเงินกู้"
+                                        Property="c=>c.LoanRequestLoanAmount"
+                                        HeaderStyle="text-align:center; font-weight:bold;"
+                                        Style="text-align:center;">
+                            @string.Format("{0:n2}", (agreement.ContractLoanAmount != null ? agreement.ContractLoanAmount : agreement.LoanRequestLoanAmount))
+                        </PropertyColumn>
+
+                        <PropertyColumn Title="จำนวนงวด"
+                                        Property="c=>c.LoanRequestNumInstallments"
+                                        HeaderStyle="text-align:center; font-weight:bold;"
+                                        Style="text-align:center;">
+                            @(agreement.ContractLoanNumInstallments != null ? agreement.ContractLoanNumInstallments : agreement.LoanRequestNumInstallments)
+                        </PropertyColumn>
+
+                        <PropertyColumn Title="ผ่อนชำระเดือนละ"
+                                        Property="c=>c.LoanRequestLoanInstallment"
+                                        HeaderStyle="text-align:center; font-weight:bold;"
+                                        Style="text-align:center;">
+                            @string.Format("{0:n2}", (agreement.ContractLoanInstallment != null ? agreement.ContractLoanInstallment : agreement.LoanRequestLoanInstallment))
+                        </PropertyColumn>
+
+                        <PropertyColumn Title="สถานะ"
+                                        Property="c=>c.CurrentStatusId"
+                                        HeaderStyle="text-align:center; font-weight:bold;">
+
+                            @switch (agreement.CurrentStatusId)
+                            {
+                                case 99:
+                                    <LoanApp.Components.Ant.TagAnt color="@PresetColor.Green.ToString()"
+                                                                   header="GetIconCurrentStatusId(99, agreement)" />
+                                    break;
+
+                                case 98:
+                                    <LoanApp.Components.Ant.TagAnt color="@PresetColor.Pink.ToString()"
+                                                                   message="@userService.GetStatusNameFromVLoanRequestContract(agreement)" />
+                                    break;
+
+                                default:
+                                    <LoanApp.Components.Ant.TagAnt color="@("error")"
+                                                                   header="GetIconCurrentStatusId(null, agreement)" />
+                                    break;
+                            }
+                        </PropertyColumn>
+
+                        <ActionColumn Title="หมายเหตุ"
+                                      HeaderStyle="text-align:center; font-weight:bold;"
+                                      Style="text-align:center;">
+                            @if (!string.IsNullOrEmpty(agreement.ContractRemark))
+                            {
+                                <div>
+                                    @agreement.ContractRemark
+                                </div>
+                            }
+                            else if (!string.IsNullOrEmpty(agreement.LoanRemark))
+                            {
+                                <div>
+                                    <i class="fa-regular fa-comment-dots mx-2"></i>
+                                    @agreement.LoanRemark
+                                </div>
+                            }
+                            else
+                            {
+                                if (agreement.CurrentStatusId == 3)
+                                {
+                                    <a>สอบถามเพิ่มเติม โทร. 2053</a>
+                                }
+                            }
+                        </ActionColumn>
+                    </Table>
+                </div>
+            }
+        </div>
+
+        @*Footer*@
+        <div class="footer">
+            <div class="my-1 ps-3">
+                <Switch @bind-Checked="@LoanCheckbook" />
+                @(LoanCheckbook ? "แสดงเฉพาะสัญญาที่คงอยู่" : "แสดงสัญญาทั้งหมด")
+            </div>
+        </div>
+    }
+</div>
+
+<style scoped>
+    :root .ant-table-pagination.ant-pagination {
+        margin: 10px !important;
+    }
+
+    :root .ant-card {
+        border-radius: 8px !important;
+    }
+</style>
+
+@code
+{
+    private RenderFragment GetIconCurrentStatusId(int? statusId, VLoanRequestContract agreement)
+    {
+        switch (statusId)
+        {
+            case 99:
+                return @<div>
+        <i class="fas fa-smile me-2" style="color: #389e0d"></i>
+        @userService.GetStatusNameFromVLoanRequestContract(agreement)
+    </div>;
+
+            case null:
+                return @<div>
+        <i class="fas fa-times-circle me-2" style="color: #f5222d"></i>
+        @userService.GetStatusNameFromVLoanRequestContract(agreement)
+    </div>;
+
+            default:
+                return @<div></div>;
+
+        }
+    }
+}

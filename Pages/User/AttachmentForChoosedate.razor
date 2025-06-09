@@ -1,0 +1,188 @@
+﻿@page "/User/AttachmentForChoosedate/{RequestID:decimal}"
+@page "/{Role}/AttachmentForChoosedate/{StaffID}/{RequestID:decimal}"
+@attribute [Authorize(Roles = "0")]
+
+<div class="container-fluid mt-3 pb-5 mb-5">
+    <div class="mt-4 mb-2 px-5 py-3">
+        <StepsAnt Stepes="@StepsChooseDate.Steps" Current="StepsChooseDate.Current" />
+    </div>
+    <div class="row p-2">
+        <div class="card shadow d-sm-flex mb-4 mt-3 col-xl-8 col-lg-12 col-md-12 col-12 p-0">
+            <div class="card-header py-3">
+                <h6 class=" mb-0 py-2 px-1 ms-1 font-color ">
+                    <strong>@Dataheader</strong>
+                </h6>
+            </div>
+            <div class="mt-2 p-3 mb-5">
+                <div class=" px-1" style="font-size:medium;color:black">
+                    คุณได้อัปโหลดเอกสารเพื่อทำสัญญาเรียบร้อย ดังนี้
+                </div>
+                <div class="row">
+                    <div class="mt-2 p-1">
+                        @if (ItemUploadImg.Count() != 0)
+                        {
+                            for (int i = 0; i < ItemUploadImg.Count(); i++)
+                            {
+                                var item = ItemUploadImg[i];
+                                bool NoImg = true;
+
+                                <div class="ms-2">
+                                    <div class="font-color" style="font-weight:bold;font-size:medium">
+                                        <i class="fa-solid fa-file fa-lg mx-2"></i> @item.AttachmentNameThai
+                                    </div>
+                                </div>
+
+                                foreach (var img in FileValue)
+                                {
+                                    if (item.AttachmentTypeId == img.AttachmentTypeId)
+                                    {
+                                        NoImg = false;
+                                        int DisplayBookBank = 1;
+
+                                        if (item.AttachmentTypeId == 10)
+                                        {
+                                            @if (DisplayBookBank == 1)
+                                            {
+                                                <div class="ms-5 my-1" style="color: black; font-size: medium">
+                                                    <i class="fas fa-money-check fa-lg"></i> : หมายเลขบัญชี  @GetBookBank().Result
+                                                </div>
+                                            }
+                                            <div class="ms-5 my-1" style="color: black; font-size: medium">
+                                                ชื่อไฟล์ : @img.Name
+                                            </div>
+
+                                            ++DisplayBookBank;
+                                        }
+                                        else
+                                        {
+                                            <div class="ms-5 my-1" style="color: black; font-size: medium">
+                                                ชื่อไฟล์ : @img.Name
+                                            </div>
+                                        }
+
+                                    }
+                                }
+                                if (NoImg)
+                                {
+                                    <div class="col-xxl-10 col-xl-9 col-lg-8 col-md-7 col-sm-12 mt-2"
+                                         style="color: black; font-size: medium">
+                                        ไม่พบเอกสาร
+                                    </div>
+                                    @if (item.AttachmentTypeId == 10)
+                                    {
+                                        <div class="ms-3 mt-3" style="color: black; font-size: medium">
+                                            <i class="fas fa-money-check fa-lg"></i> :  @GetBookBank().Result
+                                        </div>
+                                    }
+                                }
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-12 col-md-12 col-12 p-1 mt-3">
+            <div class="mx-2 shadow rounded" style="background-color:none;border:none">
+                <div class="card-body" style=" background-color: #68a541; border-top-left-radius: 10px; border-top-right-radius: 10px">
+
+                    <div class="row">
+                        <a class="text-start col-6"><i class="fas fa-calendar-check mx-3" style="color: white;font-size:50px"></i></a>
+                        <a class="p-2 col-6 text-end"
+                           style="font-size: x-large;color:white;font-weight:bold">
+                            ข้อมูลการนัดหมาย
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-white text-end mb-4" style=" border-bottom-left-radius: 10px; border-bottom-right-radius: 10px">
+                    <div class="row">
+                        <a class="p-2 mt-3 col-12"
+                           style="color: black; font-size: medium;">
+                            คุณนัดหมายทำสัญญา
+                        </a>
+                        <a class="p-2 mt-3 col-12"
+                           style="color: #68a541; font-size: 30px;">
+                            วันที่ @DataApply
+                        </a>
+                        <a class="pt-2 col-12  mb-3 pb-5"
+                           style="font-size:30px; color: #68a541; ">
+                            ช่วงเวลา @Timeheader น.
+                        </a>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@*footer*@
+<div class="footer">
+    <div class="row col-12">
+        <div class="col-xl-4 col-lg-4 col-md-5 col-6 text-start">
+            <button class="btn secondary-bg shadow rounded text-center"
+                    style="border-radius:20px;width:170px"
+                    @onclick="Back">
+                <i class="fa-solid fa-arrow-left fa-lg me-3"></i> ย้อนกลับ
+            </button>
+        </div>
+        <div class="col-xl-6 col-lg-5 col-md-7 col-6 text-end">
+            <button class="btn button-color shadow rounded text-center"
+                    style="color:white;border-radius:20px;width:170px"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirmPage">
+                ยืนยันนัดหมาย
+            </button>
+        </div>
+    </div>
+</div>
+
+@* model Confirm page *@
+<div class="modal fade"
+     id="confirmPage"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <a style="font-size:medium">@GetHeaderModel().Result</a>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary shadow rounded text-center"
+                        style="width:100px"
+                        data-bs-dismiss="modal">
+                    ยกเลิก
+                </button>
+                <button type="button"
+                        class="btn button-color shadow rounded text-center"
+                        style="width:100px"
+                        data-bs-dismiss="modal"
+                        @onclick="()=>NextPageAsync(RequestID)">
+                    ยืนยัน
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string TitleRenderFunction(string date, string time)
+    {
+        var t = "<div>" +
+        "กรุณานำเอกสารในการทำสัญญาทั้งหมดมาให้พร้อมในวันทำสัญญา และ มาให้ตรงวันเวลาที่นัดหมาย" +
+        "</div>" +
+        "<div>" +
+        $"วันที่ {date}เวลา {time} น." +
+        "</div>";
+        return t;
+    }
+}

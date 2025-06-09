@@ -1,0 +1,207 @@
+﻿@if (LoadingDataTable)
+{
+    <Loading Message="กำลังประมวลผลข้อมูล" />
+}
+else
+{
+    <div style="font-size:medium;">
+        ทะเบียนลูกหนี้ : @DebtorRegisters.Count() รายการ
+        @* => @_pageIndex *@
+    </div>
+
+    <br />
+
+    <div style="margin: 0 20px;">
+        <GridRow Gutter="(8,8)" Align="middle">
+            <GridCol Flex="@("auto")">
+                <div>
+                    <Switch Control Checked="@switchValue" OnClick="CheckboxSwitch" /> :
+                    @(switchValue ? "ทั้งหมด" : "ที่ยังไม่สิ้นสุดสัญญา")
+                </div>
+            </GridCol>
+            <GridCol Flex="@("none")">
+                <Tooltip Title="@($"{(DefaultExpand ? "ปิด" : "เปิด")} การดูข้อมูลการจ่ายเงิน")">
+                    <Button Shape="@ButtonShape.Circle" OnClick="OnExpandTable">
+                        @if (DefaultExpand)
+                        {
+                            <i class="fa-regular fa-eye-slash"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-regular fa-eye"></i>
+                        }
+                    </Button>
+                </Tooltip>
+            </GridCol>
+        </GridRow>
+    </div>
+
+    <br />
+
+    <Table @bind-PageIndex="_pageIndex"
+           TItem="DebtorRegisterModel"
+           DataSource="@DebtorRegisters"
+           Responsive=true
+           RowExpandable="@((record)=> record.Data.TransactionList.Any())"
+           DefaultExpandAllRows=DefaultExpand
+           @ref="TableRef">
+
+        <ColumnDefinitions>
+            <ActionColumn Title="วันที่จ่ายเงิน"
+                          HeaderStyle="font-weight:bold; text-align:center;">
+                <div>
+                    @dateService.ChangeDate(context.ReportTransaction.DueDate, "d/MM/yyyy", Utility.DateLanguage_TH)
+                </div>
+            </ActionColumn>
+
+            <PropertyColumn Title="ชื่อ-นามสกุล"
+                            Property="c=>c.ReportTransaction.DebtorStaffId"
+                            HeaderStyle="font-weight:bold; text-align:center;">
+                <div>
+                    @(context.ReportTransaction.DebtorNameTh + " " + context.ReportTransaction.DebtorSnameTh)
+                </div>
+            </PropertyColumn>
+
+            <PropertyColumn Title="เลขที่สัญญา"
+                            Property="c=>c.ReportTransaction.ContractNo"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:center;" />
+
+            <PropertyColumn Title="ประเภทสวัสดิการเงินกู้"
+                            Property="c=>c.ReportTransaction.StaffTypeName"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:center;" />
+
+            <PropertyColumn Title="หน่วยงาน"
+                            Property="c=>c.ReportTransaction.DebtorFacNameThai"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:center;" />
+
+            <PropertyColumn Title="จำนวนเงินกู้"
+                            Property="c=>c.ReportTransaction.ContractLoanAmount"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:center;">
+                <div>
+
+                    @String.Format("{0:n2}", context.ReportTransaction.ContractLoanAmount)
+                </div>
+            </PropertyColumn>
+
+            <PropertyColumn Title="จำนวนงวด"
+                            Property="c=>c.ReportTransaction.ContractLoanNumInstallments"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:center;" />
+
+            <PropertyColumn Title="ดอกเบี้ย(%)"
+                            Property="c=>c.ReportTransaction.ContractLoanInterest"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:center;">
+                <div>
+
+                    @String.Format("{0:n2}", context.ReportTransaction.ContractLoanInterest)
+                </div>
+            </PropertyColumn>
+
+            <PropertyColumn Title="ชำระงวดละ"
+                            Property="c=>c.ReportTransaction.ContractLoanInstallment"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:center;">
+                <div>
+
+                    @String.Format("{0:n2}", context.ReportTransaction.ContractLoanInstallment)
+                </div>
+            </PropertyColumn>
+
+            <PropertyColumn Title="คงเหลือ"
+                            Property="c=>c.ReportTransaction.BalanceAmount"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Style="text-align:center;">
+                <div>
+
+                    @String.Format("{0:n2}", context.ReportTransaction.BalanceAmount)
+                </div>
+            </PropertyColumn>
+
+            <PropertyColumn Title="สถานะ"
+                            Property="c=>c.ReportTransaction.CurrentStatusId"
+                            HeaderStyle="font-weight:bold; text-align:center;"
+                            Sortable>
+                <div>
+                    @context.ReportTransaction.CurrentStatusName
+                </div>
+            </PropertyColumn>
+        </ColumnDefinitions>
+
+        <ExpandTemplate>
+            <div>
+                @if (context.Data.TransactionList.Any(x => x.ValidationTransaction == "Y"))
+                {
+                    List<VReportTransaction> resultTransactions = context.Data.TransactionList
+                    .Where(x => x.ValidationTransaction == "Y")
+                    .ToList();
+
+                    <GridRow Gutter="(8,8)">
+                        @foreach (var item in resultTransactions)
+                        {
+                            <GridCol Xxl="8" Xl="8" Lg="12" Md="12" Sm="24" Xs="24">
+                                <Card Bordered="true">
+                                    <Descriptions>
+                                        <DescriptionsItem Title="ชำระงวดที่">
+                                            @item.InstallmentNo
+                                        </DescriptionsItem>
+                                    </Descriptions>
+
+                                    <Descriptions>
+                                        <DescriptionsItem Title="วันที่รับชำระ">
+                                            @dateService.ChangeDate(item.DueDate, "d/MM/yyyy", Utility.DateLanguage_TH)
+                                        </DescriptionsItem>
+                                    </Descriptions>
+
+                                    <Descriptions>
+                                        <DescriptionsItem Title="เลขที่ใบเสร็จรับเงิน">
+                                            @item.ReferenceId1
+                                        </DescriptionsItem>
+                                    </Descriptions>
+
+                                    <Descriptions>
+                                        <DescriptionsItem Title="จำนวนเงิน">
+                                            @String.Format("{0:n2}", item.PrincipleAmount)
+                                        </DescriptionsItem>
+                                    </Descriptions>
+
+                                    <Descriptions>
+                                        <DescriptionsItem Title="ดอกเบี้ย">
+                                            @String.Format("{0:n2}", item.InterestAmont)
+                                        </DescriptionsItem>
+                                    </Descriptions>
+                                </Card>
+                            </GridCol>
+                        }
+                    </GridRow>
+                }
+
+
+            </div>
+        </ExpandTemplate>
+    </Table>
+}
+
+<style scoped>
+    :root .ant-card-body {
+        padding: 10px !important;
+    }
+
+    :root .ant-descriptions-row > td {
+        padding-bottom: 5px !important;
+    }
+</style>
+
+@code {
+    // public RenderFragment RenderCell(DebtorRegisterModel data, int index)
+    // {
+    //     return builder =>
+    //     {
+    //         builder.AddContent(index + 1); Add 1 for zero-based indexing
+    //     };
+    // }
+}

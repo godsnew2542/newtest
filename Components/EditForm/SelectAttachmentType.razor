@@ -1,0 +1,35 @@
+﻿<div>
+    @if (AttachmentType.Any())
+    {
+        <div class="row mt-2 px-2 mx-2 mb-2">
+            @for (var i = 0; i < AttachmentType.Count; i++)
+            {
+                var item = AttachmentType[i];
+                <div class="col-4">
+                    <div class="my-2">
+                        <input class="form-check-input" @onchange="eventArgs =>{ CheckboxClicked(item.AttachmentTypeId, eventArgs.Value); }" type="checkbox" id="flexCheckChecked">
+
+                        <label class="form-check-label" for="flexCheckChecked">
+                            @item.AttachmentNameThai
+                        </label>
+                    </div>
+                </div>
+            }
+        </div>
+
+        if (SelestAttachmentId.Count != AttachmentTypeConfirm.Count)
+        {
+            <div class="text-end my-2 mx-2">
+                <button class="button-color text-light p-2 shadow rounded "
+                        style="border:none;"
+                @onclick="ConfirmAsync">
+                    ยืนยันการเลือก
+                </button>
+            </div>
+        }
+    }
+</div>
+
+@code {
+
+}

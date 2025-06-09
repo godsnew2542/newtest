@@ -1,0 +1,142 @@
+﻿<div class="card pt-3 pb-4 mt-5 mb-3 shadow rounded">
+    <div class="font-color">
+        <GridRow Gutter="(8,24)">
+            <GridCol Span="24">
+                <GridRow Gutter="(8,8)">
+                    <GridCol Span="12">
+                        <div class="left-do">
+                            <a>ยอดเงินกู้รวมดอกเบี้ย</a>
+                        </div>
+                    </GridCol>
+                    <GridCol Span="12">
+                        <div class="right-do">
+                            <SpinDisplayOption CountNo="CountNo" Text="@($"{String.Format("{0:n2}", FormOption.Display.LoanTotalAmount)} บาท")" />
+                        </div>
+                    </GridCol>
+                </GridRow>
+            </GridCol>
+
+            <GridCol Span="24">
+                <GridRow Gutter="(8,8)">
+                    <GridCol Span="12">
+                        <div class="left-do">
+                            <a>อัตราดอกเบี้ย</a>
+                        </div>
+                    </GridCol>
+                    <GridCol Span="12">
+                        <div class="right-do">
+                            <SpinDisplayOption CountNo="CountNo" Text="@($"{FormOption.Display.LoanInterest} %")" />
+                        </div>
+                    </GridCol>
+                </GridRow>
+            </GridCol>
+
+            <GridCol Span="24">
+                <GridRow Gutter="(8,8)">
+                    <GridCol Span="12">
+                        <div class="left-do">
+                            <a>ผ่อนชำระสูงสุด</a>
+                        </div>
+                    </GridCol>
+                    <GridCol Span="12">
+                        <div class="right-do">
+                            <SpinDisplayOption CountNo="CountNo" Text="@($"{FormOption.Display.LoanNumInstallments} งวด")" />
+                        </div>
+                    </GridCol>
+                </GridRow>
+            </GridCol>
+
+            <GridCol Span="24">
+                <GridRow Gutter="(8,8)">
+                    <GridCol Span="12">
+                        <div class="left-do">
+                            <a>ผ่อนชำระเดือนละ</a>
+                        </div>
+                    </GridCol>
+                    <GridCol Span="12">
+                        <div class="right-do">
+                            <SpinDisplayOption CountNo="CountNo" Text="@($"{String.Format("{0:n2}", FormOption.Display.LoanInstallment)} บาท")" />
+                        </div>
+                    </GridCol>
+                </GridRow>
+            </GridCol>
+
+            <GridCol Span="24">
+                <GridRow Gutter="(8,8)">
+                    <GridCol Span="12">
+                        <div class="left-do">
+                            <a>ยอดเงินกู้คงเหลือ</a>
+                        </div>
+                    </GridCol>
+                    <GridCol Span="12">
+                        <div class="right-do">
+                            <SpinDisplayOption CountNo="CountNo" Text="@($"{String.Format("{0:n2}", FormOption.Display.BalanceAmount)} บาท")" />
+                        </div>
+                    </GridCol>
+                </GridRow>
+            </GridCol>
+        </GridRow>
+        @*         <div class="row pt-4">
+        <div class="col-6" style="padding-left: 100px">
+        <a style="font-size:larger">ยอดเงินกู้รวมดอกเบี้ย</a>
+        </div>
+        <div class="col-6" style="text-align:end;padding-right:90px">
+        <SpinDisplayOption CountNo="CountNo"
+        Text="@($"{String.Format("{0:n2}", FormOption.Display.LoanTotalAmount)} บาท")" />
+        </div>
+        </div> *@
+        @*  <div class="row pt-4">
+        <div class="col-6" style="padding-left: 100px">
+        <a style="font-size:larger">อัตราดอกเบี้ย</a>
+        </div>
+        <div class="col-6" style="text-align:end;padding-right:90px">
+        <SpinDisplayOption CountNo="CountNo"
+        Text="@($"{FormOption.Display.LoanInterest} %")" />
+        </div>
+        </div> *@
+        @* <div class="row pt-4">
+        <div class="col-6 " style="padding-left: 100px">
+        <a style="font-size:larger">ผ่อนชำระสูงสุด</a>
+        </div>
+        <div class="col-6" style="text-align:end;padding-right:90px">
+        <SpinDisplayOption CountNo="CountNo"
+        Text="@($"{FormOption.Display.LoanNumInstallments} งวด")" />
+        </div>
+        </div> *@
+        @*   <div class="row pt-4">
+        <div class="col-6" style="padding-left: 100px">
+        <a style="font-size:larger">ผ่อนชำระเดือนละ</a>
+        </div>
+        <div class="col-6" style="text-align:end;padding-right:90px">
+        <SpinDisplayOption CountNo="CountNo"
+        Text="@($"{String.Format("{0:n2}", FormOption.Display.LoanInstallment)} บาท")" />
+        </div>
+        </div> *@
+        @* <div class="row pt-4">
+        <div class="col-6" style="padding-left: 100px">
+        <a style="font-size:larger">ยอดเงินกู้คงเหลือ</a>
+        </div>
+        <div class="col-6" style="text-align:end;padding-right:90px">
+        <SpinDisplayOption CountNo="CountNo"
+        Text="@($"{String.Format("{0:n2}", FormOption.Display.BalanceAmount)} บาท")" />
+        </div>
+        </div> *@
+    </div>
+</div>
+
+<style scoped>
+    .left-do {
+        padding-left: 100px;
+    }
+
+        .left-do > a {
+            font-size: larger;
+        }
+
+    .right-do {
+        text-align: end;
+        padding-right: 90px
+    }
+</style>
+
+@code { }

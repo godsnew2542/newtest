@@ -1,0 +1,10 @@
+﻿@if (CountNo == -1)
+{
+    <Spin />
+}
+else
+{
+    <span>
+        @String.Format("{0:n2}", CountNo) @($"{($"/ {String.Format("{0:n2}", BalanceAmount)}")}")
+    </span>
+}

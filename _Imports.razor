@@ -1,0 +1,64 @@
+﻿@using System.Net.Http
+@using LoanApp.Services.IServices
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using LoanApp
+@using LoanApp.Shared
+
+@*Add เพิ่ม *@
+@using LoanApp.DatabaseModel
+@using LoanApp.DatabaseModel.LoanEntities
+@using LoanApp.DatabaseModel.ModelsEntitiesCentral
+
+@using LoanApp.Model
+@using LoanApp.Model.Models
+@using LoanApp.Model.Models.Data
+
+@using LoanApp.Components
+@using LoanApp.Model.Helper;
+@using LoanApp.Services
+@using LoanApp.IServices
+@using LoanApp.Components.Payment
+@using LoanApp.Components.Upload
+@using LoanApp.Components.Document
+@using LoanApp.Components.PdfPreview
+@using LoanApp.Components.EditForm
+@using LoanApp.Components.Message
+@using LoanApp.Components.Loading
+@using LoanApp.Components.CarouselSlide
+@using LoanApp.Components.Ant
+@using LoanApp.Components.AdminOption
+@using LoanApp.Components.User
+@using LoanApp.Components.Admin
+
+@using WordDocument.IServices
+
+@using LoanApp.Pages.Authen
+@using LoanApp.Pages.Admin
+@using LoanApp.Pages.User
+@using LoanApp.Pages.Manager
+@using System.IO;
+@using Newtonsoft.Json
+@using AntDesign
+
+@inject NavigationManager navigationManager
+@inject IJSRuntime JS
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+@inject LoanApp.DatabaseModel.LoanEntities.ModelContext _context
+@inject LoanApp.DatabaseModel.ModelsEntitiesCentral.ModelContextCentral _contextCentral
+
+@inject IUserService userService
+@inject IDateService dateService
+@inject IEntitiesCentralService EntitiesCentralService
+@inject LoanApp.IServices.IGeneratePdfService GeneratePDFService
+@inject ITransactionService TransactionService
+@inject ILogService LogService
+@inject IMailService MailService
+@inject LoanApp.Services.IServices.ISaveFileAndImgService SaveFileAndImgService

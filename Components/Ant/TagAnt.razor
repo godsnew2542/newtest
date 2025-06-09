@@ -1,0 +1,23 @@
+﻿<Tag Color="@(color != null ? color : null)">
+    @if (header != null)
+    {
+        @header
+    }
+
+    @message
+
+    @if (body != null)
+    {
+        @body
+    }
+</Tag>
+
+@code {
+    [Parameter] public string? color { get; set; } = null;
+
+    [Parameter] public string? message { get; set; } = null;
+
+    [Parameter] public RenderFragment? header { get; set; } = null;
+    [Parameter] public RenderFragment? body { get; set; } = null;
+
+}

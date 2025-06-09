@@ -1,0 +1,439 @@
+﻿@page "/UserResume"
+@attribute [Authorize(Roles = "0")]
+
+<div class="container-fluid mt-2 mb-5 pb-5">
+    <UserManualComponents Url="Files/Manual/UserResume/UserResume_Manual" />
+
+    <div class="card shadow d-sm-flex justify-content-between mb-4 mt-3 pb-5">
+        <div class="card-header py-3">
+            <h6 class="mb-0 py-2 px-1 ms-1 font-color">
+                <strong>
+                    <i class="far fa-address-card fa-lg mx-2"></i>
+                    ข้อมูลส่วนตัว คุณ @userService.GetFullNameNoTitleName(StaffDetail?.StaffId)
+                    <a style="color:black">
+                        [รหัสบุคลากร: @StaffDetail?.StaffId]
+                    </a>
+                </strong>
+            </h6>
+        </div>
+        <div class="row mb-2 justify-content-center mx-2">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-12 pl-2 pt-4 pb-4 ms-4">
+                <div class="row">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <a>
+                            <b>ส่วนงาน</b> : @StaffDetail?.FacNameThai
+                        </a>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <a>
+                            <b>สังกัดส่วนงาน</b> : @StaffDetail?.DeptNameThai
+                        </a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <a>
+                            <b>ตำแหน่ง</b> : @StaffDetail?.PosNameThai
+                        </a>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <a>
+                            <b>ประเภทบุคลากร</b> : @StaffDetail?.StaffTypeName
+                        </a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <div class="row col-12 ps-0">
+                            <div class="col-xxl-3 col-xl-4 col-lg-12 col-md-12 col-sm-12 m-0">
+                                <b>
+                                    เบอร์โทรศัพท์มือถือ <a style="color:red"> * </a> :
+                                </b>
+                            </div>
+                            <div class="col-xl-5 col-lg-8 col-md-6 col-sm-12 text-start mb-1">
+                                <input type="text"
+                                       class="form-control "
+                                       style="height:30px"
+                                       Placeholder="ระบุเบอร์โทร"
+                                       value="@SelectDebtorDetail.MobileTel"
+                                       disabled="@(!IsEditMobileTel)"
+                                       maxlength="10"
+                                       @onchange="@((ChangeEventArgs e) => { SelectDebtorDetail.MobileTel = e.Value.ToString(); })" />
+                            </div>
+
+                            @if (!IsEditMobileTel)
+                            {
+                                <div class="col-xl-2 col-lg-3 col-md-3 col-sm-12 mb-1">
+                                    <button class="btn shadow rounded p-1"
+                                            style="height: 30px; width: 100%; background-color: #2788de;color:white"
+                                            @onclick="@(() => { IsEditMobileTel = true; })">
+                                        <i class="fa-solid fa-pen-to-square fa-lg"></i>
+
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-xl-2 col-lg-2 col-md-3 col-sm-12 ps-1 mb-1">
+                                    <button class="btn shadow rounded p-1"
+                                            style="height: 30px; width: 100%;background-color: burlywood"
+                                            @onclick="@(async()=> { await SaveToLoanDebtorDetailAsync(SelectDebtorDetail, "MobileTel"); })">
+                                        <i class="fa-solid fa-floppy-disk"></i>
+                                    </button>
+                                </div>
+                                <div class="col-xl-2 col-lg-2 col-md-3 col-sm-12 ps-1 mb-1">
+                                    <button class="btn shadow rounded secondary-bg p-1"
+                                            style="height: 30px; width: 100%; background-color: lightcoral"
+                                            @onclick="@(async()=> { await SaveToLoanDebtorDetailAsync(SelectDebtorDetail, "MobileTel", true); })">
+                                        <i class="fa-solid fa-rectangle-xmark" style="color: aliceblue"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <div class="row col-12 ps-0">
+                            <div class="col-xxl-3 col-xl-3 col-lg-12 col-md-12 col-sm-12">
+                                <b>
+                                    เบอร์โทรที่ทำงาน <a style="color:red"> * </a> :
+                                </b>
+                            </div>
+                            <div class="col-xl-5 col-lg-8 col-md-6 col-sm-12 text-start mb-1">
+                                <input type="text"
+                                       class="form-control"
+                                       style="height:30px"
+                                       Placeholder="ระบุเบอร์โทร"
+                                       value="@SelectDebtorDetail.OfficeTel"
+                                       disabled="@(!IsEditOfficeTel)"
+                                       maxlength="10"
+                                       @onchange="@((ChangeEventArgs e) => { SelectDebtorDetail.OfficeTel = e.Value.ToString(); })" />
+                            </div>
+
+                            @if (!IsEditOfficeTel)
+                            {
+                                <div class="col-xl-2 col-lg-3 col-md-3 col-sm-12 mb-1">
+                                    <button class="btn shadow rounded  p-1"
+                                            style="height: 30px; width: 100%; background-color: #2788de; color: white"
+                                            @onclick="@(() => { IsEditOfficeTel = true; })">
+                                        <i class="fa-solid fa-pen-to-square fa-lg"></i>
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-xl-2 col-lg-2 col-md-3 col-sm-12 ps-1 mb-1">
+                                    <button class="btn shadow rounded p-1"
+                                            style="height: 30px; width: 100%;background-color: burlywood"
+                                            @onclick="@(async()=> { await SaveToLoanDebtorDetailAsync(SelectDebtorDetail, "OfficeTel"); })">
+                                        <i class="fa-solid fa-floppy-disk"></i>
+                                    </button>
+                                </div>
+                                <div class="col-xl-2 col-lg-2 col-md-3 col-sm-12 ps-1 mb-1">
+                                    <button class="btn shadow rounded secondary-bg p-1"
+                                            style="height: 30px; width: 100%; background-color: lightcoral"
+                                            @onclick="@(async()=> { await SaveToLoanDebtorDetailAsync(SelectDebtorDetail, "OfficeTel", true); })">
+                                        <i class="fa-solid fa-rectangle-xmark" style="color: aliceblue"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                @{
+                    List<VStaffChild> vStaffChildren = psuLoan.GetListVStaffChildAsync(StaffID).Result;
+                }
+
+                @if (StaffDetail?.MarriedId == "2")
+                {
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                            @* MarriedNameThai == MARRIED_ID *@
+                            <a>
+                                <b>สถานภาพสมรส</b> : @StaffDetail.MarriedNameThai
+                            </a>
+                        </div>
+                        @if (@StaffFamily.FamilyPartnerFname != null)
+                        {
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                <a>
+                                    <b>ชื่อ-สกุลคู่สมรส</b> : @StaffFamily.FamilyPartnerFname  @StaffFamily.FamilyPartnerOldsname
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                <a>
+                                    <b>ชื่อ-สกุลคู่สมรส</b> : ไม่พบข้อมูลคู่สมรส
+                                </a>
+                            </div>
+                        }
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                            <a>
+                                <b>สถานภาพการมีบุตร</b> : @(vStaffChildren.Any() ? "มีบุตร" : "ไม่มีบุตร")
+                            </a>
+                        </div>
+                        @if (vStaffChildren.Any())
+                        {
+                            @foreach (var Child in vStaffChildren)
+                            {
+                                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                    <a>
+                                        <b>ชื่อ-สกุลบุตร</b> : @Child.ChildFname @Child.ChildSname
+                                    </a>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                            <a>
+                                <b>สถานภาพสมรส</b> : @StaffDetail?.MarriedNameThai
+                            </a>
+                        </div>
+                        @if (StaffFamily.FamilyPartnerFname != null)
+                        {
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                <a>
+                                    <b>ชื่อ-สกุลคู่สมรส</b> : @StaffFamily.FamilyPartnerFname  @StaffFamily.FamilyPartnerOldsname
+                                </a>
+                            </div>
+                        }
+
+                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                            <a>
+                                <b>สถานภาพการมีบุตร</b> :  @(vStaffChildren.Any() ? "มีบุตร" : "ไม่มีบุตร")
+                            </a>
+                        </div>
+                    </div>
+
+                    @if (vStaffChildren.Any())
+                    {
+                        <div class="row">
+                            @foreach (var Child in vStaffChildren)
+                            {
+                                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                    <a>
+                                        <b>ชื่อ-สกุลบุตร</b> : @Child.ChildFname @Child.ChildSname
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+
+
+                <div class="row">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <a>
+                            <b>รหัสเงินเดือน</b> : @GetStaffSalaryId(StaffDetail?.StaffId)
+                        </a>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <a>
+                            <b>เงินเดือน</b> :
+                            @(StaffDetail?.Salary == null ?
+                                "" :
+                                String.Format("{0:n2}", StaffDetail?.Salary) + " บาท")
+                        </a>
+                    </div>
+                </div>
+                <div class="row ">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        @{
+                            var staffAcceptDate = dateService.ChangeDateByString(StaffDetail?.StaffAcceptDate, MonthStering.Th, "ไม่ข้อมูล กรุณาติดต่อการเจ้าหน้าที่ส่วนงาน");
+                        }
+                        <a style="@(staffAcceptDate == "ไม่ข้อมูล กรุณาติดต่อการเจ้าหน้าที่ส่วนงาน" ? $"color:red;" : $"color:black;")">
+                            <b style="color:black;">วันที่เริ่มการทำงาน</b> : @staffAcceptDate
+                        </a>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        @{
+                            var staffEnd = dateService.ChangeDateByString(StaffDetail?.StaffEnd, MonthStering.Th, "ไม่ข้อมูล กรุณาติดต่อการเจ้าหน้าที่ส่วนงาน");
+                        }
+                        <a style="@(staffEnd == "ไม่ข้อมูล กรุณาติดต่อการเจ้าหน้าที่ส่วนงาน" ? $"color:red;" : $"color:black;")">
+                            <b style="color:black;">วันที่สิ้นสุดการทำงาน</b> : @staffEnd
+                        </a>
+                    </div>
+                </div>
+                <div class="row ">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <a>
+                            <b>อายุงานคงเหลือ</b> : @GetStaffRemainWorking(StaffDetail)
+                        </a>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <a>
+                            <b>อีเมล</b> :  @StaffDetail?.StaffEmail
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow d-sm-flex justify-content-between mb-4 mt-5 pb-5">
+        <div class="card-header py-3">
+            <h6 class="mb-0 py-2 px-1 ms-1 font-color">
+                <strong>
+                    <i class="far fa-credit-card fa-lg mx-2"></i>
+                    ข้อมูลบัญชีธนาคารเงินเดือน
+                    <a style="color:red"> * </a>
+                </strong>
+            </h6>
+        </div>
+        <div class="row  mx-2 mb-1">
+            <div class="col-12 col-md-12 text-start mt-4">
+                @if (string.IsNullOrEmpty(DebtorDetail.BookBankNo) &&
+                string.IsNullOrEmpty(DebtorDetail.BookBankName) &&
+                string.IsNullOrEmpty(DebtorDetail.BookBankBranch))
+                {
+                    <a>
+                        <b>เลขบัญชีธนาคาร</b> :
+                        <button class="btn shadow rounded  mx-2"
+                                style=" background-color: #2788de; color: white"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editBank"
+                                @onclick="@(() => { SetDataBook(); })">
+                            <i class="fa-solid fa-pen-to-square fa-lg mx-2"></i>
+
+                        </button>
+                        <br />
+                        <div class="mt-4">
+                            <Alert Type="@AlertType.Warning"
+                                   Message="@MessBookBank"
+                                   ShowIcon="true" />
+                        </div>
+                    </a>
+                }
+                else
+                {
+                    <a>
+                        <b>หมายเลขบัญชีธนาคาร</b> :  @MessBookBank
+                        <button class="btn shadow rounded  mx-2"
+                                style=" background-color: #2788de; color: white"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editBank"
+                                @onclick="@(() => { SetDataBook(); })">
+                            <i class="fa-solid fa-pen-to-square fa-lg mx-2"></i>
+
+                        </button>
+                        <br />
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@* model edit Bank *@
+<div class="modal fade" id="editBank" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 style="font-weight: bold">ข้อมูลหมายเลขบัญชีธนาคาร</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="BookbankNo" style="font-weight: bold; font-size: medium">
+                        เลขที่บัญชี
+                    </label>
+                    <Tooltip Placement="Placement.RightTop"
+                             Title="@Text"
+                             ArrowPointAtCenter="true">
+                        <a Style="border:none">
+                            <i class="fa-solid fa-circle-question fa-lg mx-1"></i>
+                        </a>
+                    </Tooltip>
+                    <input type="text"
+                           class="form-control"
+                           style="height: 45px"
+                           placeholder="xxx-x-xxxxx-x"
+                           maxlength="20"
+                           value="@SelectDebtorDetail.BookBankNo"
+                           onkeypress="return (event.charCode != 8 && event.charCode == 0 || (event.charCode >= 48 && event.charCode <= 57))"
+                           @onchange="@((ChangeEventArgs e) => { SelectDebtorDetail.BookBankNo = e.Value.ToString(); })">
+                </div>
+                <div class="form-group mx-0 p-0 mt-4">
+                    <div class="my-3 row m-0 p-0">
+                        <div class="col-xl-10 col-lg-9 col-md-7 col-sm-7 text-start p-0 m-0">
+                            <input type="text"
+                                   class="form-control"
+                                   style="height:50px"
+                                   Placeholder="ระบุชื่อธนาคาร"
+                                   value="@SelectDebtorDetail.BookBankName"
+                                   disabled="@(SelectBank.ID == 99 ? false : true)"
+                                   @onchange="@((ChangeEventArgs e) => { SelectDebtorDetail.BookBankName = e.Value.ToString(); })" />
+                        </div>
+                        <div class="col-xl-2 col-lg-2 col-md-3 col-sm-5  text-center">
+                            <button class="btn appbar-action button-color  text-center"
+                                    style="border: none; height: 50px;width:160px"
+                                    @onclick="() => ToggleButton(false)">
+                                เลือกธนาคาร
+                            </button>
+                        </div>
+                        @if (changType)
+                        {
+                            <div class="my-3 mx-3">
+                                <div class=" card bg-white p-2 rounded shadow mt-1">
+                                    @for (var i = 0; i < Select.Count; i++)
+                                    {
+                                        var item = Select[i];
+
+                                        <div class="row p-2">
+                                            <div class=" col-lg-12 col-md-7 col-xl-9">
+                                                @item.Name
+                                            </div>
+                                            <div class="col-lg-12 col-md-3 text-end  col-xl-3">
+                                                <button class="btn appbar-action px-3"
+                                                        style="width:120px"
+                                                        @onclick="()=>SelectType(item)">
+                                                    เลือก
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="BookbankBranch"
+                           style="font-weight: bold; font-size: medium">
+                        สาขา
+                    </label>
+                    <input type="text"
+                           class="form-control"
+                           style="height: 45px"
+                           value="@SelectDebtorDetail.BookBankBranch"
+                           @onchange="@((ChangeEventArgs e) => { SelectDebtorDetail.BookBankBranch = e.Value.ToString(); })" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    ยกเลิก
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="@(async ()=> { await SaveToLoanDebtorDetailAsync(SelectDebtorDetail, "BookBank"); })">
+                    บันทึก
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code
+{
+    private string Text = "ระบุเป็นเลขที่บัญชีเงินเดือนเฉพาะตัวเลขเท่านั้น";
+}

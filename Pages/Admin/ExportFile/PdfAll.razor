@@ -1,0 +1,96 @@
+﻿@page "/Admin/PdfAll"
+@using HiQPdf
+@attribute [Authorize(Roles = "2")]
+
+<div class="container-fluid mb-5 pb-5 mt-3">
+    @if (IsLoading)
+    {
+        @if (!string.IsNullOrEmpty(ReportAttrachmentHTML))
+        {
+            <div class="row gx-2 mb-3">
+                <div class="col">
+                    <div class="text-end">
+                        <Button Type="@ButtonType.Primary"
+                                Size="@ButtonSize.Large"
+                                OnClick="@(()=>ExportFileByExcel())">
+                            ดาวน์โหลดข้อมูล [.xlsx]
+                        </Button>
+                    </div>
+                </div>
+                @*  @if (Utility.DevStaffIds.Contains(stateProvider.CurrentUser.StaffId))
+                { *@
+                <div class="col-auto">
+                    <Button Type="@ButtonType.Primary"
+                            Size="@ButtonSize.Large"
+                            OnClick="@(()=>ExportExcelDataResultDEV())">
+                        @* ข้อมูล ดิบ *@
+                        ดาวน์โหลดข้อมูลแยกรายคน [.xlsx]
+                    </Button>
+                </div>
+                @* } *@
+                <div class="col-auto">
+                    <Button Type="@ButtonType.Primary"
+                            Size="@ButtonSize.Large"
+                            OnClick="@(()=>ReportAttrachmentHTML = string.Empty)"
+                            Danger>
+                        ปิด
+                    </Button>
+                </div>
+            </div>
+            <div>
+                <PreviewPdf Url="@ReportAttrachmentHTML" documentMargins="@(new PdfDocumentMargins(){ Left = 1, Bottom = 0, Right = 1, Top= 0})" />
+            </div>
+        }
+        else
+        {
+            <div class="card bg-white rounded sahdow p-2 mt-3" style="border-radius:15px">
+                @* ListReportAdmin="@ListReportAdmin" *@
+                <ReportAdmin ListReportAdminV2="@ListReportAdminV2"
+                             CampusID="Info.CampId"
+                             Title="@Title"
+                             @ref="RefReportAdmin" />
+            </div>
+        }
+    }
+    else
+    {
+        <Loading Message="ระบบกำลังประมวลผล กรุณารอสักครู่" />
+    }
+</div>
+
+<div class="footer mt-5">
+    <div class="row py-3 col-12 ms-1">
+        <div class="col-3 text-left">
+            <button type="button"
+                    class="btn secondary-bg shadow rounded text-center"
+                    style="border-radius: 5px;width:180px"
+                    @onclick="Back">
+                <i class="fa-solid fa-arrow-left fa-lg me-3"></i> ย้อนกลับ
+            </button>
+        </div>
+        <div class="col-3" style="text-align:end"></div>
+        <div class="col-4 text-end me-3">
+            @if (IsLoading)
+            {
+                @if (IsMobile)
+                {
+                    <Button Type="@ButtonType.Primary"
+                            Size="@ButtonSize.Large"
+                            OnClick="@(async()=> await DownloadPdfAsync())">
+                        ดาวน์โหลดข้อมูล
+                    </Button>
+                }
+                else
+                {
+                    <Button Type="@ButtonType.Primary"
+                            Size="@ButtonSize.Large"
+                            OnClick="@(async()=> await OpenPdfAsync())">
+                        แสดงข้อมูล
+                    </Button>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code { }

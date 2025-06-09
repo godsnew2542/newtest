@@ -1,0 +1,194 @@
+﻿@page "/Admin/ExportFileByManager"
+@attribute [Authorize(Roles = "2")]
+
+@using Radzen.Blazor
+@using LoanApp.Model.Helper;
+@using LoanApp.Services.IServices;
+
+<div class="container-fluid mt-4 mb-5 pb-5">
+    <div class="mt-4">
+        <div class="section-title" style="font-size:medium">
+            <i class="fa-solid fa-file-export mx-2 fa-lg"></i>
+            ส่งออกข้อมูลการอนุมัติคำขอกู้
+        </div>
+    </div>
+
+    <div class="card p-2 mt-4">
+
+        <div class="my-4 ms-3">
+            <GridRow Gutter="(8,16)" Align="middle">
+                <GridCol Xxl="12" Xl="12" Lg="12" Md="12" Sm="24" Xs="24">
+                    <GridRow Gutter="(16,8)">
+                        <GridCol Flex="@("auto")">
+                            <Input @bind-Value="@SearchView"
+                                   Size="@ButtonSize.Default"
+                                   Placeholder="ค้นหาจากชื่อ-สกุล"
+                                   OnPressEnter="@(async()=>{await OnSearch(SearchView, PaymentTime);})"
+                                   AllowClear=true />
+                        </GridCol>
+                        <GridCol Flex="@("none")">
+                            <Button Style="border-radius:8px; background:#367691"
+                                    Size="@ButtonSize.Default"
+                                    OnClick="@(async()=>{await OnSearch(SearchView, PaymentTime);})">
+                                <i class="fas fa-search" style="color: #ffffff "></i>
+                            </Button>
+                        </GridCol>
+                    </GridRow>
+                </GridCol>
+                <GridCol Xxl="12" Xl="12" Lg="12" Md="12" Sm="24" Xs="24">
+                    <GridRow Gutter="(16,8)" Justify="end" Style="margin-right:20px;">
+                        <GridCol Flex="@("none")">
+                            <Button Type="@ButtonType.Primary"
+                                    Style="border-radius:8px; width:120px; background-color:#2788de; border:none;"
+                                    Size="@ButtonSize.Large"
+                                    OnClick="@(()=> { SetOrClearCheckedAsync(true); })">
+                                เลือกทั้งหมด
+                            </Button>
+                        </GridCol>
+                        <GridCol Flex="@("none")">
+                            <Button Type="@ButtonType.Primary"
+                                    Style="border-radius:8px; width:120px; background-color:#FF1818; border:none;"
+                                    Size="@ButtonSize.Large"
+                                    OnClick="@(()=> { SetOrClearCheckedAsync(false); })">
+                                ล้างทั้งหมด
+                            </Button>
+                        </GridCol>
+                    </GridRow>
+                </GridCol>
+            </GridRow>
+        </div>
+
+        <h6>
+            <GridRow Gutter="(8,8)">
+                <GridCol Flex="@("none")" Class="ms-3">
+                    รายการอนุมัติคำขอกู้ จำนวน @newLoanRequestContracts.Count() รายการ
+                </GridCol>
+                @if (ListRecord.Any())
+                {
+                    <GridCol Flex="@("none")">
+                        <u>
+                            รายการที่เลือก จำนวน @ListRecord.Count() รายการ
+                        </u>
+                    </GridCol>
+                }
+            </GridRow>
+        </h6>
+
+
+        <div class="panel my-3">
+            <div class="panel-body table-container"
+                 style="border-top-left-radius:10px;border-top-right-radius:10px">
+                <div class="table-header py-3" style="@($"height: 60px;")">
+                    <div class="ms-3">
+                        <h6 style="color:#ffffff"> รายการอนุมัติคำขอกู้ </h6>
+                    </div>
+                </div>
+
+                <Table @bind-PageIndex="_pageIndex"
+                       TItem="VLoanRequestContract"
+                       DataSource="@newLoanRequestContracts"
+                       Responsive=true
+                       Class="table-hover-cursor">
+                    <ActionColumn Title="เลือก"
+                                  HeaderStyle="text-align:center; font-weight:bold;">
+                        @{
+                            bool Checked_Checkbox = GetCheckContractId(context);
+                        }
+                        <Checkbox Checked="@(Checked_Checkbox)" OnChange="@(()=>{CheckboxClickedV2(context.ContractId, Checked_Checkbox, context);})" />
+                    </ActionColumn>
+
+                    <PropertyColumn Title="ผู้กู้"
+                                    Property="c=>c.DebtorStaffId"
+                                    HeaderStyle="text-align:center; font-weight:bold;">
+                        @(userService.GetNameForDebtor(context)?.FullNameTh)
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="สังกัดส่วนงาน"
+                                    Property="c=>c.DebtorStaffId"
+                                    HeaderStyle="text-align:center; font-weight:bold;">
+                        @{
+                            VLoanStaffDetail? vLoanStaff = psuLoan.GetUserDetailAsync(context.DebtorStaffId).Result;
+                        }
+                        @vLoanStaff?.DeptNameThai
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="ประเภทกู้ยืม"
+                                    Property="c=>c.LoanTypeName"
+                                    HeaderStyle="text-align:center; font-weight:bold;">
+                        @context.LoanTypeName
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="ยอดเงินกู้"
+                                    Property="c=>c.LoanRequestLoanAmount"
+                                    HeaderStyle="text-align:center; font-weight:bold;">
+                        @String.Format("{0:n2}", context.LoanRequestLoanAmount)
+                    </PropertyColumn>
+
+                    <PropertyColumn Title="วันที่อนุมัติ"
+                                    Property="c=>c.AdminRecordDate"
+                                    HeaderStyle="text-align:center; font-weight:bold;">
+                        @dateService.ChangeDate(context.AdminRecordDate, "dd MMMM yyyy", Utility.DateLanguage_TH)
+                    </PropertyColumn>
+                </Table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="footer">
+    <div class="row  col-xl-11 col-lg-11 col-md-12">
+        <div class="row col-xl-5 col-md-6 col-lg-5">
+            <GridRow Gutter="(8,8)" Align="middle">
+                <GridCol Flex="@("none")">
+                    <h6 class="font-color align-items-center" style="font-weight:bold">
+                        วันที่คำขอกู้ผ่าน (รออนุมัติ)
+                    </h6>
+                </GridCol>
+                <GridCol Flex="@("auto")">
+                    <RadzenDatePicker @bind-Value=@PaymentTime
+                                      Culture="@(new System.Globalization.CultureInfo("en-EN"))"
+                                      DateFormat="dd MMMM yyyy"
+                                      Change="@(async(args) => { await NewOnChangeAsync(args); })"
+                                      Class="w-100" />
+                </GridCol>
+                <GridCol Flex="@("none")">
+                    <Button Type="@ButtonType.Primary"
+                            Size="@ButtonSize.Large"
+                            Class="button-color"
+                            Style="border:none; padding: 0px 20px; background-color:#367691"
+                            OnClick="@(async()=>{PaymentTime = null; await OnSearch(Search.Title, PaymentTime);})">
+                        ล้างวันที่
+                    </Button>
+                </GridCol>
+            </GridRow>
+        </div>
+        @if (ListRecord.Any())
+        {
+            <div class="col-xl-6 col-lg-3 col-md-5 text-end me-1 ">
+                @* <Button Type="@ButtonType.Primary"
+            Size="@ButtonSize.Large"
+            Class="button-color"
+            Style="border:none; padding: 0px 20px; background-color:#367691"
+            OnClick="@(async()=>{await ExportToExcel2Async(ListRecord);})">
+            บันทึกไฟล์
+            </Button> *@
+                <Button Type="@ButtonType.Primary"
+                        Size="@ButtonSize.Large"
+                        OnClick="@(async()=> await ExportToExcel2Async(ListRecord))">
+                    ดาวน์โหลดข้อมูล
+                </Button>
+            </div>
+        }
+    </div>
+</div>
+
+<style scoped>
+    :root .ant-table-pagination.ant-pagination {
+        margin: 10px !important;
+    }
+</style>
+
+@code {
+    // private bool countTable = false;
+}

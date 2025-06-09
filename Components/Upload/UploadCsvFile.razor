@@ -1,0 +1,17 @@
+﻿<div>
+	<button class="button-color appbar-action btn"
+			id="Upload_csv"
+			@onclick="()=> GeneratePDFService.OpenTypeFileAsync(GenId, myFile)">
+		<i class="fa-solid fa-file-import fa-lg me-3"></i>
+		Import Data (.xlsx)
+	</button>
+</div>
+
+<NewUpload SetChildData="SetCurrentDataAsync" 
+		   AttachmentTypeId="@AttTypeId" 
+		   MyFile="@myFile"
+		   ArrayTypeFileImg="ArrayTypeFileImg"/>
+
+@code {
+	private string[] ArrayTypeFileImg { get; } = new[] { "XLSX" };
+}

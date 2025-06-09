@@ -1,0 +1,91 @@
+﻿@page "/Doc/LoanGuarantor"
+
+<div id="pdf-LoanGuarantor">
+    @if (GuarantorStaffDetail != null)
+    {
+        <div class="px-5">
+            <h4 class="text-center">
+                สัญญาค้ำประกัน @Loan.LoanParentName
+            </h4>
+            @if (!IsLending)
+            {
+                <p class="text-end">
+                    เขียนที่ &nbsp; <h class="pdf-line">มหาวิทยาลัยสงขลานครินทร์</h>
+                </p>
+            }
+            <p class="text-end">
+                วันที่ <h class="pdf-line">@dateService.ChangeDate(Option.DateTitle, "dd", Utility.DateLanguage_TH)</h> &nbsp;
+                เดือน <h class="pdf-line">@dateService.ChangeDate(Option.DateTitle, "MMMM", Utility.DateLanguage_TH)</h> &nbsp;
+                พ.ศ. <h class="pdf-line">@dateService.ChangeDate(Option.DateTitle, "yyyy", Utility.DateLanguage_TH)</h>
+            </p>
+            <p>
+                &emsp;&emsp; ข้าพเจ้า <h class="pdf-line"> @userService.GetFullName(GuarantorStaffDetail.StaffId)</h>
+                ตำแหน่ง <h class="pdf-line"> @GuarantorStaffDetail.PosNameThai </h> &nbsp;
+                @GetStaffType(GuarantorStaffDetail.StaffType) &nbsp;
+                สังกัดหน่วยงาน <h class="pdf-line"> @GuarantorStaffDetail.DeptNameThai </h>
+                ส่วนงาน <h class="pdf-line"> @GuarantorStaffDetail.FacNameThai </h>
+                มหาวิทยาลัยสงขลานครินทร์ เงินเดือน <h class="pdf-line"> @String.Format("{0:n2}", GuarantorStaffDetail.Salary) บาท </h>
+                โทรศัพท์ <h class="pdf-line"> @userService.GetOfficeTelFromLoanStaffDetail(GuarantorStaffDetail.StaffId) </h>
+                มือถือ <h class="pdf-line"> @userService.GetMobileTelFromLoanStaffDetail(GuarantorStaffDetail.StaffId) </h>
+                ขอทำสัญญาค้ำประกันฉบับนี้ให้ไว้ต่อมหาวิทยาลัยสงขลานครินทร์ เพื่อเป็นหลักฐานการค้ำประกัน
+                @(IsLending ? "การยืมเงิน" : "การกู้ยืมเงิน") โดยมีข้อความอันเป็นสาระสำคัญดังนี้
+                <br>&emsp;&emsp; <b>ข้อ 1</b> ตามที่
+                <h class="pdf-line"> @userService.GetFullName(DebtorStaffDetail.StaffId) </h>
+                @(IsLending ? "ได้ยืม" : "ได้กู้") @Loan.LoanParentName ตามสัญญา @(IsLending ? "ยืมเงินเพื่อ" : "กู้เงินเพื่อ")
+                @Loan.LoanParentName ลงวันที่ <h class="pdf-line">
+                    @dateService.ChangeDate(Option.DateTitle, "dd  MMMM  yyyy", Utility.DateLanguage_TH) &nbsp;
+                </h> นั้น ข้าพเจ้ายินยอมเป็นผู้ค้ำประกันเกี่ยวกับ @(IsLending ? "การยืมเงินดังกล่าว" : "การกู้ยืมเงินดังกล่าว")
+                <br>
+                &emsp;&emsp; <b>ข้อ 2</b> ข้าพเจ้าได้รับทราบข้อผูกพันของ @(IsLending ? "ผู้ยืมเงิน" : "ผู้กู้")
+                ในเรื่องการส่งเงินงวดชำระหนี้ @(IsLending ? "" : "และค่าดอกเบี้ย") ตามที่กล่าวไว้ใน @(IsLending ? "สัญญาเงินยืมเพื่อ" : "สัญญากู้เงินเพื่อ")
+                @Loan.LoanParentName โดยตลอดแล้ว และข้าพเจ้ายินยอม
+                @(IsLending ? "ค้ำประกันการปฏิบัติตามข้อผูกพันในสัญญาเงินยืม" : "ปฏิบัติตามข้อผูกพันในสัญญาเงินกู้") ดังกล่าวทุกประการ
+                <br>
+                &emsp;&emsp; <b>ข้อ 3</b> หาก
+                @(IsLending ? "ผู้ยืมเงิน" : "ผู้กู้")ไม่ชำระเงิน ไม่ว่าจะด้วยเหตุประการใดก็ตามและมหาวิทยาลัยได้แจ้งให้ข้าพเจ้าทราบแล้ว
+                ข้าพเจ้ายินยอมจะชำระเงินต้น
+                @(IsLending ? "ที่ยังค้างอยู่ทั้งสิ้นให้แก่มหาวิทยาลัยแทนผผู้ยืมเงินทันที" : "พร้อมดอกเบี้ยที่ยังค้างอยู่ทั้งสิ้นให้แก่มหาวิทยาลัยแทนผู้กู้ทันที")
+                <br>
+                &emsp;&emsp; <b> ข้อ 4</b> ในกรณีที่ข้าพเจ้าต้องชำระเงินให้แก่มหาวิทยาลัยสงขลานครินทร์ ตามข้อ 3
+                ข้าพเจ้ายินยอมให้มหาวิทยาลัยสงขลานครินทร์หักเงินเดือน ค่าจ้างหรือค่าตอบแทนรายเดือนของข้าพเจ้าชำระหนี้เงินงวด
+                ซึ่งข้าพเจ้าจะต้องชำระแทนผู้กู้เพื่อส่งให้แก่มหาวิทยาลัยต่อไป
+            </p>
+            <p>
+                &emsp;&emsp; ข้าพเจ้าได้อ่านและเข้าใจข้อความในหนังสือค้ำประกันฉบับนี้โดยตลอดแล้ว เห็นว่าถูกต้องตามความประสงค์
+                จึงได้ลงลายมือชื่อไว้เป็นสำคัญต่อหน้าพยาน
+            </p>
+            <div class="row justify-content-end">
+                <div class="col-6 text-center">
+                    <p class="m-0">
+                        (ลงชื่อ) <h class="pdf-line" style="padding: 0px 100px;"> </h> ผู้ค้ำประกัน
+                    </p>
+                    <p class="mt-3">
+                        (<h class="pdf-line"> @userService.GetFullName(GuarantorStaffDetail.StaffId) </h>)
+                    </p>
+                </div>
+            </div>
+            <br>
+            <div class="row justify-content-end">
+                <div class="col-6 text-center">
+                    <p class="m-0">
+                        (ลงชื่อ) <h class="pdf-line" style="padding: 0px 120px;"> </h> พยาน
+                    </p>
+                    <p class="mt-3">
+                        (<h class="pdf-line" style="padding: 0px 120px;"> </h>)
+                    </p>
+                </div>
+            </div>
+            <br>
+            <div class="row justify-content-end">
+                <div class="col-6 text-center">
+                    <p class="m-0">
+                        (ลงชื่อ) <h class="pdf-line" style="padding: 0px 100px;"> </h> พยาน
+                    </p>
+                    <p class="mt-3">
+                        (<h class="pdf-line" style="padding: 0px 100px;"> </h>)
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+</div>

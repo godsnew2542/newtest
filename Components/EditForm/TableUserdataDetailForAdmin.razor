@@ -1,0 +1,77 @@
+﻿@page "/EditFeom/TableUserdataDetailForAdmin"
+
+<div>
+	<table class="table table-hover" style="border-top:1px solid;border-bottom:1px solid">
+		<thead class="text-center text-light table-header">
+			<tr>
+				<th>เลขที่สัญญา</th>
+				<th>ประเภทเงินกู้</th>
+				<th>ยอดเงินกู้</th>
+				<th>@((TableHeadRole == "02") ? "ผู้ค้ำ" : "ผู้กู้")</th>
+				<th>สถานะ</th>
+			</tr>
+		</thead>
+
+		@if (Agreement.Count != 0)
+		{
+			@for (int i = 0; i < Agreement.Count; i++)
+			{
+				var agreement = Agreement[i];
+				var loan = _context.LoanTypes.Where(c => c.LoanTypeId == agreement.LoanTypeId).FirstOrDefault();
+
+				<tbody class="text-center">
+					<tr>
+						<td>
+							<div>
+								@((agreement.ContractNo != null) ? agreement.ContractNo : "-")
+							</div>
+						</td>
+						<td>
+							<div>
+								@userService.GetLoanName(loan)
+							</div>
+						</td>
+						<td>
+							<div>
+								@((agreement.ContractLoanAmount != null) ? 
+									String.Format("{0:n2}", agreement.ContractLoanAmount) : 
+									String.Format("{0:n2}", agreement.LoanRequestLoanAmount)
+								)
+							</div>
+						</td>
+						<td>
+							<div>
+								@((TableHeadRole != "01") ? GetGuarantorName(agreement) : GetDebtorName(agreement))
+							</div>
+						</td>
+						<td>
+							<div>
+								@agreement.LoanRequestStatusName
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			} 
+		}
+		else
+		{
+			<tbody>
+				<tr class="my-2 py-2">
+					<td colspan="5">
+						<Empty>
+							<DescriptionTemplate>
+								<span>ไม่พบข้อมูล</span>
+							</DescriptionTemplate>
+						</Empty>
+					</td>
+				</tr>
+			</tbody>
+		}
+	</table>
+</div>
+
+
+
+@code {
+
+}

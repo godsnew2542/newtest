@@ -1,0 +1,154 @@
+﻿@page "/Admin/DetailPage"
+@page "/Admin/DetailPage/{LoanTypeId:decimal}"
+@attribute [Authorize(Roles = "2")]
+
+<div class="container-fluid mt-2 pb-5 mb-5">
+    @if (Ltype != null)
+    {
+        <div class="row pt-5 justify-content-center mx-2">
+            <div class="section-title mb-3" style="height: 50px;">
+                <a style="font-size: large;">
+                    รายละเอียดประเภทกู้ยืม
+                </a>
+            </div>
+        </div>
+        <div class="row mb-2 justify-content-center mx-2">
+            <div class="news-card" style="height: inherit;">
+                <div class="col-md-12 col-12 pl-2 pt-4 pb-4 ms-4">
+                    <div class="mb-3" style="font-weight: bold">
+                        ชื่อประเภทหลัก : @Ltype?.LoanParentName
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-12">
+                            <a style="font-weight: bold">
+                                ชื่อประเภทย่อย : @Ltype?.LoanTypeName
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-10 col-md-5">
+                            <a style="font-weight: bold">
+                                จำนวนงวด : @Ltype?.LoanNumInstallments เดือน
+                            </a>
+                        </div>
+                        <div class="col-10 col-md-5">
+                            <a style="font-weight: bold">
+                                อัตราดอกเบี้ย : ร้อยละ  @Ltype?.LoanInterest ต่อปี
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-5">
+                            <a style="font-weight: bold">
+                                วงเงินสูงสุด :
+                                @(Ltype == null ?
+                                    "" :
+                                    Ltype?.LoanMaxAmount == 0 ?
+                                    " กู้ได้ตามจริง" :
+                                    @String.Format(" {0:n2}", Ltype?.LoanMaxAmount) + " บาท")
+                            </a>
+                        </div>
+                        <div class="col-10 col-md-5">
+                            <div class="mb-2" style="font-weight: bold">
+                                สถานะ :
+                                @(Ltype == null ?
+                                    "" :
+                                    Ltype?.Active == 1 ?
+                                    "ใช้งาน" :
+                                    "ยุติการงาน")
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-12">
+                            <a style="font-weight: bold">
+                                <div>
+                                    กู้ทบยอด :
+                                    @(Ltype == null ?
+                                        "" :
+                                        Ltype.IsReconcile == 1 ?
+                                        "สามารถกู้ทบยอดได้" :
+                                        "ไม่สามารถกู้ทบยอดได้")
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="row pt-2 justify-content-center mx-2">
+            <div class="section-title" style="  height: 50px;">
+                <a style="font-size: large;">
+                    เอกสารประกอบ / เอกสารแนบ
+                </a>
+            </div>
+        </div>
+        <div class="news-card mx-2 p-2 mt-3">
+            <div class="col-md-12 col-12 pl-2 pt-4 pb-4 ms-4">
+                @if (ListRequired.Any())
+                {
+                    @foreach (var step in Listcontract)
+                    {
+                        bool NoAttachmemt = true;
+
+                        <div class="row mt-1">
+                            <div class="col-12 col-md-12 ">
+                                <a style="font-weight: bold">
+                                    @step.ContractStepName
+                                </a>
+                            </div>
+                        </div>
+                        @for (int i = 0; i < ListRequired.Count; i++)
+                        {
+                            var Required = ListRequired[i];
+
+                            @if (step.ContractStepId == Required.ContractStepId)
+                            {
+                                NoAttachmemt = false;
+                                <div class="row col-12 mb-2">
+                                    <div class="mt-2 ms-3 mb-1">
+                                        - @Required.AttachmentNameThai
+                                    </div>
+                                </div>
+                            }
+                        }
+                        @if (NoAttachmemt)
+                        {
+                            <div class="row col-12 mb-1">
+                                <div class="mt-3 ms-3">
+                                    - ไม่มีเอกสารแนบ
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+
+                @if (File != null)
+                {
+                    <div class="row mb-2 justify-content-center mx-2">
+                        <iframe src="@File.AttachmentAddr" style="width:100%; height:@Utility.PdfHeightMaxPage"></iframe>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@*footer*@
+<div class="footer">
+    <div class="row py-1 col-12 ms-1">
+        <div class="col-3 text-left">
+            <button type="button"
+                    class="btn secondary-bg shadow rounded text-center"
+                    @onclick="Back"
+                    style="border-radius: 5px;width:180px">
+                <i class="fa-solid fa-arrow-left fa-lg me-3"></i> ย้อนกลับ
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+
+}

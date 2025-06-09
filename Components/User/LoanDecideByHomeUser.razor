@@ -1,0 +1,136 @@
+﻿<div class="row mt-4">
+    <div class="col">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="font-color fw-bold m-0">
+                    รายการคำขอกู้รอดำเนินการ
+                </h6>
+            </div>
+            <ul class="list-group list-group-flush">
+                @if (RequestList.Count != 0)
+                {
+                    @for (int i = 0; i < RequestList.Count; i++)
+                    {
+                        var request = RequestList[i];
+                        var loan = userService.GetLoanType(request.LoanTypeId);
+                        var Active = GetLoanActive(loan?.Active, loan);
+
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="row col-6">
+									<div class="col-12">
+										<h class="mt-2">
+											<strong>
+                                                @userService.GetLoanName(loan)
+												(จำนวน @request.LoanNumInstallments งวด
+												ยอดเงิน @String.Format("{0:n2}", @request.LoanAmount) บาท)
+											</strong>
+										</h>
+										@if (!Active.IsPass)
+										{
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Red.ToString())"
+                                                               message="@("! ปิดรอบให้ยื่นกู้แล้ว รอเปิดรอบใหม่")" />
+                                            <div>
+											@*<Tag PresetColor="@PresetColor.Red">! ปิดรอบให้ยื่นกู้แล้ว รอเปิดรอบใหม่</Tag>*@
+										    </div>
+                                        }
+										</div>
+                                </div>
+
+                                <div class="col text-end">
+                                    <div class="row justify-content-end">
+                                        <div class="col-12 col-xl-4 col-lg-6 col-md-12 text-end">
+                                            @if (Active.IsPass)
+                                            {
+                                                <button class="btn edit-button px-1 my-1"
+                                            style="width: 140px"
+                                            @onclick="() => EditAppiyLoan(request)">
+                                                    <i class="fa-solid fa-pen-to-square fa-lg me-2"></i>
+                                                    แก้ไข
+                                                </button>
+                                            }
+                                        </div>
+                                        <div class="col-12 col-xl-3 col-lg-6 col-md-12">
+                                            <button class="btn error-button px-1 my-1"
+                                            style="width: 140px"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#DeleteLoanRequest"
+                                            @onclick="@(()=>{ SelectAppiyLoanDelete = new DeleteApplyLoanModel(); SelectLoan(request, loan); })">
+                                                <i class="fa-solid fa-trash fa-lg me-2"></i>
+                                                ลบ
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item">
+                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                            <Empty>
+                                <DescriptionTemplate>
+                                    <span>ไม่พบคำขอกู้รอดำเนินการ</span>
+                                </DescriptionTemplate>
+                            </Empty>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+@* model Delete LoanRequest *@
+<div class="modal fade"
+     id="DeleteLoanRequest"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        @if (!SelectAppiyLoanDelete.IsLoaing)
+        {
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title" id="exampleModalLabel">
+                        คุณยืนยันการลบคำขอกู้ @SelectAppiyLoanDelete.LoanParentName
+                        @String.Format("{0:n2}", @SelectAppiyLoanDelete.LoanAmount)
+                        บาท ใช่หรือไม่ ?
+                    </div>
+                    <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    </button>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                        ยกเลิก
+                    </button>
+                    <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="()=>DeleteAppiyLoanAsync(SelectAppiyLoanDelete.LoanRequestId)">
+                        ยืนยัน
+                    </button>
+                </div>
+
+            </div>
+        }
+        else
+        {
+            <div class="p-2">
+                <Loading />
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+
+}

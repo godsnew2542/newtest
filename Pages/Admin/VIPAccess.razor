@@ -1,0 +1,260 @@
+﻿@page "/Admin/Access"
+@attribute [Authorize(Roles = "2")]
+
+<div class="container-fluid my-4 pb-5">
+    <div class="section-title mb-4" style="font-size:medium">
+        <i class="material-icons me-2">security</i> สิทธิ์การใช้งานพิเศษ
+    </div>
+    <div class="panel mt-5">
+        <div class="panel-body  mt-1 table-container"
+             style="border-top-left-radius:10px;border-top-right-radius:10px">
+            <div class="table-header py-3">
+                <GridRow Gutter="(8,8)" Justify="space-around" Align="middle">
+                    <GridCol Flex="@("auto")">
+                        <div class="ms-3">
+                            <h6 style="color:#ffffff">รายการสิทธิ์การใช้งาน</h6>
+                        </div>
+                    </GridCol>
+                    <GridCol Flex="@("none")">
+                        <div style="margin-right: 20px;">
+                            <Input @bind-Value="@SearchTable"
+                                   Size="@ButtonSize.Default"
+                                   Placeholder="ค้นหารหัสบุคลากร"
+                                   OnPressEnter="@(async()=>{await DataTableV2(SearchTable);})"
+                                   AllowClear=true
+                                   Style="min-width:350px;" />
+                        </div>
+                    </GridCol>
+                </GridRow>
+            </div>
+
+            <Table @bind-PageIndex="_pageIndex"
+                   TItem="LoanStaffWorkingSpecial"
+                   DataSource="@NewWorkingSpecial"
+                   Responsive=true
+                   Class="table-hover-cursor">
+                <PropertyColumn Title="ผู้กู้"
+                                Property="c=>c.StaffId"
+                                HeaderStyle="text-align:center; font-weight:bold;">
+                    @($"{userService.GetFullName(context.StaffId)} ({context.StaffId})")
+                </PropertyColumn>
+
+                <ActionColumn Title="สังกัดส่วนงาน"
+                              HeaderStyle="text-align:center; font-weight:bold;">
+                    @{
+                        var StaffDetail = userService.GetUserDetail(context.StaffId);
+                    }
+
+                    @StaffDetail?.DeptNameThai
+                </ActionColumn>
+
+                <PropertyColumn Title="วันที่ดำเนินการ"
+                                Property="c=>c.InputDate"
+                                HeaderStyle="text-align:center; font-weight:bold;">
+                    <div>
+                        @(dateService.ChangeDate(context.InputDate, "วันที่ dd MMMM yyyy เวลา HH.mm น.", Utility.DateLanguage_TH))
+                    </div>
+                    <div>
+                        <i class="far fa-thumbs-up mx-1"></i>
+                        @userService.GetFullNameNoTitleName(context.AdminStaffId)
+                    </div>
+                </PropertyColumn>
+
+                <PropertyColumn Title="หมายเหตุ"
+                                Property="c=>c.InputDate"
+                                HeaderStyle="text-align:center; font-weight:bold;">
+                    @context.Remark
+                </PropertyColumn>
+
+                <ActionColumn>
+                    <button type="button"
+                            class="rounded text-center p-2 cardheight"
+                            style="border-color:red;border-radius:20px;width:60px"
+                            data-bs-toggle="modal"
+                            data-bs-target="#removeworkingspecial"
+                            @onclick="@(()=> { RemoveSpecial = context; })">
+                        <i class="fas fa-trash-alt fa-lg" style="color:red"></i>
+                    </button>
+                </ActionColumn>
+            </Table>
+        </div>
+    </div>
+
+
+    <div class="card rounded shadow mt-4 py-2 px-3">
+        @*ค้นหา*@
+        <div>
+            <div class="row col-12 p-2">
+                <div class="col-xl-10 col-lg-10">
+                    <Input @bind-Value="@SearchView"
+                           Size="@ButtonSize.Large"
+                           Placeholder="ค้นหาจากชื่อ-สกุล/รหัสบุคลากร"
+                           OnPressEnter="@(async()=>{await OnSearch(SearchView);})"
+                           AllowClear=true />
+                </div>
+                <button class="col-xl-2 col-lg-2  button-style  p-2 justify-content-center"
+                        style="border:none"
+                        @onclick="()=>OnSearch(SearchView)">
+                    <i class="fas fa-search mx-2 my-1" style="color: #ffffff "></i>	ค้นหา
+                </button>
+                @if (ListStaffDetail.Any())
+                {
+                    <div class="overflow-auto my-2" style="height:200px;">
+                        <ul>
+                            @for (var i = 0; i < ListStaffDetail.Count; i++)
+                            {
+                                var people = ListStaffDetail[i];
+                                var fullName = userService.GetFullName(people.StaffId);
+                                var StaffId = people.StaffId;
+
+                                <li @onclick="()=>ChangeValStaff(people, true)">
+                                    <a class="dropdown-item">@fullName ( @people.FacNameThai ) (@StaffId)</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                @if (CheckSearchVeiw)
+                {
+                    <div class="mt-2" style="color:red">
+                        ไม่พบผลการค้นหา กรุณาระบุข้อมูลให้ถูกต้อง
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* ข้อมูลเบื้องต้น *@
+        @if (!string.IsNullOrEmpty(StaffDetail?.StaffId))
+        {
+            <div class="card bg-light mt-3 mb-3 p-2 simple-card">
+                <div class="row ms-2">
+                    <div class="col-6 pt-3">
+                        <b>ชื่อ-สกุล</b> : @userService.GetFullName(StaffDetail.StaffId)
+                    </div>
+                    <div class="col-6 pt-3">
+                        <b>วิทยาเขต</b> : @StaffDetail.CampNameThai
+                    </div>
+                    <div class="col-6 pt-3">
+                        <b>ประเภทบุคลากร</b> : @StaffDetail.StaffTypeName
+                    </div>
+                    <div class="col-6 pt-3">
+                        <b>ส่วนงาน</b> : @StaffDetail.FacNameThai
+                    </div>
+                    <div class="col-6 pt-3">
+                        <b>วันที่เริ่มทำงาน</b> : @ChangeDate(StaffDetail.StaffAcceptDate, model_month.Th)
+                    </div>
+                    <div class="col-6 pt-3">
+                        <b>วันที่สิ้นสุดการทำงาน</b> : @ChangeDate(StaffDetail.StaffEnd, model_month.Th)
+                    </div>
+                    <div class="row">
+                        @if (!CheckPeopleSpecial(StaffDetail.StaffId).Result)
+                        {
+                            <div class="mt-3 mb-3 row col-6">
+                                <label for="input"
+                                       class="col-sm-2 col-form-label">
+                                    <b>หมายเหตุ</b> :
+                                </label>
+                                <div class="col">
+                                    <input type="text"
+                                           class="form-control"
+                                           maxlength="200"
+                                           value="@Remark"
+                                           @onchange="@((ChangeEventArgs e) => { Remark = e.Value.ToString(); })">
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="pt-3">
+                                    <button class="btn appbar-action p-1 CardHove"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#addworkingspecial">
+                                        เปิดสิทธิ์พิเศษ
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+        }
+    </div>
+</div>
+
+@* model add working special *@
+<div class="modal fade"
+     id="addworkingspecial"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6>ตรวจสอบและยืนยันการเพิ่มสิทธินี้หรือไม่?</h6>
+            </div>
+            <div class="modal-body">
+                <div>
+                    รายชื่อที่ต้องการเพิ่ม : @userService.GetFullName(StaffDetail?.StaffId) (@StaffDetail?.StaffId)
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ยกเลิก
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="@(async()=> { await SaveToDbAsync(StaffDetail, Remark); })">
+                    ยืนยัน
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* model remove working special *@
+<div class="modal fade"
+     id="removeworkingspecial"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-body">
+                ต้องการยืนยันการลบสิทธินี้หรือไม่
+                <div>
+                    @userService.GetFullName(RemoveSpecial.StaffId)
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    ปิด
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="@(async()=> { await RemovePeopleSpecialAsync(RemoveSpecial.SpecialId); })">
+                    ยืนยัน
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style scoped>
+    :root .ant-table-pagination.ant-pagination {
+        margin: 10px !important;
+    }
+</style>
+
+@code {
+    // private bool countTable = false;
+}

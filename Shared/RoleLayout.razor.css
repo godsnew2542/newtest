@@ -1,0 +1,6 @@
+﻿body {
+}
+.sb-sidenav .sb-sidenav-menu .nav .sb-sidenav-menu-nested {
+    margin: 0.2rem;
+    flex-direction: column;
+}

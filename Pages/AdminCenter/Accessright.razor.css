@@ -1,0 +1,26 @@
+﻿body {
+}
+@media (min-width: 1180px) {
+   
+    .cardheight {
+        height: 40px
+    }
+}
+
+@media (max-width: 1180px) {
+    .cardheight {
+        height: 80px
+    }
+}
+
+@media (max-width: 768px) {
+    .cardheight {
+        height: 80px
+    }
+}
+
+@media (max-width: 450px) {
+    .cardheight {
+        height: 80px
+    }   
+}

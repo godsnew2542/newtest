@@ -1,0 +1,48 @@
+﻿<div class="@ClassAlign">
+	<div class="row mt-4">
+		<div class="col-5 justify-content-start text-start">
+			@if (!string.IsNullOrEmpty(Title))
+			{
+				<b style="font-size: x-large; margin-right: 10px;">@Title</b>
+			}
+		</div>
+		<div class="col-7 justify-content-end text-end">
+			@if (!string.IsNullOrEmpty(Url))
+			{
+				<i class="fa-solid fa-circle-question fa-lg" color="#304893"></i>
+				<a href="@Url"
+				   style="font-size: medium; color: #304893; cursor: pointer; text-underline: darkgray"
+				   target="_blank"
+				   class="AgreementRow">
+					วิธีการใช้งาน
+				</a>
+			}
+			@if (OpenDetail)
+			{
+				<a href="@UrlDetail"
+				   style="font-size: medium; color: #304893; cursor: pointer; text-underline: darkgray"
+				   target="_blank"
+				   class="AgreementRow ms-2">
+					[
+					<i class="fas fa-book mx-2" color="#304893"></i>
+					ข้อมูลสวัสดิการและสิทธิประโยชน์ ม.อ.
+					]
+				</a>
+			}
+		</div>
+	</div>
+	
+</div>
+
+
+@code {
+	[Parameter] public string? Url { get; set; } = null;
+	/// <summary>
+	/// OpenDetail = คู่มือสวัสดิการและสิทธิประโยชน์ ม.อ.
+	/// </summary>
+	[Parameter] public bool OpenDetail { get; set; } = false;
+	[Parameter] public string? UrlDetail { get; set; } = "http://www.personnel.psu.ac.th/word/9.81.pdf";
+	[Parameter] public string? ClassAlign { get; set; } = "text-end me-4";
+	[Parameter] public string? Title { get; set; } = null;
+
+}

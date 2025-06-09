@@ -1,0 +1,524 @@
+﻿@page "/Admin/NewRecordPayment"
+@attribute [Authorize(Roles = "2")]
+
+@using Radzen.Blazor
+
+<div class="container-fluid mt-4 pb-5 mb-5">
+    <div class="mt-4 mx-2">
+        <div class="section-title" style="font-size:medium">
+            <i class="fa-solid fa-hand-holding-dollar fa-lg mx-2 "></i>
+            บันทึกชำระเงินกู้ยืม (เป็นงวดรายเดือน)
+        </div>
+    </div>
+
+    @if (!pageLogeing)
+    {
+        <div class="card rounded shadow mt-4 pb-3 px-2 mb-3">
+            <div class="mt-3 px-2 me-2">
+                <GridRow Gutter="(32,16)" Justify="end" Align="middle">
+                    <GridCol Flex="@("none")">
+                        <Button Type="@ButtonType.Link"
+                                OnClick="@(async()=>{await TemplateDowload();})"
+                                Style="font-size:1rem; font-weight:bold;">
+                            <i class="fa-solid fa-file-arrow-down fa-lg"></i>
+                            Template Import Data
+                        </Button>
+                    </GridCol>
+                    <GridCol Flex="@("none")">
+                        <UploadCsvFile GenId="Upload_csv"
+                                       myFile="my_fileCsv_RecordPayment"
+                                       SetChildData="SetCurrentDataUploadCSVAsync" />
+                    </GridCol>
+                </GridRow>
+            </div>
+
+            <div class="mt-3" style="margin:0 25px;">
+                <GridRow Gutter="(8,8)" Align="middle">
+                    <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                        <h6>
+                            รายการสัญญากู้ยืมเงิน จำนวน @(String.Format("{0:n0}", ListContract.Count())) รายการ
+                        </h6>
+                    </GridCol>
+                    <GridCol Xxl="12" Xl="12" Lg="12" Md="24" Sm="24" Xs="24">
+                        <GridRow Gutter="(8,8)">
+                            <GridCol Flex="@("auto")">
+                                <Input @bind-Value="@SearchVal"
+                                       Size="@InputSize.Large"
+                                       Placeholder="ค้นหาจาก ชื่อ-สกุล/เลขที่สัญญา"
+                                       OnPressEnter="@(async() => { await OnSearch(SearchVal); })"
+                                       AllowClear=true />
+                            </GridCol>
+                            <GridCol Flex="@("none")">
+                                <Button Style="border-radius:8px; background:#367691"
+                                        Size="@ButtonSize.Large"
+                                        OnClick="@(async()=>{await OnSearch(SearchVal);})">
+                                    <i class="fas fa-search" style="color: #ffffff "></i>
+                                </Button>
+                            </GridCol>
+                        </GridRow>
+                    </GridCol>
+                </GridRow>
+            </div>
+
+            <div class="mt-3">
+                @if (!IsRefaceTale)
+                {
+                    <Table TItem="VLoanRequestContract"
+                           DataSource="@ListContract"
+                           Responsive=true
+                           Class="table-hover-cursor">
+                        <TitleTemplate>
+                            <div class="py-3" style="height: 60px; background-color: #367691; border-top-left-radius:10px;border-top-right-radius:10px">
+                                <div class="ms-3">
+                                    <h6 style="color:#ffffff">
+                                        รายการสัญญากู้ยืมเงิน
+                                    </h6>
+                                </div>
+                            </div>
+                        </TitleTemplate>
+
+                        <ColumnDefinitions>
+
+                            @{
+                                var InstallmentsNo = GetNumInstallment(context.ContractId).Result;
+                            }
+
+                            <PropertyColumn Title="เลขที่สัญญา"
+                                            Property="c=>c.ContractNo"
+                                            HeaderStyle="font-weight:bold; text-align:center;">
+                                @context.ContractNo
+                            </PropertyColumn>
+
+                            <PropertyColumn Title="ผู้กู้"
+                                            Property="c=>c.DebtorNameTh"
+                                            HeaderStyle="font-weight:bold; text-align:center;">
+                                @{
+                                    var fullname = userService.GetNameForDebtor(context);
+                                }
+
+                                @fullname?.FullNameTh
+
+                                @if (fullname != null && (fullname?.FullNameTh.Trim() != "" && fullname?.FullNameEn.Trim() != ""))
+                                {
+                                    <br />
+                                }
+
+                                @fullname?.FullNameEn
+                            </PropertyColumn>
+
+                            <PropertyColumn Title="ประเภทกู้ยืม"
+                                            Property="c=>c.LoanTypeName"
+                                            HeaderStyle="font-weight:bold; text-align:center;" />
+
+                            <PropertyColumn Title="ยอดเงินกู้"
+                                            Property="c=>c.ContractLoanAmount"
+                                            HeaderStyle="font-weight:bold; text-align:center;">
+                                @{
+                                    var contractLoanAmount = context.ContractLoanAmount != null ? String.Format("{0:n2}", context.ContractLoanAmount) : "ไม่พบข้อมูล";
+                                }
+
+                                @contractLoanAmount
+                            </PropertyColumn>
+
+                            <ActionColumn Title="งวดที่"
+                                          HeaderStyle="font-weight:bold; text-align:center;">
+                                @(InstallmentsNo == null ? "ไม่พบงวด" : InstallmentsNo)
+                            </ActionColumn>
+
+                            <PropertyColumn Title="ชำระต่องวด"
+                                            Property="c=>c.ContractLoanInstallment"
+                                            HeaderStyle="font-weight:bold; text-align:center;">
+                                @{
+                                    var contractLoanInstallment = context.ContractLoanInstallment != null ? String.Format("{0:n2}", context.ContractLoanInstallment) : "ไม่พบข้อมูล";
+                                }
+
+                                @contractLoanInstallment
+                            </PropertyColumn>
+
+                            <ActionColumn>
+                                <Button Type="@ButtonType.Primary" OnClick="@(async()=> {await SelectData(context); })">
+                                    บันทึกชำระเงิน
+                                </Button>
+                            </ActionColumn>
+                        </ColumnDefinitions>
+                    </Table>
+                }
+                else
+                {
+                    <Skeleton ParagraphRows="15" />
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <Loading />
+    }
+</div>
+
+@if (!pageLogeing)
+{
+    @*footer*@
+    <div class="footer">
+        <div class="py-1 ps-5">
+            <GridRow Gutter="(8,8)">
+                <GridCol Flex="@("none")">
+                    <div class="font-color font-weight-bolder">
+                        <i class="fas fa-filter me-1"></i>
+                        ประเภทกู้ยืม
+                    </div>
+                </GridCol>
+                <GridCol Flex="@("auto")">
+                    <Select @bind-Value="@TypeID"
+                            TItem="LoanType"
+                            TItemValue="decimal"
+                            DataSource="@LoanTypeList"
+                            LabelName="@nameof(LoanType.LoanTypeName)"
+                            ValueName="@nameof(LoanType.LoanTypeId)"
+                            OnSelectedItemChanged="OnSelectedItemChangedHandler"
+                            Style="width: 40%">
+                    </Select>
+                </GridCol>
+            </GridRow>
+        </div>
+    </div>
+}
+
+@* @{
+    RenderFragment footer = @<Template>
+        <Button OnClick="@HandleCancel" @key="@( "back" )">
+            ปิด
+        </Button>
+        <Button OnClick="@HandleOk" @key="@( "submit" )"
+                Type="primary"
+                Loading="@_loading">
+            ยืนยัน
+        </Button>
+    </Template>;
+} *@
+
+@if (PaymentConfirm)
+{
+    <Modal Title="@("บันทึกข้อมูลชำระเงิน")"
+           Visible="@PaymentConfirm"
+           OnCancel="@HandleCancel"
+           MaskClosable=false
+           Width="@("63%")"
+           Footer=null>
+        <div>
+            @if (SelectRequest.Any())
+            {
+                <div>
+                    <div class="my-3 mx-3">
+                        <GridRow Gutter="(8,8)">
+                            <GridCol Flex="@("auto")">
+                                <Button Type="@ButtonType.Primary" OnClick="@(()=>OpenTransactionHistory(SelectRequest[0]))">
+                                    ประวัติการชำระ
+                                </Button>
+                            </GridCol>
+                            <GridCol Flex="@("none")">
+                                <a style="font-size:medium">วันที่ชำระเงิน </a>
+                            </GridCol>
+                            <GridCol Flex="@("none")">
+                                <div style="@($"min-width:{(IsMobile? "150" : "200")}px;")">
+                                    <RadzenDatePicker @bind-Value=@DateValueCheck
+                                                      Culture="@(new System.Globalization.CultureInfo(Utility.DateLanguage_EN))"
+                                                      DateFormat="dd MMMM yyyy"
+                                                      Change="@(args => GetDate(args))" Class="w-100" />
+                                </div>
+                            </GridCol>
+                        </GridRow>
+                    </div>
+
+                    <div>
+                        <Table TItem="PaymentTransaction"
+                               DataSource="@SelectRequest"
+                               Responsive=true
+                               HidePagination=true
+                               Class="table-hover-cursor"
+                               Context="ctx">
+                            <ColumnDefinitions>
+                                @{
+                                    if (ctx.InstallmentNo == null)
+                                    {
+                                        ctx.InstallmentNo = 1;
+                                    }
+                                    if (ctx.PrincipleAmount == null)
+                                    {
+                                        ctx.PrincipleAmount = 0;
+                                    }
+                                    if (ctx.InterestAmont == null)
+                                    {
+                                        ctx.InterestAmont = 0;
+                                    }
+
+                                    ctx.TotalAmount = ResultTotalAmount(ctx.PrincipleAmount, ctx.InterestAmont);
+
+
+                                    if (!IsEditBalanceAmount)
+                                    {
+                                        // BalanceAmountTemp = ctx.BalanceAmount - ctx.TotalAmount;
+                                        BalanceAmountTemp = ctx.BalanceAmount - ctx.PrincipleAmount;
+                                    }
+                                }
+                                <ActionColumn Title="เลขที่สัญญา"
+                                              HeaderStyle="font-weight:bold; text-align:center;">
+                                    @ctx.ContractNo
+                                </ActionColumn>
+
+                                <ActionColumn Title="ชื่อ - สกุล"
+                                              HeaderStyle="font-weight:bold; text-align:center;">
+                                    @{
+                                        ContractMain? contract = psuLoan.GeContractMainByContractIdAsync(ctx.ContractId).Result;
+                                    }
+
+                                    @userService.GetFullNameNoTitleName(contract?.DebtorStaffId)
+                                </ActionColumn>
+
+                                <ActionColumn Title="วันที่ชำระเงิน"
+                                              HeaderStyle="font-weight:bold; text-align:center;">
+                                    @dateService.ChangeDate(DateValueCheck, "d MMMM yyyy", Utility.DateLanguage_TH)
+                                </ActionColumn>
+
+                                <ActionColumn Title="งวดที่"
+                                              HeaderStyle="font-weight:bold; text-align:center;">
+                                    <AntDesign.InputNumber class="form-control"
+                                                           Step="1"
+                                                           Min="1"
+                                                           Formatter="FormatNumberN0"
+                                                           Parser="Utility.ParseNumber"
+                                                           @bind-Value="ctx.InstallmentNo" />
+                                </ActionColumn>
+
+                                <ActionColumn Title="เงินต้น"
+                                              HeaderStyle="font-weight:bold; text-align:center;">
+                                    <AntDesign.InputNumber Step="1"
+                                                           Min="0"
+                                                           Formatter="FormatNumberN2"
+                                                           Parser="Utility.ParseNumber"
+                                                           @bind-Value="ctx.PrincipleAmount" />
+                                </ActionColumn>
+
+                                <ActionColumn Title="ดอกเบี้ย"
+                                              HeaderStyle="font-weight:bold; text-align:center;">
+                                    <AntDesign.InputNumber Step="1"
+                                                           Min="0"
+                                                           Formatter="FormatNumberN2"
+                                                           Parser="Utility.ParseNumber"
+                                                           @bind-Value="ctx.InterestAmont" />
+                                </ActionColumn>
+
+                                <ActionColumn Title="รวม"
+                                              HeaderStyle="font-weight:bold; text-align:center;">
+                                    @String.Format("{0:n2}", ctx.TotalAmount)
+                                </ActionColumn>
+
+                                <ActionColumn Title="เงินต้นคงเหลือ"
+                                              HeaderStyle="font-weight:bold; text-align:center;">
+                                    @if (IsEditBalanceAmount)
+                                    {
+                                        <div>
+                                            <AntDesign.InputNumber Style="min-width:150px;"
+                                                                   Step="1"
+                                                                   Min="0"
+                                                                   Formatter="FormatNumberN2"
+                                                                   Parser="Utility.ParseNumber"
+                                                                   @bind-Value="BalanceAmountTemp" />
+                                        </div>
+
+                                    }
+                                    else
+                                    {
+                                        <div>
+                                            @String.Format("{0:n2}", BalanceAmountTemp)
+                                        </div>
+                                    }
+                                </ActionColumn>
+                            </ColumnDefinitions>
+                        </Table>
+                    </div>
+
+                    <div class="p-2 mt-2">
+                        <Checkbox @bind-Checked="IsEditBalanceAmount">
+                            @($"{(IsEditBalanceAmount ? "สามารถแก้ไขยอดเงินต้นคงเหลือได้" : "ต้องการแก้ไขยอดเงินต้นคงเหลือ")}")
+                        </Checkbox>
+                    </div>
+                    <div class="p-2 mt-2">
+                        <Tag Color="error">
+                            ผู้กู้และผู้ค้ำจะได้รับอีเมลที่แจ้งจากระบบ
+                        </Tag>
+                    </div>
+                </div>
+            }
+            else
+            {
+                if (IsAgreementSuccess)
+                {
+                    <div class="modal-body">
+                        <div>
+                            คุณได้ทำการชำระเงินหมดไปแล้ว
+                        </div>
+                        @if (SelectRequestId.Any())
+                        {
+                            @foreach (var i in SelectRequestId)
+                            {
+                                <div class="row">
+                                    <div class="col">
+                                        <button class="button-color appbar-action btn">
+                                            ดูรายละเอียด => LoanRequestId
+                                        </button>
+                                    </div>
+                                    <div class="col">
+                                        <button class="button-color appbar-action btn">
+                                            ทำการปิดยอด(UpDate Status is 99) => LoanRequestId
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="modal-body">
+                        ไม่มีรายการที่คุณเลือก
+                    </div>
+                }
+            }
+
+            <Divider />
+
+            <div>
+                <GridRow Gutter="(16,16)" Justify="end">
+                    <GridCol Flex="@("none")">
+                        <Button Type="@ButtonType.Primary" OnClick="@HandleCancel" Danger>
+                            ปิด
+                        </Button>
+                    </GridCol>
+                    <GridCol Flex="@("none")">
+                        <Button Type="@ButtonType.Primary" OnClick="@HandleOk" Loading="@_loading">
+                            ยืนยัน
+                        </Button>
+                    </GridCol>
+                </GridRow>
+            </div>
+        </div>
+    </Modal>
+}
+
+@if (VisibleTransaction)
+{
+    <Modal Title="@("ประวัติการชำระ")"
+           Visible="@VisibleTransaction"
+           MaskClosable=false
+           Width="@("90%")"
+           Footer="null"
+           OnCancel="@CancelTransactionHistory">
+        <div style="min-height:60vh">
+            <Collapse DefaultActiveKey="@(new[]{"0"})" Animation>
+                @for (int i = 0; i < SelectRequest.Count; i++)
+                {
+                    PaymentTransaction transaction = SelectRequest[i];
+                    ContractMain? contract = psuLoan.GeContractMainByContractIdAsync(transaction.ContractId).Result;
+
+                    <Panel Header="@userService.GetFullNameNoTitleName(contract?.DebtorStaffId)" Key="@i.ToString()">
+                        <Table TItem="PaymentTransaction"
+                               DataSource="@TransactionListHis"
+                               Responsive=true
+                               HidePagination=true
+                               Class="table-hover-cursor"
+                               Context="ctx">
+                            <TitleTemplate>
+                                <div>
+                                    <GridRow Gutter="(16,16)">
+                                        <GridCol Flex="@("none")">
+                                            <b>
+                                                เลขที่สัญญา:
+                                            </b>
+                                            @TransactionListHis[0].ContractNo
+                                        </GridCol>
+                                        <GridCol Flex="@("none")">
+                                            <b>
+                                                ยอดเงินต้นคงเหลือ:
+                                            </b>
+                                            @String.Format("{0:n2}", TransactionListHis[(TransactionListHis.Count() - 1)].BalanceAmount) บาท
+                                        </GridCol>
+                                    </GridRow>
+                                    <br />
+                                </div>
+                            </TitleTemplate>
+                            <ColumnDefinitions>
+                                <ActionColumn Title="งวดที่"
+                                              HeaderStyle="font-weight:bold; text-align:center;"
+                                              Style="text-align:center;">
+                                    @ctx.InstallmentNo
+                                </ActionColumn>
+
+                                <ActionColumn Title="วันที่ชำระเงิน"
+                                              HeaderStyle="font-weight:bold; text-align:center;">
+                                    @dateService.ChangeDate(ctx.PayDate, "d MMMM yyyy", Utility.DateLanguage_TH)
+                                </ActionColumn>
+
+                                <ActionColumn Title="เงินต้น"
+                                              HeaderStyle="font-weight:bold; text-align:center;"
+                                              Style="text-align:center;">
+                                    @String.Format("{0:n2}", ctx.PrincipleAmount)
+                                </ActionColumn>
+
+                                <ActionColumn Title="ดอกเบี้ย"
+                                              HeaderStyle="font-weight:bold; text-align:center;"
+                                              Style="text-align:center;">
+                                    @String.Format("{0:n2}", ctx.InterestAmont)
+                                </ActionColumn>
+
+                                <ActionColumn Title="รวม"
+                                              HeaderStyle="font-weight:bold; text-align:center;"
+                                              Style="text-align:center;">
+                                    @String.Format("{0:n2}", ctx.TotalAmount)
+                                </ActionColumn>
+
+                                <ActionColumn Title="คงเหลือ"
+                                              HeaderStyle="font-weight:bold; text-align:center;"
+                                              Style="text-align:center;">
+                                    @String.Format("{0:n2}", ctx.BalanceAmount)
+                                </ActionColumn>
+                            </ColumnDefinitions>
+                        </Table>
+                    </Panel>
+                }
+            </Collapse>
+        </div>
+    </Modal>
+}
+
+
+<style scoped>
+    :root .ant-table-title {
+        padding: 0 !important;
+    }
+</style>
+
+@code {
+    bool _loading = false;
+    bool pageLogeing = true;
+
+    private string FormatNumberN0(decimal? data)
+    {
+        string value = "0";
+        if (data != null)
+        {
+            value = data.Value.ToString("n0");
+        }
+        return value;
+    }
+
+    private string FormatNumberN2(decimal? data)
+    {
+        string value = "0";
+        if (data != null)
+        {
+            value = data.Value.ToString("n2");
+        }
+        return value;
+    }
+}

@@ -1,0 +1,110 @@
+﻿<div class="ma-md">
+    <GridRow Gutter="(8,8)">
+        <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+            ชื่อ : @userService.GetFullName(SetRole.staffDetail)
+        </GridCol>
+        <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+            ตำแหน่ง : @SetRole.staffDetail?.PosNameThai
+        </GridCol>
+
+        <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+            วิทยาเขต : @SetRole.staffDetail?.CampNameThai
+        </GridCol>
+        <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+            ส่วนงาน : @SetRole.staffDetail?.FacNameThai
+        </GridCol>
+
+        <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+            <GridRow Gutter="(8,8)">
+                <GridCol Flex="@("none")">
+                    บทบาท
+                </GridCol>
+                <GridCol Flex="@("auto")">
+                    <Select @bind-Value="SetRole.GroupId"
+                            TItem="LoanGroup"
+                            TItemValue="decimal"
+                            DataSource="@ListGroup"
+                            ValueName="@nameof(LoanGroup.GroupId)"
+                            LabelName="@nameof(LoanGroup.GroupName)"
+                            OnSelectedItemChanged="@((e)=>{ OnSelectedItemChangedLoanGroup(e); })"
+                            Placeholder="เลือกบทบาท">
+                    </Select>
+                </GridCol>
+            </GridRow>
+        </GridCol>
+
+        <GridCol Xxl="12" Xl="12" Lg="24" Md="24" Sm="24" Xs="24">
+            <GridRow Gutter="(8,8)">
+                <GridCol Flex="@("none")">
+                    วิทยาเขต
+                </GridCol>
+                <GridCol Flex="@("auto")">
+                    <Select @bind-Value="SetRole.CampId"
+                            TItem="CCampus"
+                            TItemValue="string"
+                            DataSource="@ListCampus"
+                            ValueName="@nameof(CCampus.CampId)"
+                            LabelName="@nameof(CCampus.CampNameThai)"
+                            OnSelectedItemChanged="@((e)=>{ OnSelectedItemChangedCcampus(e); })"
+                            Disabled="@(SetRole.GroupId == 0 || SetRole.GroupId == 1 ? true : false)"
+                            Placeholder="เลือกวิทยาเขต">
+                    </Select>
+                </GridCol>
+            </GridRow>
+        </GridCol>
+    </GridRow>
+</div>
+
+<Divider />
+
+<div style="margin-top:10px;">
+    <GridRow Gutter="(8,8)" Justify="end">
+        <GridCol Flex="@("non")">
+            <Button Style="color: #fff; background-color: #6c757d; border-color: #6c757d; font-size: 1rem; border-radius: 0.25rem;"
+                    OnClick="@HandleCancelAddPerson"
+                    @key="@( "back" )">
+                ปิด
+            </Button>
+        </GridCol>
+        <GridCol Flex="@("none")">
+            @if (!IsAddPerson)
+            {
+                <Popconfirm OnConfirm="@(()=>HandleOkAddPerson())"
+                            OkText="ยืนยัน"
+                            CancelText="ปิด"
+                            Icon="null">
+                    <TitleTemplate>
+                        <div>
+                            @{
+                                var campNameThai = ListCampus.Find(x => x.CampId == SetRole.CampId)?.CampNameThai;
+                                var groupName = ListGroup.Find(x => x.GroupId == SetRole.GroupId)?.GroupName;
+                                var campName = SetRole.GroupId == 1 ? "" : SetRole.GroupId == 2 ? campNameThai : $"วิทยาเขต {campNameThai}";
+                            }
+
+                            ยืนยันการเพิ่มสิทธิ์นี้หรือไม่ ?
+                            <br />
+                            บทบาท : @($"{groupName} {campName}")
+
+                        </div>
+                    </TitleTemplate>
+                    <ChildContent>
+                        <Button Style="color: #fff; background-color: #367691; border-color: #367691; font-size: 1rem; border-radius: 0.25rem;" Disabled=IsAddPerson @key="@( "submit" )">
+                            ยืนยัน
+                        </Button>
+                    </ChildContent>
+                </Popconfirm>
+            }
+        </GridCol>
+    </GridRow>
+</div>
+
+@code{
+    private RenderFragment CancelButtonRender = @<Button Style="width:100%; color: #fff; background-color: #367691; border-color: #367691; font-size: 1rem; border-radius: 0.25rem;">
+        ยืนยัน
+    </Button>;
+
+    private RenderFragment OkButtonRender = @<Button Style="color: #fff; background-color: #6c757d; border-color: #6c757d; font-size: 1rem; border-radius: 0.25rem;">
+        ปิด
+    </Button>;
+}
+

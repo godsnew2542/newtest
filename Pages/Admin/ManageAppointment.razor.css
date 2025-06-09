@@ -1,0 +1,204 @@
+﻿.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+}
+
+
+/*@media (min-width: 1024px) {
+}
+
+@media (max-width: 1024px) {
+}
+
+@media (max-width: 768px) {
+}*/
+
+@media (max-width: 450px) {
+    .hidden {
+        margin-top: 5px
+    }
+}
+
+
+
+.microsoft-login-button {
+    display: block;
+    margin: auto;
+    margin-top: 10px;
+    width: 250px;
+    border-radius: 4px;
+    padding: 7px;
+    border: 1px solid #3b3a39;
+    color: #3b3a39;
+    background-color: #ffffff;
+    text-decoration: none;
+    text-align: center;
+}
+
+    .microsoft-login-button:hover {
+        text-decoration: none;
+        color: #3b3a39;
+    }
+
+    .microsoft-login-button img {
+        width: 35px;
+        padding: 5px;
+    }
+
+.shadow-effect {
+    transition: 0.3s;
+}
+
+    .shadow-effect:hover {
+        -webkit-box-shadow: 0px 4px 15px -6px rgba(0,0,0,0.75);
+        -moz-box-shadow: 0px 4px 15px -6px rgba(0,0,0,0.75);
+        box-shadow: 0px 4px 15px -6px rgba(0,0,0,0.75);
+    }
+
+
+
+/*calendar style*/
+.calendar-table {
+    margin: 10px;
+    width: 100%;
+    background-color: #f3f2f1;
+    text-align: center;
+}
+
+    .calendar-table thead {
+        background-color: white;
+    }
+
+    .calendar-table .day {
+        width: 125px;
+        height: 125px;
+        min-width: 125px;
+        margin: 2px;
+        border-radius: 5px;
+        background-color: white;
+        padding: 5px;
+        cursor: pointer;
+    }
+
+.calendar {
+    padding: 10px;
+}
+
+.calendar-table td {
+    padding: 2px;
+}
+
+@media(max-width:900) {
+    .calendar-table .day {
+        width: 100%;
+        height: 50px;
+        min-width: auto;
+    }
+
+    .day .day-event {
+        display: none;
+    }
+}
+
+
+
+.current-day {
+    border: 2px solid #0078d4;
+    color: #0078d4;
+}
+
+.select-day {
+    border: 2px solid #004578;
+    color: #004578;
+    background-color: #c7e0f4 !important;
+}
+
+.day .day-event {
+    font-size: 10px;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+/*color*/
+.red-orange {
+    color: white;
+    background-color: #da3b01;
+}
+
+.magenta {
+    color: white;
+    background-color: #881798;
+}
+
+.pink-red {
+    color: white;
+    background-color: #750b1c;
+}
+
+.yellow {
+    color: black;
+    background-color: #fce100;
+}
+
+.yellow-green {
+    color: black;
+    background-color: #8cbd18;
+}
+
+/*calendar day section*/
+
+.calendar-toolbar {
+    background: #0078d4;
+    color: white;
+}
+
+.toolbar-button {
+    background: #0078d4;
+    margin: 0px;
+    padding: 5px 10px;
+    text-align: center;
+    vertical-align: middle;
+    outline: none;
+    color: white;
+    border: none;
+    font-size: 25px;
+    font-weight: 100;
+}
+
+    .toolbar-button:hover {
+        background: #004578;
+    }
+
+    .toolbar-button:focus {
+        border: none;
+        outline: none;
+    }
+
+.fluent-input {
+    display: block;
+    width: 100%;
+    padding: 7px;
+    margin: 10px;
+    border: 1px solid #3b3a39;
+}
+
+    .fluent-input:focus {
+        outline: none;
+        border: 2px dashed #0078d4;
+    }
+
+.card-content {
+    padding: 10px;
+}
+
+.event {
+    border-radius: 5px;
+    margin: 5px;
+    padding: 5px;
+}
+
+.card {
+    margin: 10px;
+}

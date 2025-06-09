@@ -1,0 +1,154 @@
+﻿@page "/User/AnotherRequest"
+@attribute [Authorize(Roles = "0")]
+
+@using AntDesign.Charts
+@using Title = AntDesign.Charts.Title
+
+<div class="container-fluid mt-3 mb-5 pb-5">
+    <div class="row">
+        <div class="col-1 col-md-1"></div>
+        <div class="col-lg-9 col-10 mx-2">
+
+            <div class="section-title d-sm-flex justify-content-between  mb-4 mt-5 mx-2 py-2 ">
+                <h4 class=" mb-0 py-2 px-1 ms-1 font-color">
+                    <strong>เปลี่ยนผู้ค้ำ กรณีทำสัญญาแล้ว</strong>
+                </h4>
+            </div>
+            <div class="card d-sm-flex justify-content-between  shadow rounded  mb-4 mt-1 mx-2 py-2  px-2">
+                <div class="mt-4 ms-3">
+                    เลขที่สัญญา
+
+                </div>
+                <div class="card primary-bg-drop pt-3 pb-4 mt-4 shadow rounded mx-3">
+                    <div class="font-color">
+                        <div class="row pt-4 ms-2">
+                            <div class="col-md-5 col-5 " style="font-size: larger">
+                                วงเงินสูงสุด
+                            </div>
+                            <div class="col-md-5 col-5 " style="text-align: end;font-size:larger">
+                                50000 บาท
+                            </div>
+                        </div>
+                        <div class="row pt-4 ms-2">
+                            <div class="col-md-5 col-5  " style="font-size: larger">
+                                อัตราดอกเบี้ย
+                            </div>
+                            <div class="col-md-5 col-5 " style="text-align: end; font-size: larger">
+                                0.25 %
+                            </div>
+                        </div>
+                        <div class="row pt-4 ms-2">
+                            <div class="col-md-5 col-5 " style="font-size: larger">
+                                ผ่อนชำระสูงสุด
+                            </div>
+                            <div class="col-md-5 col-5" style="text-align: end; font-size: larger">
+                                12 เดือน
+                            </div>
+                        </div>
+                        <div class="row pt-4 ms-2">
+                            <div class="col-md-5 col-5 " style="font-size: larger">
+                                ผ่อนชำระเดือนละ
+                            </div>
+                            <div class="col-md-5 col-5 " style="text-align: end; font-size: larger">
+                                1000 บาท
+                            </div>
+                        </div>
+                        <div class="row pt-4 ms-2">
+                            <div class="col-md-5 col-5 " style="font-size: larger">
+                                วันที่ทำรายการ
+                            </div>
+                            <div class="col-md-5 col-5 " style="text-align: end; font-size: larger">
+                                12 กรกฎาคม 2564
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="mt-4 ms-3">
+                    <label for="guarantor" class="form-label font-weight-bold">ชื่อผู้ค้ำใหม่</label>
+                    <div class="row">
+                        <div class="col-md-10  col-9">
+                            <input class="form-control" id="exampleFormControlInput1" placeholder="ระบุชื่อผู้ค้ำคนใหม่">
+                        </div>
+                        <button type="button"
+                                class="btn btn-outline-secondary primary-bg-drop col-md-1 col-2">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="mt-5 mb-5  row col-lg-11 col-11">
+                    <div class="col-md-6  col-12 back  ">
+                        <button type="button"
+                                class="btn secondary-bg shadow rounded backpage"
+                                data-bs-toggle="modal"
+                                data-bs-target="#backPage">
+                            กลับ
+                        </button>
+                    </div>
+                    <div class="col-md-6 col-12 next">
+                        <button type="button"
+                                class="btn button-color shadow rounded nextpage"
+                                style="color: white;"
+                                data-bs-toggle="modal"
+                                data-bs-target="#nextPage">
+                            ยื่นคำขอ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@* model Back page *@
+<div class="modal fade" id="backPage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">กลับหน้าหลัก</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                เมื่อกดกลับ ระบบจะไม่ทำการบันทึกข้อมูลหน้านี้ คุณต้องการกลับหรือไหม
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @onclick="BackPage">กลับ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* model next page *@
+<div class="modal fade" id="nextPage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                คุณยืนยันการส่งคำขอเปลี่ยนผู้ค้ำใช่หรือไหม
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @onclick="NextPage">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@code {
+    public void BackPage()
+    {
+        navigationManager.NavigateTo("/RequestLoan");
+    }
+
+    public void NextPage()
+    {
+        navigationManager.NavigateTo("/applyloansuccess");
+    }
+}
+
+

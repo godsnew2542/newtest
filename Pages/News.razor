@@ -1,0 +1,144 @@
+﻿@page "/"
+
+@* <div>
+    TEST: @test
+</div> *@
+
+<AuthorizeView>
+    <NotAuthorized>
+        <div class="container mt-5 mb-5">
+            <div class="section-title col-12 col-md-12 col-lg-12 mb-3">
+                <i class="fas fa-volume-off fa-lg mx-2"></i>ข่าวประกาศ
+            </div>
+
+            @* <div class="news-card col-12 col-md-12 col-lg-12">
+            <div class="news-content">
+            <h3 class="text-danger">
+            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> ปิดปรับปรุงระบบชั่วคราว</h3>
+            <div class="news-content">
+            เพื่อเพิ่มประสิทธิภาพในการประมวลผลข้อมูลของระบบ
+            </div>
+            </div>
+            </div>*@
+
+            <div class="news-card col-12 col-md-12 col-lg-12">
+                <div class="news-title">
+                    @{
+                        var isNew = getNewsData(new DateTime(2025, 3, 31));
+                        // var fileUrl = getFileUrl("ปรับปรุงหลักเกณฑ์_สวัสดิการเงินกู้_2568.pdf");
+                        var fileUrl = "https://hr.psu.ac.th/component/sppagebuilder/?view=page&id=86";
+                    }
+                    การปรับปรุงระบบสวัสดิการเงินกู้และเงินยืม ตามหลักเกณฑ์ใหม่
+                    @if (isNew)
+                    {
+                        <TagAnt message="ข่าวใหม่" color="@(PresetColor.Red.ToString())" />
+
+                    }
+                    <div class="news-date">
+                        อัปเดตเมื่อวันที่ @dateService.ChangeDate(new DateTime(2025, 1, 28), "d MMMM yyyy", Utility.DateLanguage_TH)
+                    </div>
+                </div>
+                <div class="news-content">
+                    <div>
+                        เปิดให้บุคลากรยื่นกู้ออนไลน์ตามหลักเกณฑ์ใหม่ตั้งแต่วันที่ 1 กุมภาพันธ์ 2568
+                    </div>
+                    <div>
+                        อ้างอิง : 
+                        @if (!string.IsNullOrEmpty(fileUrl))
+                        {
+                            <a href="@fileUrl"
+                               target="_blank"
+                               class="AgreementRow link-style-news">
+                                "ข้อมูลและประกาศสวัสดิการเงินกู้และเงินยืมบุคลากรมหาวิทยาลัยสงขลานครินทร์"
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="news-card col-12 col-md-12 col-lg-12" style="display:none;">
+                <div class="news-title">
+                    ขอเชิญชวนทุกท่านร่วมตอบแบบสอบถามความพึงพอใจของระบบ
+                    <div class="news-date">
+                        อัปเดตเมื่อวันที่ @dateService.ChangeDate(new DateTime(2024, 5, 1), "d MMMM yyyy", Utility.DateLanguage_TH)
+                    </div>
+                </div>
+                <div class="news-content">
+                    <div>
+                        คลิกที่ลิงก์ด้านล่างเพื่อตอบกลับแบบสอบถาม ภายในวันที่ @dateService.ChangeDate(new DateTime(2024, 5, 30), "d MMMM yyyy", Utility.DateLanguage_TH)
+                    </div>
+                    <div>
+                        <a href="https://forms.office.com/r/Bvk6PE0E9n"
+                           target="_blank"
+                           class="AgreementRow link-style-news">
+                            "แบบสอบถามความพึงพอใจ ระบบสวัสดิการเงินกู้และเงินยืมบุคลากร มหาวิทยาลัยสงขลานครินทร์"
+                        </a>
+                    </div>
+                    <br />
+                    <div style="text-align:center;">
+                        <Image Style="  width: 100%; max-width: 250px; height: auto;" Src="css/images/QRCode for แบบสอบถามความพึงพอใจระบบสวัสดิการเงินกู้.png" Preview=false />
+                    </div>
+                </div>
+            </div>
+
+            <div class="news-card col-12 col-md-12 col-lg-12">
+                <div class="news-title">
+                    การเปิดใช้งานระบบ
+                    <div class="news-date">
+                        อัปเดตเมื่อวันที่ @dateService.ChangeDate(new DateTime(2022, 7, 1), "d MMMM yyyy", Utility.DateLanguage_TH)
+                    </div>
+                </div>
+                <div class="news-content">
+                    เปิดให้บุคลากรยื่นกู้ออนไลน์ได้แล้วตั้งแต่วันที่ @dateService.ChangeDate(new DateTime(2022, 7, 1), "d MMMM yyyy", Utility.DateLanguage_TH)
+
+                    เตรียมตัวให้พร้อมก่อนการยื่นกู้  ศึกษาขั้นตอนการยื่นกู้ คลิก
+                    <a href="/images/วิธีการใช้งาน loan.pdf"
+                       target="_blank"
+                       class="AgreementRow link-style-news">
+                        "วิธีการยื่นกู้"
+                    </a>
+                    <br />
+                    อ้างอิง : ประกาศ
+                    <a href="https://personnel.psu.ac.th/fromper/form326.pdf"
+                       target="_blank"
+                       class="AgreementRow link-style-news">
+                        "สวัสดิการเงินกู้และเงินยืมบุคลากรมหาวิทยาลัยสงขลานครินทร์"
+                    </a>
+                </div>
+            </div>
+        </div>
+    </NotAuthorized>
+    <Authorized>
+        <div class="row">
+            <div class="col-12">
+                <Loading />
+            </div>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+<style scoped>
+    .link-style-news {
+        font-size: medium;
+        font-weight: bold;
+        color: dodgerblue;
+        cursor: pointer;
+        /* text-underline: darkgray; */
+    }
+</style>
+
+
+@code {
+
+    private RenderFragment NewsHtml(bool isNew)
+    {
+        return @<div>
+        @{
+    if (isNew)
+    {
+            <TagAnt message="ข่าวใหม่" color="@(PresetColor.Red.ToString())" />
+    }
+        }
+    </div>;
+    }
+}

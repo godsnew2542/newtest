@@ -1,0 +1,365 @@
+﻿@page "/GuarantDetailPage"
+@page "/GuarantDetailPage/{RequestID:decimal}"
+@page "/Admin/GuarantDetailPage/{PageTo:int}/{StaffID}/{RequestID:decimal}"
+
+@page "/{newRole:int}/GuarantDetailPage/{PageTo:int}/{StaffID}/{RequestID:decimal}/{rootPage:int}/{rootRequestID:decimal}"
+
+@page "/{Role}/GuarantDetailPage/{PageTo:int}/{StaffID}/{RequestID:decimal}"
+
+@attribute [Authorize(Roles = "0,2")]
+
+<div class="container-fluid mt-3 mb-5 pb-5">
+    <div class="card bg-white px-4 pb-5 mt-4" style="border-radius:10px">
+        @*รายละเอียดการกู้เงิน *@
+        <div>
+            <div class="section-title d-sm-flex justify-content-between mb-4 mt-4 mx-2 py-2"
+                 style="border: solid 1px; background-color: #e6ecef ">
+                <h5 class="mb-0 py-2 px-1 ms-1 font-color">
+                    <strong>รายละเอียดคำขอกู้</strong>
+                </h5>
+            </div>
+            <div class="row">
+                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                    <b>ประเภทกู้ยืม</b> : @Request?.LoanTypeName
+                </div>
+                <br />
+                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                    <b>จำนวนเงินที่ต้องการกู้</b> :
+                    @String.Format("{0:n2}",
+                    (Request?.LoanRequestLoanAmount != null ?
+                    Request?.LoanRequestLoanAmount :0))
+                    บาท
+                </div>
+                <br />
+                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                    <b>อัตราดอกเบี้ย(ต่อปี)</b> :
+                    @(Request?.LoanRequestLoanInterest != null ?
+                        $"{Request?.LoanRequestLoanInterest} %" : "")
+                </div>
+                <br />
+                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                    <b>ผ่อนชำระเดือนละ</b> :
+                    @String.Format("{0:n2}",
+                    (Request?.LoanRequestLoanInstallment != null ?
+                    Request?.LoanRequestLoanInstallment : 0))
+                    บาท
+                </div>
+                <br />
+                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                    <b>ผ่อนชำระจำนวน</b> :
+                    @(Request?.LoanRequestNumInstallments != null ?
+                        $"{Request?.LoanRequestNumInstallments} งวด" : "")
+                </div>
+
+            </div>
+        </div>
+
+
+        @* ข้อมูลผู้กู้ *@
+        <div>
+            <div class="section-title d-sm-flex justify-content-between mb-4 mt-3 mx-2 py-2"
+                 style="border: solid 1px; background-color: #e6ecef">
+                <h5 class=" mb-0 py-2 px-1 ms-1 font-color">
+                    <strong>ข้อมูลผู้กู้</strong>
+                </h5>
+            </div>
+
+            <div class="row ">
+                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                    <b>ชื่อ-สกุล </b>: @userService.GetFullName(Request?.DebtorStaffId)
+                </div>
+                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                    <b>ประเภทบุคลากร </b>: @DebtorStaff?.StaffTypeName
+                </div>
+
+                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                    <b>ตำแหน่งงาน</b>: @DebtorStaff?.PosNameThai
+                </div>
+                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                    <b>ส่วนงาน</b>: @DebtorStaff?.FacNameThai
+                </div>
+                <div class="mt-4"></div>
+            </div>
+
+        </div>
+
+        @* ข้อมูลผู้ค้ำ *@
+        <div>
+            <div class="section-title d-sm-flex justify-content-between mb-4 mt-2 mx-2 py-2"
+                 style="border: solid 1px; background-color: #e6ecef">
+                <h5 class=" mb-0 py-2 px-1 ms-1 font-color">
+                    <strong>ข้อมูลผู้ค้ำ</strong>
+                </h5>
+            </div>
+            <div class="row ">
+                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                    <b>ชื่อ-สกุล</b>: @userService.GetFullName(GuarantStaff?.StaffId)
+                </div>
+                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                    <b>ประเภทบุคลากร</b>: @GuarantStaff?.StaffTypeName
+                </div>
+                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                    <b>ตำแหน่งงาน</b>: @GuarantStaff?.PosNameThai
+                </div>
+                <div class="mt-2 ps-5  col-xl-6 col-lg-6 col-md-12 col-12">
+                    <b>ส่วนงาน</b>: @GuarantStaff?.FacNameThai
+                </div>
+                <div class="mt-4"></div>
+            </div>
+
+        </div>
+
+        @*การดำเนินการ*@
+        <div>
+            <div class="section-title d-sm-flex justify-content-between mb-4 mt-2 mx-2 py-2"
+                 style="border: solid 1px; background-color: #e6ecef">
+                <h5 class=" mb-0 py-2 px-1 ms-1 font-color">
+                    <i class="fas fa-list-alt mx-2"></i><strong>การดำเนินการ</strong>
+                </h5>
+            </div>
+            <div class="mt-5 mb-2">
+                <Timeline>
+                    @foreach (var listUser in ListStatusUser)
+                    {
+                        <TimelineItem>
+                            <a style="margin-right:5px">@listUser.Title </a>
+                            @if (listUser.DateStatus != null)
+                            {
+                                @dateService.ChangeDate(listUser.DateStatus.Value, "dd MMMM yyyy", Utility.DateLanguage_TH)
+                            }
+                            &nbsp;
+                            <b>
+                                [ สถานะ :
+
+                                @switch (listUser.StatusID)
+                                {
+                                    case 1:
+                                        <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Yellow.ToString())"
+                                                           message="@listUser.Status" />
+                                        break;
+
+                                    case 2:
+                                        <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Cyan.ToString())"
+                                                           message="@listUser.Status" />
+                                        break;
+
+                                    case 4:
+                                        <LoanApp.Components.Ant.TagAnt color="@(PresetColor.GeekBlue.ToString())"
+                                                           message="@listUser.Status" />
+                                        break;
+
+                                    case 9:
+                                        <LoanApp.Components.Ant.TagAnt color="#2db7f5"
+                                                           message="@listUser.Status" />
+                                        break;
+
+                                    case 6:
+                                        <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Purple.ToString())"
+                                                           message="@listUser.Status" />
+                                        break;
+
+                                    case 7:
+                                        <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Lime.ToString())"
+                                                           message="@listUser.Status" />
+                                        break;
+
+                                    case 8:
+                                        <LoanApp.Components.Ant.TagAnt color="rgb(143, 201, 146)"
+                                                           message="@listUser.Status">
+                                            <header>
+                                                <i class="fas fa-check-circle me-2" style="color:white"></i>
+                                            </header>
+                                        </LoanApp.Components.Ant.TagAnt>
+                                        break;
+
+                                    case 80:
+                                        <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Orange.ToString())"
+                                                           message="@listUser.Status">
+                                            <header>
+                                                <i class="fas fa-frown me-2" style="color: #d46b08"></i>
+                                            </header>
+                                        </LoanApp.Components.Ant.TagAnt>
+                                        break;
+
+                                    case 81:
+                                        <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Volcano.ToString())"
+                                                           message="@listUser.Status">
+                                            <header>
+                                                <i class="fas fa-frown me-2" style="color: #d4380d"></i>
+                                            </header>
+                                        </LoanApp.Components.Ant.TagAnt>
+                                        break;
+
+                                    case 82:
+                                        <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Magenta.ToString())"
+                                                           message="@listUser.Status">
+                                            <header>
+                                                <i class="fas fa-frown me-2" style="color: #c41d7f"></i>
+                                            </header>
+                                        </LoanApp.Components.Ant.TagAnt>
+                                        break;
+
+                                    case 99:
+                                        <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Green.ToString())"
+                                                           message="@listUser.Status">
+                                            <header>
+                                                <i class="fas fa-smile me-2" style="color: #389e0d"></i>
+                                            </header>
+                                        </LoanApp.Components.Ant.TagAnt>
+                                        break;
+
+                                    case 98:
+                                        <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Pink.ToString())"
+                                                           message="@listUser.Status" />
+                                        break;
+
+                                    case 200:
+                                        <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Gold.ToString())"
+                                                           message="@listUser.Status" />
+                                        break;
+
+                                    default:
+                                        <LoanApp.Components.Ant.TagAnt color="error"
+                                                           message="@listUser.Status">
+                                            <header>
+                                                <i class="fas fa-times-circle me-2" style="color: #f5222d"></i>
+                                            </header>
+                                        </LoanApp.Components.Ant.TagAnt>
+                                        break;
+                                }
+
+                                @* @if (listUser.StatusID == 1)
+                            {
+                            <Tag PresetColor="@PresetColor.Yellow">
+                            @listUser.Status
+                            </Tag>
+                            }
+                            else if (listUser.StatusID == 2)
+                            {
+                            <Tag PresetColor="@PresetColor.Cyan">
+                            @listUser.Status
+                            </Tag>
+                            }
+                            else if (listUser.StatusID == 4)
+                            {
+                            <Tag PresetColor="@PresetColor.GeekBlue">
+                            @listUser.Status
+                            </Tag>
+                            }
+                            else if (listUser.StatusID == 9)
+                            {
+                            <Tag Color="#2db7f5">
+                            @listUser.Status
+                            </Tag>
+                            }
+                            else if (listUser.StatusID == 6)
+                            {
+                            <Tag PresetColor="@PresetColor.Purple">
+                            @listUser.Status
+                            </Tag>
+                            }
+                            else if (listUser.StatusID == 7)
+                            {
+                            <Tag PresetColor="@PresetColor.Lime">
+                            @listUser.Status
+                            </Tag>
+                            }
+                            else if (listUser.StatusID == 8)
+                            {
+                            <Tag Color="rgb(143, 201, 146)">
+                            <i class="fas fa-check-circle me-2" style="color:white"></i>
+                            @listUser.Status
+                            </Tag>
+                            }
+                            else if (listUser.StatusID == 80)
+                            {
+                            <Tag PresetColor="@PresetColor.Orange">
+                            <i class="fas fa-frown me-2" style="color: #d46b08"></i>
+                            @listUser.Status
+                            </Tag>
+                            }
+                            else if (listUser.StatusID == 81)
+                            {
+                            <Tag PresetColor="@PresetColor.Volcano">
+                            <i class="fas fa-frown me-2" style="color: #d4380d"></i>
+                            @listUser.Status
+                            </Tag>
+                            }
+                            else if (listUser.StatusID == 82)
+                            {
+                            <Tag PresetColor="@PresetColor.Magenta">
+                            <i class="fas fa-frown me-2" style="color: #c41d7f"></i>
+                            @listUser.Status
+                            </Tag>
+                            }
+                            else if (listUser.StatusID == 99)
+                            {
+                            <Tag PresetColor="@PresetColor.Green">
+                            <i class="fas fa-smile me-2" style="color: #389e0d"></i>
+                            @listUser.Status
+                            </Tag>
+                            }
+                            else if (listUser.StatusID == 98)
+                            {
+                            <Tag PresetColor="@PresetColor.Pink">
+                            @listUser.Status
+                            </Tag>
+                            }
+                            else if (listUser.StatusID == 200)
+                            {
+                            <Tag PresetColor="@PresetColor.Gold">
+                            @listUser.Status
+                            </Tag>
+                            }
+                            else
+                            {
+                            <Tag Color="error">
+                            <i class="fas fa-times-circle me-2" style="color: #f5222d"></i>
+                            @listUser.Status
+                            </Tag>
+                            }*@
+                                ]
+                            </b>
+                        </TimelineItem>
+                    }
+                </Timeline>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@*footer*@
+<div class="footer">
+    <div class="row py-1 col-12 ms-0 px-0">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-3">
+            <button class="btn secondary-bg shadow rounded text-center"
+                    style="border-radius:20px;width:160px"
+                    @onclick="@(()=>{BackPage();})">
+                <i class="fa-solid fa-arrow-left fa-lg me-3"></i>
+                ย้อนกลับ
+            </button>
+        </div>
+        <div class="col-xl-4 col-lg-3 col-md-5 col-4 text-center"></div>
+        <div class="col-xl-3 col-lg-3 col-md-3 col-3 p-0 ms-0" style="text-align:end">
+            @if (Request != null)
+            {
+                if ((Request.CurrentStatusId >= 6 && Request.CurrentStatusId <= 8) ||
+                (Request.CurrentStatusId >= 80 && Request.CurrentStatusId <= 82) ||
+                Request.CurrentStatusId == 99)
+                {
+                    <button class="btn button-color shadow rounded text-center"
+                            style="border-radius:20px;width:170px"
+                    @onclick="()=>ToPageTransaction(Request)">
+                        ดูข้อมูลชำระหนี้
+                    </button>
+                }
+            }
+        </div>
+    </div>
+
+</div>
+
+@code {
+
+}

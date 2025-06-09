@@ -1,0 +1,188 @@
+﻿
+<div>
+    <br />
+
+    @if (LoadingTransaction)
+    {
+        <Skeleton ParagraphRows="10"></Skeleton>
+    }
+    else
+    {
+        <Table TItem="PaymentTransaction"
+               DataSource="TestResult"
+               PageSize="@TestResult.Count()"
+               HidePagination=true
+               Responsive=true>
+            <PropertyColumn Title="งวดที่"
+                            Property="c=>c.InstallmentNo"
+                            HeaderStyle="text-align:center; font-weight:bold;"
+                            Style="text-align:center;" />
+            <ActionColumn Title="วันที่"
+                          HeaderStyle="text-align:center; font-weight:bold;">
+                <div>
+                    @{
+                        string payDate = dateService.ChangeDate(context.PayDate, "d MMMM yyyy", Utility.DateLanguage_TH);
+                    }
+
+                    @(!string.IsNullOrEmpty(payDate) ? payDate : "ไม่พบข้อมูล")
+                </div>
+            </ActionColumn>
+            <ActionColumn Title="เงินต้น"
+                          HeaderStyle="text-align:center; font-weight:bold;">
+                <div>
+                    @String.Format("{0:n2}", (context.PrincipleAmount != null ? context.PrincipleAmount : "ไม่พบข้อมูล"))
+                </div>
+            </ActionColumn>
+            <ActionColumn Title="ดอกเบี้ย"
+                          HeaderStyle="text-align:center; font-weight:bold;"
+                          Style="text-align:center;">
+                <div>
+                    @String.Format("{0:n2}", (context.InterestAmont != null ? context.InterestAmont : "ไม่พบข้อมูล"))
+                </div>
+            </ActionColumn>
+            <ActionColumn Title="รวมชำระ"
+                          HeaderStyle="text-align:center; font-weight:bold;"
+                          Style="text-align:center;">
+                <div>
+                    @String.Format("{0:n2}", (context.TotalAmount != null ? context.TotalAmount : "ไม่พบข้อมูล"))
+                </div>
+            </ActionColumn>
+            <ActionColumn Title="เงินต้นคงเหลือ"
+                          HeaderStyle="text-align:center; font-weight:bold;"
+                          Style="text-align:center;">
+                <div>
+                    @String.Format("{0:n2}", (context.BalanceAmount != null ? context.BalanceAmount : "ไม่พบข้อมูล"))
+                </div>
+            </ActionColumn>
+            <ActionColumn Title="สถานะ"
+                          HeaderStyle="text-align:center; font-weight:bold;"
+                          Style="text-align:center;">
+                @if (context.PaymentTransId != 0)
+                {
+                    <div>
+                        <i class="fas fa-check-circle mx-2 fa-lg" style="color: green"></i>
+                        ชำระแล้ว
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        <i class="far fa-times-circle mx-2 fa-lg" style="color: red"></i>
+                        ยังไม่ชำระ
+                    </div>
+                }
+            </ActionColumn>
+        </Table>
+    }
+</div>
+
+@* <div class="table-responsive">
+    <table class="table table-hover table-responsive  rounded">
+        <thead class="table-header text-center">
+            <tr>
+                <th>งวดที่</th>
+                <th>วันที่</th>
+                <th>เงินต้น</th>
+                <th>ดอกเบี้ย</th>
+                <th>รวมชำระ</th>
+                <th>เงินต้นคงเหลือ</th>
+                <th>สถานะ</th>
+            </tr>
+        </thead>
+        <tbody class="text-center">
+            @if (LInstallmentDetail.Any())
+            {
+                @for (int i = 0; i < DayInstallments.Length; i++)
+                {
+                    var day = DayInstallments[i];
+                    int index = i + 1;
+
+                    InstallmentDetail Detail = LInstallmentDetail[i];
+
+                    var transaction = GetPaymentTransaction(index, ContractId);
+
+                    <tr>
+                        <td>
+                            @index
+                        </td>
+                        <td class="text-start">
+                            <div class="mx-1">@day</div>
+                        </td>
+                        <td>
+                            @String.Format("{0:n2}", (
+                                     (transaction != null) ?
+                                     transaction.PrincipleAmount :
+                                     Detail.PrincipleAmount))
+                        </td>
+                        <td>
+                            @String.Format("{0:n2}", (
+                                     (transaction != null) ?
+                                     transaction.InterestAmont :
+                                     Detail.InterestAmont))
+                        </td>
+                        <td>
+                            @String.Format("{0:n2}", (
+                                     (transaction != null) ?
+                                     transaction.TotalAmount :
+                                     Detail.TotalAmount))
+                        </td>
+                        <td>
+                            @String.Format("{0:n2}", (
+                                     (transaction != null) ?
+                                     transaction.BalanceAmount : "-"))
+                        </td>
+                        <td>
+                            @if (transaction != null)
+                            {
+                                <div class="col-12 mb-1">
+                                    <i class="fas fa-check-circle mx-2 fa-lg" style="color: green"></i>
+                                    ชำระแล้ว
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-12 mb-1">
+                                    <i class="far fa-times-circle mx-2 fa-lg" style="color: red"></i>
+                                    ยังไม่ชำระ
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+
+            @if (PTransaction.Any())
+            {
+                foreach (var item in PTransaction)
+                {
+                    <tr>
+                        <td>
+                            @item.InstallmentNo
+                        </td>
+                        <td class="text-start">
+                            <div class="mx-1">@(dateService.ChangeDate(item.PayDate, "d MMMM yyyy", Utility.DateLanguage_TH))</div>
+                        </td>
+                        <td>
+                            @String.Format("{0:n2}", item.PrincipleAmount ?? 0)
+                        </td>
+                        <td>
+                            @String.Format("{0:n2}", item.InterestAmont ?? 0)
+                        </td>
+                        <td>
+                            @String.Format("{0:n2}", item.TotalAmount ?? 0)
+                        </td>
+                        <td>
+                            @String.Format("{0:n2}", item.BalanceAmount ?? 0)
+                        </td>
+                        <td>
+                            <div class="col-12 mb-1">
+                                <i class="fas fa-check-circle mx-2 fa-lg" style="color: green"></i>
+                                ชำระแล้ว
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div> *@

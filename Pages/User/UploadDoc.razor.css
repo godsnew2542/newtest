@@ -1,0 +1,23 @@
+﻿body {
+    background-color: #dbe8ee;
+}
+
+.icon {
+    font-size: 25px;
+    color: #e45e5e;
+}
+
+
+/*#main {
+    transition: margin-left 0.5s;
+    height: 88vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 767px) {
+    #main {
+        height: 76vh;
+    }
+}*/

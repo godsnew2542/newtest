@@ -1,0 +1,365 @@
+﻿@page "/Admin/CreateTypeLoan"
+@attribute [Authorize(Roles = "1")]
+
+<div class="container-fluid mt-3 pb-5">
+    <div class="row justify-content-center mx-2">
+        <div class="col-12 card table-container py-4 px-3 mb-5">
+            <EditForm Model="Loan">
+                <div class="my-3 mx-3 row">
+                    <div class=" col-lg-2 col-12">
+                        <label class="form-label font-weight-bold font-color">
+                            ชื่อประเภทใหม่
+                        </label>
+                    </div>
+                    <div class="col-lg-8 col-md-8 col-sm-12">
+                        <InputText @bind-Value="Loan.LoanParentName"
+                                   class="form-control"
+                                   disabled />
+                    </div>
+                    <div class="col-lg-2 text-center col-md-2 col-sm-12">
+                        <button class="btn appbar-action"
+                                style="height:40px;width:100px"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editLoan">
+                            แก้ไข
+                        </button>
+                    </div>
+
+                    @if (ListType.Count != 0)
+                    {
+                        <button class="btn appbar-action button-color col-12 mt-3"
+                                style="border: none; height: 40px"
+                                @onclick="() => ToggleButton(false)">
+                            เลือกประเภทเดิม
+                        </button>
+                    }
+
+                    @if (changType == true)
+                    {
+                        <div class="my-3 mx-3">
+                            <div class=" card bg-white p-2 rounded shadow mt-1">
+                                @for (var i = 0; i < ListType.Count; i++)
+                                {
+                                    var item = ListType[i];
+                                    <div class="row p-2">
+                                        <div class=" col-lg-12 col-md-7 col-xl-9">
+                                            @item.LoanParentName
+                                        </div>
+                                        <div class="col-lg-12 col-md-3 text-end  col-xl-3">
+                                            <button class="btn appbar-action px-3"
+                                                    style="width:120px"
+                                                    @onclick="()=>SelectType(false,item)">
+                                                เลือก
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="my-3 mx-3 row">
+                    <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12">
+                        <label class="form-label font-weight-bold font-color">
+                            ชื่อประเภทย่อย
+                        </label>
+                    </div>
+                    <div class="col-xl-8 col-lg-7 col-md-8 col-sm-12">
+                        <InputText @bind-Value="Loan.LoanTypeName"
+                                   class="form-control"
+                                   style="font-size:small"
+                                   placeholder="ระบุชื่อประเภทย่อย" />
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-12">
+                        <div class="row">
+                            <div class="col-3 py-1 font-color font-weight-bold">
+                                |
+                            </div>
+                            <div class="col-9 py-1">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       id="flexCheckChecked2"
+                                       @onchange="eventArgs => { CheckReconcile(eventArgs.Value); }">
+                                <label class="form-check-label font-weight-bold font-color"
+                                       for="flexCheckChecked2"
+                                       style="font-size:medium">
+                                    กู้ทบยอด
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-3 mx-3 row">
+                    <div class="col-2">
+                        <label class="form-label font-weight-bold font-color">
+                            ดอกเบี้ย
+                        </label>
+                    </div>
+                    <div class="col-8">
+                        <AntDesign.InputNumber @bind-Value="Loan.LoanInterest" class="form-control" Style="width:100%" />
+                    </div>
+                </div>
+
+                <div class="my-3 mx-3 row">
+                    <div class=" col-2">
+                        <label class="form-label font-weight-bold font-color">
+                            จำนวนงวดสูงสุด
+                        </label>
+                    </div>
+                    <div class="col-8">
+                        <AntDesign.InputNumber @bind-Value="Loan.LoanNumInstallments" class="form-control" Style="width:100%" />
+                    </div>
+
+                </div>
+
+                <div class="my-3 mx-3 row">
+                    <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12">
+                        <label class="form-label font-weight-bold font-color">
+                            วงเงินสูงสุด
+                        </label>
+                    </div>
+                    <div class="col-xl-8 col-lg-7 col-md-8 col-sm-12">
+                        <AntDesign.InputNumber Formatter="FormatNumber1"
+                                               Parser="Utility.ParseNumber"
+                                               @bind-Value="Loan.LoanMaxAmount"
+                                               class="form-control"
+                                               Style="width:100%"
+                                               Disabled="@CheckboxMaxAmount" />
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-12">
+                        <div class="row">
+                            <div class="col-3 py-1 font-color font-weight-bold">
+                                |
+                            </div>
+                            <div class="col-9 py-1">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       id="flexCheckChecked"
+                                       @onchange="eventArgs => { CheckboxClicked(eventArgs.Value); }">
+                                <label class="form-check-label font-weight-bold font-color"
+                                       for="flexCheckChecked"
+                                       style="font-size:medium">
+                                    วงเงินตามจริง
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-3 mx-3 row">
+                    <div class="col-xl-2 col-lg-2 col-12">
+                        <label class="form-label font-weight-bold font-color">
+                            สำเนาเอกสารเงื่อนไขการกู้
+                        </label>
+                    </div>
+                    <div class="row col-xl-8 col-lg-8 col-12 p-0 m-0">
+                        <div class="input-group col-xl-12 col-lg-12 col-12">
+                            <InputText @bind-Value="ModelUpload.Name"
+                                       class="form-control" aria-describedby="basic-uploadPDF"
+                                       disabled />
+                            <span class="input-group-text" style="height:35px " id="basic-uploadPDF">.pdf</span>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-lg-2 col-12 text-center">
+                        <button class="btn appbar-action "
+                                style="border-radius: 10px; height: 40px ;width:100px"
+                                id="@GenId"
+                                @onclick="()=> GeneratePDFService.OpenTypeFileAsync(GenId, myFile)">
+                            อัปโหลด
+                        </button>
+
+                        <NewUpload SetChildData="SetCurrentDataAsync"
+                                   MyFile="@myFile" />
+                    </div>
+                </div>
+                <div class="my-3 mx-3 row">
+                    <div class=" col-2">
+                        <label class="form-label font-weight-bold font-color">
+                            หมายเหตุ
+                        </label>
+                    </div>
+                    <div class="col-8">
+                        <InputText @bind-Value="Loan.Remark" class="form-control" placeholder="หมายเหตุ" />
+                    </div>
+                </div>
+                @if (AttachmentSteps.Any())
+                {
+                    foreach (var title in AttachmentSteps)
+                    {
+                        <div class="row col-12 mb-2">
+                            <div class="card my-2 mx-2 px-2">
+                                <div class="mt-3 ms-3 font-color">
+                                    <strong>@title.ContractStepName</strong>
+                                </div>
+                                <div class="card mt-2 mx-2 px-2 mb-4 pb-2">
+                                    <SelectAttachmentType TitleId="title.ContractStepId" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </EditForm>
+
+            <div class="my-4 mx-3 row">
+                <div class="col-xl-6 col-lg-6 text-left my-1">
+                    <button class="btn secondary-bg shadow rounded text-center"
+                            style="border-radius:20px;width:170px"
+                            data-bs-toggle="modal"
+                            data-bs-target="#backPage">
+                        <i class="fa-solid fa-arrow-left fa-lg me-3"></i>
+                        ย้อนกลับ
+                    </button>
+                </div>
+                <div class="col-xl-6 col-lg-6 text-end my-1">
+                    <button type="button"
+                            class="btn appbar-action button-color"
+                            style="width: 200px"
+                            @onclick="AttachmentTypeDataAsync"
+                            data-bs-toggle="modal"
+                            data-bs-target="#confirmPage">
+                        สร้างประเภทใหม่
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* model Confirm page *@
+<div class="modal fade" id="confirmPage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card section-title text-center py-1 my-2">
+                    กรุณาตรวจสอบข้อมูลที่ระบุมาให้ถูกต้องก่อนกดดำเนินการ
+                </div>
+                <div class="card px-3 py-2" style="border: 1px solid; border-color: #2788DE;">
+                    <div class="mx-2">
+                        <div class="mt-2">ชื่อประเภทกู้ยืม : @Loan.LoanParentName</div>
+                        <div class="mt-2">ชื่อประเภทย่อย : @Loan.LoanTypeName</div>
+                        <div class="mt-2 row">
+                            <div class="col-4">
+                                ดอกเบี้ย : ร้อยละ @Loan.LoanInterest
+                            </div>
+                            <div class="col-4">
+                                จำนวนงวดสูงสุด : @Loan.LoanNumInstallments งวด
+                            </div>
+                            <div class="col-4">
+                                วงเงินสูงสุด : @(CheckboxMaxAmount ? "กู้ได้ตามจริง" : String.Format("{0:n2}", Loan.LoanMaxAmount) + " บาท")
+                            </div>
+                        </div>
+                    </div>
+                    @foreach (var document in AttachmentSteps)
+                    {
+                        var index = 0;
+                        <div class="mt-2 mb-3 mx-2 px-2 py-2 shadow rounded">
+                            <i class="fas fa-minus-square fa-lg px-2" style="color: #2788DE"></i>
+                            เอกสารใน: @document.ContractStepName
+                            <div class=" mt-1 px-2 py-1">
+                                @for (var i = 0; i < AttachmentList.Count; i++)
+                                {
+                                    var item = AttachmentList[i];
+                                    if (document.ContractStepId == item.ContractStepId)
+                                    {
+                                        ++index;
+
+                                        @index @item.AttachmentNameThai
+                                        <br />
+                                    }
+                                }
+                                @if (index == 0)
+                                {
+                                    <div>ไม่มีเอกสารที่ต้องส่ง</div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="()=>SaveToDbAsync()">
+                    ยืนยัน
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* model Back page *@
+<div class="modal fade"
+     id="backPage"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    กลับหน้าหลัก
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                เมื่อกดกลับ ระบบจะไม่ทำการบันทึกข้อมูลหน้านี้ คุณต้องการกลับหรือไม่ ?
+            </div>
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="BackPage">
+                    กลับ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* model edit loan *@
+<div class="modal fade" id="editLoan" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                แก้ไขข้อความประเภทกู้ยืม
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="Loan">
+                    <InputText @bind-Value="Loan.LoanParentName" class="form-control" />
+                </EditForm>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        @onclick="()=>ChangeParentName(Loan.LoanParentName)">
+                    นำไปใช้
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string GenId = "Upload_file";
+    private string myFile = "my_file";
+    private string FormatNumber1(decimal? data)
+    {
+        if (data == null)
+        {
+            return string.Empty;
+        }
+
+        return data!.Value.ToString("n0");
+    }
+}

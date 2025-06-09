@@ -1,0 +1,187 @@
+﻿@page "/Admin/PdfAgreement"
+@page "/Admin/Pdf/{RequestID:decimal}"
+@attribute [Authorize(Roles = "2")]
+
+<div class="container-fluid mt-5 pb-5">
+    <div class="card shadow d-sm-flex justify-content-between mb-4 mt-5">
+        <div class="card-header py-3">
+            <div class="row">
+                <h6 class="mb-0 py-2 px-1 ms-1 font-color col-7">
+                    <strong>@DataUser <a style="color:black">@DataUserStatus</a> </strong>
+                </h6>
+                <div class="col-2 text-end"
+                    <a style="text-decoration: underline; font-size: medium; font-weight: bold;"
+                    data-bs-toggle="modal"
+                    data-bs-target="#extralarge"
+		            @onclick="(async()=> { LoadingResultImg = true; await GetDocStap1Async(); })">
+			            <i class="fa-regular fa-eye"></i>
+			            เอกสารการยื่นกู้
+		            </a>
+			    </div>
+                <div class="col-2 text-end"
+					<button
+						 style="text-decoration: underline;
+								font-size: medium;
+								font-weight: bold;
+								cursor: pointer;
+								border: none;
+								background-color: #f7f7f7"
+						 @onclick="@(async()=> { await ToPdfBufferAsync(RequestAttrachmentHTML); } )">
+						<i class="fa-regular fa-file-pdf fa-lg  mx-2"></i>
+						เอกสารคำขอกู้
+					</button>
+			    </div>
+            </div>
+        </div>
+        <div class=" mb-0 py-2 px-1 ms-1 font-color">
+            @if (IsMobile)
+            {
+                @if (!string.IsNullOrEmpty(LoanAttrachmentHTML))
+                {
+                    <div class="px-2 mt-2 text-center">
+                        <button type="button"
+                                class="btn appbar-action px-5 buttonsize shadow rounded"
+                        @onclick="DownloadPdfAsync">
+                            ดาวน์โหลด PDF
+                        </button>
+                    </div>
+                }
+            }
+            else
+            {
+                @if (!string.IsNullOrEmpty(LoanAttrachmentHTML))
+                {
+                    <div>
+                        <PreviewPdf Url="@LoanAttrachmentHTML" Height="700px" />
+                    </div>
+                }
+                else
+                {
+                    <Loading Message="ระบบกำลังประมวลผล กรุณารอสักครู่" />
+                }
+            }
+        </div>
+        <div class="my-2">
+            @if (!string.IsNullOrEmpty(LoanAttrachmentHTML))
+            {
+                <div class="row py-1 col-12">
+                    <div class="col-xxl-2 col-xl-2 col-lg-3 col-md-4 text-left">
+                        <button class="btn secondary-bg shadow rounded text-center"
+                                style="border-radius:20px;width:170px"
+                            @onclick="Back">
+                            <i class="fa-solid fa-arrow-left fa-lg me-3"></i>
+                            ย้อนกลับ
+                        </button>
+                    </div>
+                    <div class="col-xxl-10 col-xl-10 col-lg-9 col-md-8 row text-end">
+                        <div class="col-xxl-10 col-xl-8 col-lg-8 col-md-6 me-0">
+                            @if (!IsMobile)
+                            {
+                                @if (!string.IsNullOrEmpty(LoanAttrachmentHTML))
+                                {
+                                    <div>
+                                        <button type="button"
+                                                class="btn secondary-bg shadow rounded text-center"
+                                                style="width:160px"
+                                    @onclick="()=> PrintPdfAsync(LoanAttrachmentHTML)">
+                                            พิมพ์สัญญา
+                                        </button>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-6 me-0">
+                            @if (RequestID != 0)
+                            {
+                                <button type="button"
+                                        class="btn button-color shadow rounded text-center"
+                                        style="width:200px"
+                                @onclick="SeeDetail">
+                                    อัปโหลดสัญญาฉบับจริง
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @* model ดูเอกสารขั้นตอนการยื่นกู้ *@
+    <div class="modal fade" id="extralarge" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        เอกสารประกอบขั้นตอนการยื่นกู้
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    @if (!LoadingResultImg)
+                    {
+                        <ImgStapComponents ListDocModels="ResultDocList" />
+                    }
+                    else
+                    {
+                        <Loading />
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn button-color" data-bs-dismiss="modal">
+                        ปิด
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-none pb-5 mt-2">
+        <LoanAttrachment StaffDetail="DebtorStaffDetail"
+                         StaffAssress="DebtorStaffAssress"
+                         Loan="LoanData"
+                         Other="Info"
+                         Option="OptionLoanAgreement"
+                         @ref="RefLoanAttrachment" />
+
+        <LoanGuarantor DebtorStaffDetail="DebtorStaffDetail"
+                       GuarantorStaffDetail="GuarantorStaffDetail"
+                       StaffAssress="GuarantorStaffAssress"
+                       Loan="LoanData"
+                       Option="OptionLoanAgreement"
+                       @ref="RefGuarantor" />
+
+        @if (DebtorStaffDetail?.MarriedId == "2")
+        {
+            @*Role="ผู้กู้"*@
+            <LoanPartner Loan="@LoanData"
+                     StaffDetail="@DebtorStaffDetail"
+                     StaffFamilies="DebtorStaffFamilies"
+                     Option="OptionLoanAgreement"
+                     @ref="RefDebtorPartner"
+                     PageId="DebtorStaffDetail" />
+        }
+
+        @if (GuarantorStaffDetail?.MarriedId == "2")
+        {
+            <LoanPartner Loan="@LoanData"
+                     StaffDetail="@GuarantorStaffDetail"
+                     StaffFamilies="GuarantorStaffFamilies"
+                     Role="ผู้ค้ำประกัน"
+                     Option="OptionLoanAgreement"
+                     @ref="RefGuarantorPartner"
+                     PageId="GuarantorStaffDetail" />
+        }
+    </div>
+
+    <div class="d-none">
+        <RequestAttrachment Loan="LoanData"
+                            TitleDocument="แบบคำขอสวัสดิการ"
+                            StaffDetail="DebtorStaffDetail"
+                            Other="Info"
+                            StaffAssress="DebtorStaffAssress"
+                            Option="OptionLoanAgreement"
+                            @ref="RefRequestAttrachment" />
+    </div>
+</div>
+
+@code { }

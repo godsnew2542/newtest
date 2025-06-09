@@ -1,0 +1,74 @@
+﻿body {
+}
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid #e3e6f0;
+    border-radius: .35rem;
+}
+
+/* equal card height */
+.row-equal > div[class*='col-'] {
+    display: flex;
+    flex: 1 0 auto;
+}
+
+.row-equal .card {
+    width: 100%;
+}
+
+/* ensure equal card height inside carousel */
+.carousel-inner > .row-equal.active,
+.carousel-inner > .row-equal.next,
+.carousel-inner > .row-equal.prev {
+    display: flex;
+    color:dodgerblue;
+}
+
+    /* prevent flicker during transition */
+    .carousel-inner > .row-equal.active.left,
+    .carousel-inner > .row-equal.active.right {
+        opacity: 0.5;
+        display: flex;
+    }
+
+/* control image height */
+.card-img-top-250 {
+    max-height: 250px;
+    overflow: hidden;
+}
+
+.canvas{
+    height:230px;
+}
+
+
+
+@media (min-width: 1681px) {
+    .fontsize {
+        font-size: 30px;
+    }
+
+}
+@media (max-width: 1680px) {
+    .fontsize {
+        font-size: 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    .fontsize {
+        font-size: 30px;
+    }
+}
+
+@media (max-width: 450px) {
+    .fontsize {
+        font-size: 30px;
+    }
+}

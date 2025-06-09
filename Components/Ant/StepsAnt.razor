@@ -1,0 +1,12 @@
+﻿<div>
+	<Steps Current="Current" Direction="@(IsMobile ? "vertical" : "horizontal")">
+		@foreach (var item in Stepes)
+		{
+			<Step Title="@item.Title" Subtitle="@item.Subtitle" Description="@item.Description" Icon="@item.Icon" />
+		}
+	</Steps>
+</div>
+
+@code {
+
+}

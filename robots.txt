@@ -1,0 +1,4 @@
+#Block all but AdsBot crawlers
+User-agent: AdsBot-Google
+User-agent: *
+Disallow: /

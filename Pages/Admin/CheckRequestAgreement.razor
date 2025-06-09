@@ -1,0 +1,282 @@
+﻿@page "/Admin/CheckRequestAgreement"
+@page "/Admin/CheckRequestAgreement/{StaffID}"
+@page "/{Role}/CheckRequestAgreement/{StaffID}"
+
+@attribute [Authorize(Roles = "2")]
+
+<div class="container-fluid mt-4 mb-5 pb-5">
+
+    <div class="section-title ms-3 mt-1" style="font-size:medium">
+        <i class="material-icons mx-2 my-1">how_to_reg</i>คำขอกู้
+    </div>
+
+    <div class="mx-2 col-12 col-md-12 mt-4">
+        <div class="table-header py-3"
+             style="height: 60px;">
+            <div class="ms-3">
+                คำขอกู้
+            </div>
+        </div>
+        <div class="table-responsive" style="background-color:white">
+            <table class="table table-hover table-responsive table-borderless">
+                <thead class="text-center" style="border-bottom: solid 1px; border-color: #367691;background-color:white">
+                    <tr>
+                        <th>ผู้กู้</th>
+                        <th>ประเภทกู้ยืม</th>
+                        <th>ยอดเงินกู้</th>
+                        <th>จำนวนงวด</th>
+                        <th>ผู้ค้ำ</th>
+                        <th>สถานะ</th>
+                        <th>หมายเหตุ</th>
+                        @if (string.IsNullOrEmpty(Role))
+                        {
+                            <th></th>
+                        }
+                    </tr>
+                </thead>
+
+                <tbody style="background-color:white">
+                    @if (ListAgreement.Count != 0)
+                    {
+                        countTable = false;
+
+                        @foreach (var agreement in ListAgreement)
+                        {
+                            var loan = userService.GetLoanType(agreement.LoanTypeId);
+                            var colorTable = "";
+                            if (!countTable)
+                            {
+                                colorTable = $"table-whiteColor";
+                                countTable = true;
+                            }
+                            else
+                            {
+                                colorTable = $"table-orangeColor";
+                                countTable = false;
+                            }
+                            <tr class="@colorTable AgreementRow"
+                                style="height:50px;border:none">
+                                <td @onclick="()=> TopageAgreementDetailPage(agreement.LoanRequestId)">
+                                    @userService.GetFullNameNoTitleName(agreement.DebtorStaffId)
+                                </td>
+                                <td @onclick="()=> TopageAgreementDetailPage(agreement.LoanRequestId)">
+                                    @userService.GetLoanSubName(loan)
+                                </td>
+                                <td class="text-center" @onclick="()=> TopageAgreementDetailPage(agreement.LoanRequestId)">
+                                    @String.Format("{0:n2}", agreement.LoanRequestLoanAmount)
+                                </td>
+                                <td class="text-center" @onclick="()=> TopageAgreementDetailPage(agreement.LoanRequestId)">
+                                    @agreement.LoanRequestNumInstallments
+                                </td>
+                                <td @onclick="()=> TopageAgreementDetailPage(agreement.LoanRequestId)">
+                                    @userService.GetFullNameNoTitleName(agreement.LoanRequestGuaranStaffId)
+                                </td>
+                                <td class="text-center" @onclick="()=> TopageAgreementDetailPage(agreement.LoanRequestId)">
+                                    @switch (agreement.CurrentStatusId)
+                                    {
+                                        case 0:
+                                            <LoanApp.Components.Ant.TagAnt color="orange-inverse"
+                                                           message="รอยืนยันส่งคำขอกู้" />
+                                            break;
+
+                                        case 1:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Yellow.ToString())"
+                                                                           message="@userService.GetStatusNameFromVLoanRequestContract(agreement)" />
+                                            break;
+
+                                        case 2:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.Cyan.ToString())"
+                                                                           message="@userService.GetStatusNameFromVLoanRequestContract(agreement)" />
+                                            break;
+
+                                        case 4:
+                                            <LoanApp.Components.Ant.TagAnt color="@(PresetColor.GeekBlue.ToString())"
+                                                                           message="@userService.GetStatusNameFromVLoanRequestContract(agreement)" />
+                                            break;
+                                    }
+
+                                   @* @if (agreement.CurrentStatusId == 0)
+                                    {
+                                        <Tag Color="orange-inverse">
+                                            รอยืนยันส่งคำขอกู้
+                                        </Tag>
+                                    }
+                                    else if (agreement.CurrentStatusId == 1)
+                                    {
+                                        <Tag PresetColor="@PresetColor.Yellow">
+                                            @UserService.GetStatusNameFromVLoanRequestContract(agreement)
+                                        </Tag>
+                                    }
+                                    else if (agreement.CurrentStatusId == 2)
+                                    {
+                                        <Tag PresetColor="@PresetColor.Cyan">
+                                            @UserService.GetStatusNameFromVLoanRequestContract(agreement)
+                                        </Tag>
+                                    }
+                                    else if (agreement.CurrentStatusId == 4)
+                                    {
+                                        <Tag PresetColor="@PresetColor.GeekBlue">
+                                            @UserService.GetStatusNameFromVLoanRequestContract(agreement)
+                                        </Tag>
+                                    }*@
+
+
+                                </td>
+                                <td @onclick="()=> TopageAgreementDetailPage(agreement.LoanRequestId)">
+                                    @* รอพิจารณาการกู้ *@
+                                    @if (agreement.CurrentStatusId == 1)
+                                    {
+                                        <div>
+                                            วันที่ยื่นคำขอกู้ @dateService.ChangeDate(dateService.ConvertToDateTime(agreement.LoanRequestDate), FormathDate, Utility.DateLanguage_TH)
+                                        </div>
+                                    }
+
+                                    @* อนุมัติ และระบุวันนัดหมาย *@
+                                    @if (agreement.CurrentStatusId == 2)
+                                    {
+                                        <div>
+                                            วันที่อนุมัติคำขอ @dateService.ChangeDate(dateService.ConvertToDateTime(agreement.AdminRecordDate), FormathDate, Utility.DateLanguage_TH)
+                                        </div>
+                                    }
+
+                                    @* รอทำสัญญา *@
+                                    @if (agreement.CurrentStatusId == 4)
+                                    {
+                                        if (agreement.ContractDate != null)
+                                        {
+                                            <div>
+                                                วันที่นัดหมาย
+                                                @dateService.ChangeDate(dateService.ConvertToDateTime(agreement.ContractDate),
+                                FormathDate, Utility.DateLanguage_TH)
+                                                เวลา
+                                                @dateService.ChangeDate(dateService.ConvertToDateTime(agreement.ContractDate),
+                                FormathTime, Utility.DateLanguage_TH) น.
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div>
+                                                ไม่พบวันที่นัดหมาย
+                                            </div>
+                                        }
+                                    }
+
+
+                                </td>
+
+                                @if (string.IsNullOrEmpty(Role))
+                                {
+
+                                    @if (Role != "Manager")
+                                    {
+                                        <td>
+                                            @if (agreement.CurrentStatusId == 2)
+                                            {
+                                                if (agreement.ContractDate == null)
+                                                {
+
+                                                    <button class="btn lightBlue"
+                                                            style="border-radius: 10px; width: 150px"
+                                    @onclick="() => Choosedate(agreement)">
+                                                        เลือกวันนัดหมาย
+                                                    </button>
+
+                                                }
+                                            }
+                                        </td>
+                                    }
+
+                                }
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr style="height:50px;border:none">
+                            <td colspan="8">
+                                <Empty>
+                                    <DescriptionTemplate>
+                                        <span>ไม่พบข้อมูล</span>
+                                    </DescriptionTemplate>
+                                </Empty>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (ListAgreement.Any())
+        {
+            <div class="panel-footer pb-5 pt-2 shadow" style="background-color: #f1f1f1">
+                <div class="d-flex tool-bar mt-2">
+                    <div class="ml-auto d-flex justify-content-center align-items-center">
+                        <span class="form-control-user mr-2">
+                            รายการต่อหน้า
+                        </span>
+                        <label class="d-flex align-items-center text-center">
+                            <select class="form-control form-control-sm text-center"
+                                @onchange="SelectPageSizeAsync">
+                                @foreach (var LM in Footer.Limits)
+                                {
+                                    <option value="@LM">@LM</option>
+                                }
+                            </select>
+                        </label>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <span class="form-control-user mr-2 ml-2">
+                            รายการ
+                        </span>
+                        <span class="mr-2">
+                            หน้า
+                        </span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div role="group" class="btn-group">
+                            <button class="btn btn-light btn-sm"
+                                    type="button"
+                                @onclick="@(e => NavigateToAsync("Prev"))">
+                                <i class="fas fa-chevron-left icon-primary"></i>
+                            </button>
+                            <label class="d-flex align-items-center text-center mx-1">
+                                <select class="form-control form-control-sm text-center"
+                                    @onchange="SelectCurrentPageAsync"
+                                        value="@Footer.CurrentPage">
+                                    @for (int i = 1; i <= Footer.TotalPages; i++)
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                </select>
+                            </label>
+                            <button class="btn btn-light btn-sm"
+                                    type="button"
+                                @onclick="@(e => NavigateToAsync("Next"))">
+                                <i class="fas fa-chevron-right icon-primary"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@*footer*@
+<div class="footer">
+    <div class="row py-1 col-12 ms-1">
+        <button class="me-1 secondary-bg p-2 justify-content-center rounded shadow"
+                style="border:none;width:120px"
+                @onclick="BackPage">
+            <i class="fa-solid fa-arrow-left fa-lg me-3"></i>
+            ย้อนกลับ
+        </button>
+        <div class="col-4 text-center"></div>
+        <div class="col-3" style="text-align:end"></div>
+    </div>
+</div>
+
+@code {
+    private bool countTable = false;
+}

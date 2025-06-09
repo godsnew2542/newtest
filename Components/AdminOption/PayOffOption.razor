@@ -1,0 +1,331 @@
+﻿@using Radzen.Blazor;
+@using LoanApp.Model.Models.Data;
+@using LoanApp.Model.Models;
+@using LoanApp.Services.IServices;
+
+<div class="card pt-3 pb-4 mt-5 mb-3 shadow rounded">
+    <div class="font-color pt-4">
+        <GridRow Gutter="(8,16)">
+            <GridCol Span="12">
+                <div class="padding-text">
+                    <a>
+                        ยอดเงินกู้
+                    </a>
+                </div>
+            </GridCol>
+            <GridCol Span="12" Style="text-align:end">
+                <div class="padding-data">
+                    <a>
+                        @String.Format("{0:n2}", FormOption.LoanAmount) บาท
+                    </a>
+                </div>
+            </GridCol>
+
+            <GridCol Span="12">
+                <div class="padding-text">
+                    <a>
+                        ยอดเงินกู้รวมดอกเบี้ย
+                    </a>
+                </div>
+            </GridCol>
+            <GridCol Span="12" Style="text-align:end">
+                <div class="padding-data">
+                    <a>
+                        @String.Format("{0:n2}", FormOption.Display.LoanTotalAmount) บาท
+                    </a>
+                </div>
+            </GridCol>
+
+            <GridCol Span="12">
+                <div class="padding-text">
+                    <a>
+                        ยอดเงินกู้คงเหลือ ณ ปัจจุบัน
+                    </a>
+                </div>
+            </GridCol>
+            <GridCol Span="12" Style="text-align:end">
+                <div class="padding-data">
+                    <a>
+                        @String.Format("{0:n2}", TempBalanceAmount) บาท
+                    </a>
+                </div>
+            </GridCol>
+
+            <GridCol Span="12">
+                <div class="padding-text">
+                    <a>
+                        งวดที่ชำระเงิน
+                    </a>
+                </div>
+            </GridCol>
+            <GridCol Span="12" Style="text-align:end">
+                <div class="padding-data">
+                    @if (IsEqualsLoanNumInstallments)
+                    {
+                        <a>
+                            @FormOption.PayOff.InstallmentNo งวด
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="input-group">
+                            <AntDesign.InputNumber Class="form-control"
+                                                   Step="1"
+                                                   Min="0"
+                                                   TValue="decimal?"
+                                                   DefaultValue="FormOption.PayOff.InstallmentNo"
+                                                   ValueChanged="(decimal? val)=>InstallmentNunberChangeAsync(val)" />
+                            <span class="input-group-text py-0">งวด</span>
+                        </div>
+                    }
+                </div>
+            </GridCol>
+
+            <GridCol Span="12">
+                <div class="padding-text">
+                    <a>
+                        @* เงินต้นที่ชำระต่องวด *@
+                        เงินต้นที่ชำระเพื่อปิด/โปะยอด
+                    </a>
+                </div>
+            </GridCol>
+            <GridCol Span="12" Style="text-align:end">
+                <div class="padding-data">
+                    <div class="input-group">
+                        <AntDesign.InputNumber Class="form-control"
+                                               Step="1"
+                                               Min="0"
+                                               Formatter="FormatNumber"
+                                               TValue="decimal?"
+                                               DefaultValue="FormOption.PayOff.PrincipleAmount"
+                                               ValueChanged="(decimal? val)=>PrincipleAmountChangeAsync(val)" />
+                        <span class="input-group-text py-0">฿</span>
+                    </div>
+                </div>
+            </GridCol>
+
+            <GridCol Span="12">
+                <div class="padding-text">
+                    <a>
+                        @* ดอกเบี้ยต่องวดที่ชำระจริง *@
+                        ดอกเบี้ยที่ชำระเพื่อปิด/โปะยอด
+                    </a>
+                </div>
+            </GridCol>
+            <GridCol Span="12" Style="text-align:end">
+                <div class="padding-data">
+                    <div class="input-group">
+                        <AntDesign.InputNumber Class="form-control"
+                                               Step="1"
+                                               Min="0"
+                                               Formatter="FormatNumber"
+                                               TValue="decimal?"
+                                               DefaultValue="FormOption.PayOff.InterestAmont"
+                                               ValueChanged="(decimal? val)=>InterestAmontChangeAsync(val)" />
+                        <span class="input-group-text py-0">฿</span>
+                    </div>
+                </div>
+            </GridCol>
+
+            <GridCol Span="12">
+                <div class="padding-text">
+                    <a>
+                        รวมชำระ
+                    </a>
+                </div>
+            </GridCol>
+            <GridCol Span="12" Style="text-align:end">
+                <div class="padding-data">
+                    @String.Format("{0:n2}", FormOption.PayOff.TotalAmount) บาท
+                </div>
+            </GridCol>
+
+            <GridCol Span="12">
+                <div class="padding-text">
+                    <a>
+                        ยอดเงินกู้คงเหลือ
+                    </a>
+                </div>
+            </GridCol>
+            <GridCol Span="12" Style="text-align:end">
+                <div style="padding-right:30px; font-size: larger;">
+                    <GridRow Gutter="(8,8)" Align="middle">
+                        <GridCol Flex="@("auto")">
+                            @if (!IsEditBalanceAmount)
+                            {
+                                @($"{String.Format("{0:n2}", FormOption.PayOff.BalanceValue)} บาท")
+                            }
+                            else
+                            {
+                                <div class="input-group">
+                                    <AntDesign.InputNumber Class="form-control"
+                                                           Formatter="FormatNumber"
+                                                           TValue="decimal?"
+                                                           DefaultValue="BalanceValueTemp"
+                                                           ValueChanged="(decimal? val)=>BalanceAmountChange(val)" />
+                                    <span class="input-group-text py-0">฿</span>
+                                </div>
+                            }
+                        </GridCol>
+                        @if (!IsEditBalanceAmount)
+                        {
+                            <GridCol Flex="@("none")">
+                                <Tooltip Placement="@Placement.TopLeft" Title="แก้ไขยอดคงเหลือ">
+                                    <Button Class="shadow rounded"
+                                            Style="background-color: #2788de; color:white; padding:0 20px !important;"
+                                            OnClick="@(()=>{IsEditBalanceAmount = true; BalanceValueTemp = FormOption.PayOff.BalanceValue;})">
+                                        <i class="fa-solid fa-pen-to-square fa-lg"></i>
+                                    </Button>
+                                </Tooltip>
+                            </GridCol>
+
+                        }
+                        else
+                        {
+                            <GridCol Flex="@("none")">
+                                <Tooltip Placement="@Placement.TopLeft" Title="บันทึกยอดคงเหลือ">
+                                    <Button Type="@ButtonType.Text"
+                                            Class="shadow rounded"
+                                            Style="background-color: burlywood; padding:0 12px !important;"
+                                            OnClick="@(()=>SetBalanceAmountAsync(BalanceValueTemp))">
+                                        <i class="fa-solid fa-floppy-disk"></i>
+                                    </Button>
+                                </Tooltip>
+                            </GridCol>
+
+                            <GridCol Flex="@("none")">
+                                <Tooltip Placement="@Placement.TopLeft" Title="ยกเลิก">
+                                    <Button Type="@ButtonType.Text"
+                                            Class="shadow rounded secondary-bg"
+                                            Style="background-color: lightcoral; padding:0 12px !important;"
+                                            OnClick="@(()=>IsEditBalanceAmount = false)">
+                                        <i class="fa-solid fa-rectangle-xmark" style="color: aliceblue"></i>
+                                    </Button>
+                                </Tooltip>
+                            </GridCol>
+                        }
+                    </GridRow>
+
+                    @* @String.Format("{0:n2}", FormOption.PayOff.BalanceAmount) บาท *@
+
+                </div>
+            </GridCol>
+
+            <GridCol Span="12">
+                <div class="padding-text">
+                    <a>
+                        ใบเสร็จเลขที่
+                    </a>
+                </div>
+            </GridCol>
+            <GridCol Span="12" Style="text-align:end">
+                <div class="padding-data">
+                    <input type="text"
+                           class="form-control"
+                           style="height:35px"
+                           placeholder="ใบเสร็จเลขที่"
+                           value="@FormOption.PayOff.ReferenceId1"
+                           @onchange="@(async(ChangeEventArgs e) => { FormOption.PayOff.ReferenceId1 = e.Value.ToString(); })" />
+                </div>
+            </GridCol>
+
+            <GridCol Span="12">
+                <div class="padding-text">
+                    <a>
+                        วันที่ชำระตามใบเสร็จรับเงิน
+                    </a>
+                </div>
+            </GridCol>
+            <GridCol Span="12" Style="text-align:end">
+                <div class="padding-data">
+                    <RadzenDatePicker Culture="@(new System.Globalization.CultureInfo("en-EN"))"
+                                      @bind-Value=@FormOption.PayOff.Date
+                                      DateFormat="dd MMMM yyyy"
+                                      Change="@((args)=>PayDateChangeAsync(args))"
+                                      Class="w-100" />
+                </div>
+            </GridCol>
+
+            <GridCol Span="12">
+                <div class="padding-text">
+                    <a>
+                        หมายเหตุ
+                    </a>
+                </div>
+            </GridCol>
+            <GridCol Span="12" Style="text-align:end">
+                <div class="padding-data">
+                    <input type="text"
+                           class="form-control"
+                           style="height:35px"
+                           placeholder="หมายเหตุ"
+                           value="@FormOption.PayOff.ContractRemark"
+                           @onchange="@(async(ChangeEventArgs e) => { FormOption.PayOff.ContractRemark = e.Value.ToString(); })" />
+                </div>
+            </GridCol>
+
+            @* อัปโหลดไฟล์ ลง Folder othrt *@
+            <GridCol Span="12">
+                <div class="padding-text">
+                    <a>
+                        อัปโหลดไฟล์
+                    </a>
+                </div>
+            </GridCol>
+            <GridCol Span="12" Style="text-align:end">
+                <div class="padding-data">
+                    <button type="button"
+                            class="btn appbar-action"
+                            style="border-radius: 10px; width:100px"
+                            id="@GenId"
+                            @onclick="()=> GeneratePDFService.OpenTypeFileAsync(GenId, myFile)">
+                        อัปโหลด
+                    </button>
+
+                    <NewUpload SetChildData="SetCurrentDataAsync" MyFile="@myFile" />
+                </div>
+            </GridCol>
+
+            @if (FormOption.PayOff.ReferenceFile.Any())
+            {
+                <GridCol Span="24">
+                    <div class="padding-text">
+                        @foreach (var item in FormOption.PayOff.ReferenceFile)
+                        {
+                            <ListUpload listModel="item" ListId="CurrentRemoveListAsync" />
+                        }
+                    </div>
+                </GridCol>
+            }
+
+            <GridCol Span="12">
+                <div class="padding-text">
+                    <a>
+                        วันที่ทำรายการ
+                    </a>
+                </div>
+            </GridCol>
+            <GridCol Span="12" Style="text-align:end">
+                <div class="padding-data">
+                    @dateService.ChangeDate(FormOption.DateNow, "dd MMMM yyyy", Utility.DateLanguage_TH)
+                </div>
+            </GridCol>
+        </GridRow>
+    </div>
+</div>
+
+<style scoped>
+    .padding-text {
+        padding-left: 85px;
+        font-size: larger;
+    }
+
+    .padding-data {
+        padding-right: 75px;
+        font-size: larger;
+    }
+</style>
+
+@code {
+
+}

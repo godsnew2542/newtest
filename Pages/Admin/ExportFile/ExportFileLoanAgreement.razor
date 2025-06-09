@@ -1,0 +1,242 @@
+﻿@page "/Admin/ExportFileLoanAgreement"
+
+@attribute [Authorize(Roles = "2")]
+
+@if (Loading)
+{
+    <Loading Message="กำลังประมาณผล" />
+}
+else
+{
+    <div class="container-fluid mt-3 pb-5 mb-5">
+        <div class="section-title d-sm-flex justify-content-between mb-4 mt-3 mx-2 py-2">
+            <div class=" mb-0 py-2 px-1 ms-1 font-color" style="font-size:medium">
+                <i class="fa-solid fa-file-export mx-2 fa-lg"></i>
+                <strong>รายงานการหักชำระเงินสวัสดิการรายเดือน</strong>
+            </div>
+        </div>
+
+        <div class="mx-2 py-3">
+            <div style="margin: 0px 20px;">
+                <GridRow Gutter="(8,8)">
+                    <GridCol Flex="@("auto")">
+                        <GridRow Gutter="(16,8)">
+                            <GridCol Flex="@("none")">
+                                <GridRow Gutter="(8,8)" Align="middle">
+                                    <GridCol Flex="@("none")">
+                                        <h6>
+                                            จากเดือน:
+                                        </h6>
+                                    </GridCol>
+                                    <GridCol Flex="@("auto")">
+                                        <DatePicker @bind-Value="StartDate"
+                                                    TValue="DateTime?"
+                                                    Picker="@DatePickerType.Month"
+                                                    Locale="@Utility.DatePicker_TH"
+                                                    CultureInfo="@Utility.TH"
+                                                    OnChange="@((e)=>{ SetStartDate(e?.Date); })"
+                                                    Size="@DatePickerSize.Large"
+                                                    AllowClear=true
+                                                    Style="width:280px;" />
+                                    </GridCol>
+                                </GridRow>
+                            </GridCol>
+                            <GridCol Flex="@("none")">
+                                <GridRow Gutter="(8,8)" Align="middle">
+                                    <GridCol Flex="@("none")">
+                                        <h6>
+                                            ถึงเดือน:
+                                        </h6>
+                                    </GridCol>
+                                    <GridCol Flex="@("auto")">
+                                        <DatePicker @bind-Value="EndDate"
+                                                    TValue="DateTime?"
+                                                    Picker="@DatePickerType.Month"
+                                                    Locale="@Utility.DatePicker_TH"
+                                                    CultureInfo="@Utility.TH"
+                                                    OnChange="@((e)=>{ SetEndDate(e?.Date); })"
+                                                    Size="@DatePickerSize.Large"
+                                                    AllowClear=true
+                                                    Style="width:280px;" />
+                                    </GridCol>
+                                </GridRow>
+                            </GridCol>
+                        </GridRow>
+                    </GridCol>
+                    <GridCol Flex="@("none")">
+                        <Button Type="@ButtonType.Primary" Size="@ButtonSize.Large" OnClick="@(()=> PerViewData())">
+                            แสดงข้อมูล
+                        </Button>
+                    </GridCol>
+                </GridRow>
+                <br />
+                <GridRow Gutter="(8,8)">
+                    <GridCol Flex="@("none")">
+                        สรุปข้อมูล
+                        @*  <Checkbox Indeterminate="@indeterminate" Checked="@checkAll" CheckedChange="@CheckAllChanged">
+                    เลือกทั้งหมด
+                    </Checkbox> *@
+                    </GridCol>
+                    <GridCol Flex="@("none")">
+                        <AntDesign.CheckboxGroup Options="@ckeckAllOptions" ValueChanged="@CheckboxGroupChanged" TValue="string" />
+                    </GridCol>
+                </GridRow>
+            </div>
+
+            <br />
+
+            @if (StartDateTemp != null || EndDateTemp != null)
+            {
+                <GridRow Gutter="(8,8)">
+                    <GridCol Flex="@("auto")">
+                        <div style="text-align:center;">
+                            <h6 style="font-weight:bold;">
+                                สรุปข้อมูลการหักชำระเงินสวัสดิการเงินกู้ เดือน @dateService.ChangeDate(StartDateTemp, "MMMM yyyy", Utility.DateLanguage_TH) ถึง @dateService.ChangeDate(EndDateTemp, "MMMM yyyy", Utility.DateLanguage_TH) จำนวนข้อมูล @ReportData.Count() รายการ
+                            </h6>
+                        </div>
+                    </GridCol>
+                    <GridCol Flex="@("none")">
+                        <Button Type="@ButtonType.Primary" Size="@ButtonSize.Large" OnClick="@(()=> DowloadData())">
+                            ดาวน์โหลดข้อมูล
+                        </Button>
+                    </GridCol>
+                </GridRow>
+
+
+                <br />
+
+                <Collapse DefaultActiveKey="@(CollapseDefault.ToArray())" Animation>
+                    @if (CollapseDefault.Any(x => x == "LoanDataByPeople"))
+                    {
+                        <Panel Key="LoanDataByPeople">
+                            <HeaderTemplate>
+                                <div style="font-weight:bold;">
+                                    @ckeckAllOptions[0].Label
+                                </div>
+                            </HeaderTemplate>
+                            <ChildContent>
+                                <ReportLoanTypeDataByStaff ReportTransactions="ReportData" @ref="ReportLoanTypeDataRef" />
+                            </ChildContent>
+                        </Panel>
+                    }
+
+                    @if (CollapseDefault.Any(x => x == "TypeDataByPeople"))
+                    {
+                        <Panel Key="TypeDataByPeople">
+                            <HeaderTemplate>
+                                <div style="font-weight:bold;">
+                                    @ckeckAllOptions[1].Label
+                                </div>
+                            </HeaderTemplate>
+                            <ChildContent>
+                                <ReportTypeDataByStaff ReportTransactions="ReportData" @ref="ReportTypeDataRef" />
+                            </ChildContent>
+                        </Panel>
+                    }
+
+                    @* @if (CollapseDefault.Any(x => x == "PaymentDataByPeople"))
+                    {
+                        <Panel Key="PaymentDataByPeople">
+                            <HeaderTemplate>
+                                <div style="font-weight:bold;">
+                                    @ckeckAllOptions[2].Label
+                                </div>
+                            </HeaderTemplate>
+                            <ChildContent>
+                                <ReportLoanForMonth ReportTransactions="ReportData" @ref="ReportLoanMonthRef" />
+                            </ChildContent>
+                        </Panel>
+                    } *@
+
+                    @if (CollapseDefault.Any(x => x == "DebtorRegister"))
+                    {
+                        <Panel Key="DebtorRegister">
+                            <HeaderTemplate>
+                                <div style="font-weight:bold;">
+                                    @ckeckAllOptions[3].Label
+                                </div>
+                            </HeaderTemplate>
+                            <ChildContent>
+                                <DebtorRegisterForMonth ReportTransactions="ReportData" @ref="DebtorRegisterForMonthRef" />
+                            </ChildContent>
+                        </Panel>
+                    }
+                </Collapse>
+            }
+
+            <br />
+
+            @if (ReportData.Any())
+            {
+                <div>
+                    ข้อมูลทั้งหมด: @String.Format("{0:n0}", ReportData.Count()) รายการ
+                    <br />
+                    พบข้อมูลการชำระเงิน: @String.Format("{0:n0}", ReportData.Count(x => x.ValidationTransaction == "Y")) รายการ
+                    <br />
+                    ไม่พบข้อมูลการชำระเงิน: @String.Format("{0:n0}", ReportData.Count(x => x.ValidationTransaction == "N")) รายการ
+                </div>
+
+                <br />
+
+                <Table @bind-PageIndex="_pageIndex"
+                       TItem="VReportTransaction"
+                       DataSource="@ReportData"
+                       Responsive=true>
+
+                    <PropertyColumn Title="เลขที่สัญญา" Property="c=>c.ContractNo" />
+                    <PropertyColumn Title="วันที่ได้รับเงินจากกองคลัง" Property="c=>c.PaidDate">
+                        <div>
+                            @dateService.ChangeDate(context.PaidDate, "d MMMM yyyy", Utility.DateLanguage_TH)
+                        </div>
+                    </PropertyColumn>
+                    <PropertyColumn Title="งวดที่จ่าย" Property="c=>c.InstallmentNo">
+                        <div>
+                            @(context.InstallmentNo + "/" + context.ContractLoanNumInstallments)
+                        </div>
+                    </PropertyColumn>
+                    <PropertyColumn Title="เงินต้น" Property="c=>c.PrincipleAmount">
+                        <div>
+                            @String.Format("{0:n2}", context.PrincipleAmount)
+                        </div>
+                    </PropertyColumn>
+                    <PropertyColumn Title="ดอกเบี้ย" Property="c=>c.InterestAmont">
+                        @context.InterestAmont
+                    </PropertyColumn>
+                    <PropertyColumn Title="รวมจำนวนเงิน" Property="c=>c.TotalAmount">
+                        @String.Format("{0:n2}", context.TotalAmount)
+                    </PropertyColumn>
+                    <PropertyColumn Title="วันที่จ่ายเงิน" Property="c=>c.DueDate">
+                        @dateService.ChangeDate(context.DueDate, "d MMMM yyyy", Utility.DateLanguage_TH)
+                    </PropertyColumn>
+                    <PropertyColumn Title="ข้อมูลการชำระเงิน"
+                                    Property="c=>c.ValidationTransaction"
+                                    Sortable>
+                        <div>
+                            @(context.ValidationTransaction == "Y" ? "" : "ไม่พบข้อมูลการชำระเงิน")
+                        </div>
+                    </PropertyColumn>
+
+                    @if (StateProvider?.CurrentUser.CapmSelectNow == "00")
+                    {
+                        <PropertyColumn Title="วิทยาเขต" Property="c=>c.DebtorCampusId">
+                            @{
+                                var mess = !string.IsNullOrEmpty(context.DebtorCampusId) ? CampusDict[context.DebtorCampusId].CampNameThai : "ไม่พบข้อมูล";
+                            }
+                            @mess
+                        </PropertyColumn>
+                    }
+                </Table>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private RenderFragment CancelButtonRender = @<Button Style="width:100%; color: #fff; background-color: #367691; border-color: #367691; font-size: 1rem; border-radius: 0.25rem;">
+        ดาวน์โหลด
+    </Button>;
+
+    private RenderFragment OkButtonRender = @<Button Style="color: #fff; background-color: #6c757d; border-color: #6c757d; font-size: 1rem; border-radius: 0.25rem;">
+        ปิด
+    </Button>;
+}
